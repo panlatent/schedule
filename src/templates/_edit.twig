@@ -1,0 +1,55 @@
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+{% set fullPageForm = true %}
+{% set crumbs = [{
+    label: 'Schedule'|t('schedule'),
+    url: url('schedule')
+}] %}
+{% set title = isNewSchedule ? 'New a schedule'|t('schedule') : 'Edit: {name}'|t('schedule', {name: schedule.name}) %}
+
+{% block content %}
+
+    <div class="schedule-settings">
+        {{ forms.selectField({
+            label: 'Group'|t('app'),
+            value: schedule.groupId,
+            options: groupOptions,
+        }) }}
+
+        {{ forms.textField({
+            label: 'Name'|t('app'),
+            required: true,
+        }) }}
+
+        {{ forms.textField({
+            label: 'Handle'|t('app'),
+            required: true,
+        }) }}
+
+        <hr>
+
+
+
+    </div>
+
+    <hr>
+
+    {{ forms.selectField({
+        label: 'Schedule Type'|t('schedule'),
+        value: className(schedule),
+        options: scheduleTypeOptions,
+        toggle: true,
+    }) }}
+
+    {% for scheduleType in scheduleTypes %}
+        {% set isCurrent = (scheduleType == className(schedule)) %}
+
+        <div id="{{ scheduleType|id }}"{% if not isCurrent %} class="hidden"{% endif %}>
+            {% namespace 'type[' ~ scheduleType ~']' %}
+                {{ scheduleInstances[scheduleType].settingsHtml|raw }}
+            {% endnamespace %}
+        </div>
+
+    {% endfor %}
+
+{% endblock %}
