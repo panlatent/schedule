@@ -43,7 +43,7 @@ class ScheduleController extends Controller
             $command = $event->getSummaryForDisplay();
             $this->stdout("Running scheduled command: {$command}\n");
 
-            //$event->run(Craft::$app);
+            $event->run(Craft::$app);
 
             Craft::info("Running scheduled command: {$command}", __METHOD__);
         }
