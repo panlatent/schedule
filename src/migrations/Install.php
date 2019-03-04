@@ -10,8 +10,17 @@ namespace panlatent\schedule\migrations;
 
 use craft\db\Migration;
 
+/**
+ * Class Install
+ *
+ * @package panlatent\schedule\migrations
+ * @author Panlatent <panlatent@gmail.com>
+ */
 class Install extends Migration
 {
+    /**
+     * @inheritdoc
+     */
     public function safeUp()
     {
         $this->createTable('{{%schedulegroups}}', [
@@ -29,6 +38,7 @@ class Install extends Migration
             'groupId' => $this->integer(),
             'name' => $this->string()->notNull(),
             'handle' => $this->string()->notNull(),
+            'description' => $this->string(),
             'type' => $this->string()->notNull(),
             'minute' => $this->string()->notNull()->defaultValue('*'),
             'hour' => $this->string()->notNull()->defaultValue('*'),
@@ -36,6 +46,7 @@ class Install extends Migration
             'month' => $this->string()->notNull()->defaultValue('*'),
             'week' => $this->string()->notNull()->defaultValue('*'),
             'user' => $this->string(),
+            'timer', $this->string()->notNull(),
             'settings' => $this->text(),
             'sortOrder' => $this->smallInteger()->unsigned(),
             'dateLastStarted' => $this->dateTime(),
@@ -51,11 +62,18 @@ class Install extends Migration
         $this->createIndex(null, '{{%schedules}}', ['dateCreated']);
         $this->createIndex(null, '{{%schedules}}', ['sortOrder', 'dateCreated']);
         $this->addForeignKey(null, '{{%schedules}}', 'groupId', '{{%schedulegroups}}', 'id', 'SET NULL');
+
+        return true;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function safeDown()
     {
         $this->dropTableIfExists('{{%schedules}}');
         $this->dropTableIfExists('{{%schedulegroups}}');
+
+        return true;
     }
 }

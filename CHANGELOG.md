@@ -6,3 +6,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## [Unreleased]
 ### Added
+### Updated
+### Fixed
+
+## [0.1.3] 2019-03-04
+### Fixed
+- Fixed a Install migration error.
