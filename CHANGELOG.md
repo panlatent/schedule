@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Added
 ### Updated
 ### Fixed
+- Remove duplicate command
 
 ## [0.1.3] 2019-03-04
 ### Fixed
