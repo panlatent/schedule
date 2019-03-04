@@ -6,7 +6,7 @@
  * @copyright Copyright (c) 2018 panlatent@gmail.com
  */
 
-namespace panlatent\schedule\console\controllers;
+namespace panlatent\schedule\console;
 
 use Craft;
 use panlatent\schedule\base\ExecutableScheduleInterface;

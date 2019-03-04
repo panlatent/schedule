@@ -10,7 +10,7 @@ namespace panlatent\schedule;
 
 use Craft;
 use craft\web\twig\variables\CraftVariable;
-use panlatent\schedule\console\controllers\SchedulesController;
+use panlatent\schedule\console\SchedulesController;
 use panlatent\schedule\models\Settings;
 use panlatent\schedule\plugin\Routes;
 use panlatent\schedule\plugin\Services;
