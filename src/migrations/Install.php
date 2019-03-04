@@ -46,7 +46,7 @@ class Install extends Migration
             'month' => $this->string()->notNull()->defaultValue('*'),
             'week' => $this->string()->notNull()->defaultValue('*'),
             'user' => $this->string(),
-            'timer', $this->string()->notNull(),
+            'timer' => $this->string()->notNull(),
             'settings' => $this->text(),
             'sortOrder' => $this->smallInteger()->unsigned(),
             'dateLastStarted' => $this->dateTime(),
