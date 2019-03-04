@@ -31,3 +31,8 @@ To install the plugin, follow these instructions.
 
 3. In the Control Panel, go to Settings → Plugins and click the “Install” button for Schedule.
 
+4. Add a record to system crontab:
+    
+        * * * * * php /path/to/craft schedules/run 1>> /dev/null 2>&1
+
+
