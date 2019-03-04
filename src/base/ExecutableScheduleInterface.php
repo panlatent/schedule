@@ -8,19 +8,16 @@
 
 namespace panlatent\schedule\base;
 
-use craft\base\SavableComponentInterface;
-use panlatent\schedule\Builder;
-
 /**
- * Interface ScheduleInterface
+ * Interface ExecutableScheduleInterface
  *
  * @package panlatent\schedule\base
  * @author Panlatent <panlatent@gmail.com>
  */
-interface ScheduleInterface extends SavableComponentInterface
+interface ExecutableScheduleInterface extends ScheduleInterface
 {
     /**
-     * @param Builder $builder
+     * @return mixed
      */
-    public function build(Builder $builder);
+    public function execute();
 }

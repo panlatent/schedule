@@ -9,12 +9,13 @@
 namespace panlatent\schedule\controllers;
 
 use Craft;
+use craft\helpers\Json;
 use craft\web\Controller;
-use panlatent\schedule\assets\ScheduleAsset;
+use panlatent\schedule\base\Schedule;
 use panlatent\schedule\base\ScheduleInterface;
 use panlatent\schedule\models\ScheduleGroup;
 use panlatent\schedule\Plugin;
-use panlatent\schedule\schedules\CommandSchedule;
+use panlatent\schedule\schedules\Console;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
@@ -26,22 +27,6 @@ use yii\web\Response;
  */
 class SchedulesController extends Controller
 {
-    /**
-     * @param int|null $groupId
-     * @return Response
-     */
-    public function actionIndex(int $groupId = null): Response
-    {
-        $schedules = Plugin::$plugin->getSchedules();
-
-        $this->getView()->registerAssetBundle(ScheduleAsset::class);
-
-        return $this->renderTemplate('schedule/_index', [
-            'groups' => $schedules->getAllGroups(),
-            'groupId' => $groupId,
-        ]);
-    }
-
     /**
      * @return Response
      */
@@ -108,7 +93,9 @@ class SchedulesController extends Controller
     public function actionEditSchedule(int $scheduleId = null, ScheduleInterface $schedule = null): Response
     {
         $schedules = Plugin::$plugin->getSchedules();
+        $timers = Plugin::$plugin->getTimers();
 
+        /** @var Schedule $schedule */
         if ($schedule === null) {
             if ($scheduleId !== null) {
                 $schedule = $schedules->getScheduleById($scheduleId);
@@ -116,7 +103,7 @@ class SchedulesController extends Controller
                     throw new NotFoundHttpException();
                 }
             } else {
-                $schedule = new CommandSchedule();
+                $schedule = $schedules->createSchedule(Console::class);
             }
         }
 
@@ -124,6 +111,7 @@ class SchedulesController extends Controller
 
         $allGroups = $schedules->getAllGroups();
         $allScheduleTypes = $schedules->getAllScheduleTypes();
+        $allTimerTypes = $timers->getAllTimerTypes();
 
         $groupOptions = [
             [
@@ -150,6 +138,22 @@ class SchedulesController extends Controller
             ];
         }
 
+        $timerInstances = [];
+        $timerTypeOptions = [];
+        foreach ($allTimerTypes as $class) {
+            $timerInstances[$class] = new $class([
+                'minute' => $schedule->minute,
+                'hour' => $schedule->hour,
+                'day' => $schedule->day,
+                'month' => $schedule->month,
+                'week' => $schedule->week,
+            ]);
+            $timerTypeOptions[] = [
+                'label' => $class::displayName(),
+                'value' => $class,
+            ];
+        }
+
         return $this->renderTemplate('schedule/_edit', [
             'isNewSchedule' => $isNewSchedule,
             'groupOptions' => $groupOptions,
@@ -157,6 +161,105 @@ class SchedulesController extends Controller
             'scheduleInstances' => $scheduleInstances,
             'scheduleTypes' => $allScheduleTypes,
             'scheduleTypeOptions' => $scheduleTypeOptions,
+            'timerInstances' => $timerInstances,
+            'timerTypes' => $allTimerTypes,
+            'timerTypeOptions' => $timerTypeOptions,
+        ]);
+    }
+
+    /**
+     * Save a schedule.
+     *
+     * @return Response|null
+     */
+    public function actionSaveSchedule()
+    {
+        $this->requirePostRequest();
+
+        $schedules = Plugin::$plugin->getSchedules();
+        $timers = Plugin::$plugin->getTimers();
+        $request = Craft::$app->getRequest();
+
+        $type = $request->getBodyParam('type');
+        $timerType = $request->getBodyParam('timerType');
+
+        $timer = $timers->createTimer([
+            'type' => $timerType,
+            'settings' => $request->getBodyParam('timers.' . $timerType)
+        ]);
+
+        /** @var Schedule $schedule */
+        $schedule = $schedules->createSchedule([
+            'id' => $request->getBodyParam('scheduleId'),
+            'groupId' =>  $request->getBodyParam('groupId'),
+            'name' => $request->getBodyParam('name'),
+            'handle' => $request->getBodyParam('handle'),
+            'description' => $request->getBodyParam('description'),
+            'type' => $type,
+            'minute' => $timer->getMinute(),
+            'hour' => $timer->getHour(),
+            'day' => $timer->getDay(),
+            'month' => $timer->getMonth(),
+            'week' => $timer->getWeek(),
+            'timer' => $timerType,
+            'settings' => $request->getBodyParam('types.' . $type, [])
+        ]);
+
+        if (!$schedules->saveSchedule($schedule)) {
+            Craft::$app->getSession()->setError(Craft::t('schedule', 'Couldn’t save schedule.'));
+
+            Craft::$app->getUrlManager()->setRouteParams([
+                'schedule' => $schedule,
+            ]);
+
+            return null;
+        }
+
+        Craft::$app->getSession()->setNotice(Craft::t('schedule', 'Schedule saved.'));
+
+        return $this->redirect('schedule' . ($schedule->groupId ? '/groups/' . $schedule->groupId : ''));
+    }
+
+    /**
+     * @return Response
+     */
+    public function actionReorderSchedules(): Response
+    {
+        $this->requirePostRequest();
+        $this->requireAcceptsJson();
+
+        $scheduleIds = Json::decode(Craft::$app->getRequest()->getRequiredBodyParam('ids'));
+        Plugin::$plugin->getSchedules()->reorderSchedules($scheduleIds);
+
+        return $this->asJson(['success' => true]);
+    }
+
+    /**
+     * Delete a schedule.
+     *
+     * @return Response
+     */
+    public function actionDeleteSchedule(): Response
+    {
+        $this->requirePostRequest();
+        $this->requireAcceptsJson();
+
+        $schedules = Plugin::$plugin->getSchedules();
+
+        $scheduleId = Craft::$app->getRequest()->getBodyParam('id');
+        $schedule = $schedules->getScheduleById($scheduleId);
+        if (!$schedule) {
+            throw new NotFoundHttpException();
+        }
+
+        if (!$schedules->deleteSchedule($schedule)) {
+            return $this->asJson([
+                'success' => false,
+            ]);
+        }
+
+        return $this->asJson([
+            'success' => true,
         ]);
     }
 }

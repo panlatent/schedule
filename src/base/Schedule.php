@@ -18,12 +18,41 @@ use craft\base\SavableComponent;
  */
 abstract class Schedule extends SavableComponent implements ScheduleInterface
 {
+    // Traits
+    // =========================================================================
+
     use ScheduleTrait;
 
+    // Public Methods
+    // =========================================================================
+
+    /**
+     * @inheritdoc
+     */
     public function rules()
     {
         return [
 
         ];
+    }
+
+    /**
+     * Returns cron expression.
+     *
+     * @return string
+     */
+    public function getCronExpression(): string
+    {
+        return sprintf('%s %s %s %s %s *', $this->minute ?: '*', $this->hour ?: '*', $this->day ?: '*', $this->month ?: '*', $this->week ?: '*');
+    }
+
+    /**
+     * Returns cron expression description.
+     *
+     * @return string
+     */
+    public function getCronDescription(): string
+    {
+        return '';
     }
 }

@@ -2,7 +2,7 @@
     "name": "panlatent/schedule",
     "description": "Schedule plugin for CraftCMS 3",
     "type": "craft-plugin",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "keywords": [
         "craft",
         "cms",
@@ -24,8 +24,10 @@
         }
     ],
     "require": {
-        "craftcms/cms": "^3.0.0",
-        "omnilight/yii2-scheduling": "^1.1"
+        "craftcms/cms": "^3.1.0",
+        "omnilight/yii2-scheduling": "^1.1",
+        "symfony/process": "^4.2",
+        "guzzlehttp/guzzle": "^6.3"
     },
     "autoload": {
         "psr-4": {

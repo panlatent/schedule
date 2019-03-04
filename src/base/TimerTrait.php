@@ -9,33 +9,13 @@
 namespace panlatent\schedule\base;
 
 /**
- * Trait ScheduleTrait
+ * Trait TimerTrait
  *
  * @package panlatent\schedule\base
  * @author Panlatent <panlatent@gmail.com>
  */
-trait ScheduleTrait
+trait TimerTrait
 {
-    /**
-     * @var int|null
-     */
-    public $groupId;
-
-    /**
-     * @var string|null
-     */
-    public $name;
-
-    /**
-     * @var string|null
-     */
-    public $handle;
-
-    /**
-     * @var string|null
-     */
-    public $description;
-
     /**
      * @var string|null
      */
@@ -60,14 +40,4 @@ trait ScheduleTrait
      * @var string|null
      */
     public $week;
-
-    /**
-     * @var string|null
-     */
-    public $user;
-
-    /**
-     * @var string|null
-     */
-    public $timer;
 }

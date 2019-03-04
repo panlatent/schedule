@@ -1,0 +1,12 @@
+{% set schedule = schedule is defined ? schedule : null %}
+{% set minute = minute is defined ? minute : schedule.minute %}
+{% set hour = hour is defined ? hour : schedule.hour %}
+{% set day = day is defined ? day : schedule.day %}
+{% set month = month is defined ? month : schedule.month %}
+{% set week = week is defined ? week : schedule.week %}
+
+<input type="hidden" name="minute" value{{ schedule.minute }}>
+<input type="hidden" name="hour" value{{ schedule.hour }}>
+<input type="hidden" name="day" value{{ schedule.day }}>
+<input type="hidden" name="month" value{{ schedule.month }}>
+<input type="hidden" name="week" value{{ schedule.week }}>

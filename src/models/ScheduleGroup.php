@@ -10,6 +10,8 @@ namespace panlatent\schedule\models;
 
 use Craft;
 use craft\base\Model;
+use panlatent\schedule\base\ScheduleInterface;
+use panlatent\schedule\Plugin;
 use panlatent\schedule\records\ScheduleGroup as ScheduleGroupRecord;
 
 /**
@@ -30,6 +32,11 @@ class ScheduleGroup extends Model
      */
     public $name;
 
+    /**
+     * @var ScheduleInterface[]|null
+     */
+    private $_schedules;
+
     public function rules()
     {
         return [
@@ -39,11 +46,30 @@ class ScheduleGroup extends Model
         ];
     }
 
+    /**
+     * @inheritdoc
+     */
     public function attributeLabels()
     {
         return [
             'id' => Craft::t('app', 'ID'),
             'name' => Craft::t('app', 'name'),
         ];
+    }
+
+    /**
+     * @return ScheduleInterface[]
+     */
+    public function getSchedules(): array
+    {
+        if ($this->_schedules !== null) {
+            return $this->_schedules;
+        }
+
+        if (!$this->id) {
+            return [];
+        }
+
+        return $this->_schedules = Plugin::$plugin->getSchedules()->getSchedulesByGroupId($this->id);
     }
 }

@@ -1,0 +1,19 @@
+{% import "_includes/forms" as forms %}
+
+{{ forms.textField({
+    label: "Class Name"|t('schedule'),
+    required: true,
+    id: 'className',
+    name: 'className',
+    value: schedule.className,
+    errors: schedule.getErrors('className'),
+}) }}
+
+{{ forms.textField({
+    label: "Event Name"|t('schedule'),
+    required: true,
+    id: 'eventName',
+    name: 'eventName',
+    value: schedule.eventName,
+    errors: schedule.getErrors('eventName'),
+}) }}

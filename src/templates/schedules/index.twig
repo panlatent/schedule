@@ -1,0 +1,87 @@
+{% extends "_layouts/cp" %}
+
+{% do view.registerAssetBundle('panlatent\\schedule\\assets\\ScheduleAsset') %}
+{% set title = "Schedules"|t("schedule") %}
+{% set groups = craft.schedule.schedules.getAllGroups() %}
+{% set groupId = groupId is defined ? groupId : null %}
+{% set schedules = craft.schedule.schedules.getSchedulesByGroupId(groupId) %}
+
+{% block actionButton %}
+    {% set newScheduleUrl = url('schedule/new', (groupId  ? { groupId: groupId } : null)) %}
+    <a href="{{ newScheduleUrl }}" class="submit btn add icon">{{ "New schedule"|t('schedule') }}</a>
+{% endblock %}
+
+{% block sidebar %}
+    <nav>
+        <ul id="groups">
+            <li><a href="{{ url('schedule') }}"{% if not groupId %} class="sel"{% endif %}>{{ 'Ungrouped'|t('schedule') }}</a></li>
+            {% for group in groups %}
+                <li><a href="{{ url('schedule/groups/'~group.id) }}"{% if groupId is defined and group.id == groupId %} class="sel"{% endif %} data-id="{{ group.id }}">{{ group.name|t('site') }}</a></li>
+            {% endfor %}
+        </ul>
+    </nav>
+
+    <div class="buttons">
+        <div id="newgroupbtn" class="btn add icon">{{ "New group"|t('app') }}</div>
+
+        {% if groupId %}
+            <div id="groupsettingsbtn" class="btn settings icon menubtn" title="{{ 'Settings'|t('app') }}"></div>
+            <div class="menu">
+                <ul>
+                    <li><a data-action="rename" role="button">{{ "Rename selected group"|t('app') }}</a></li>
+                    <li><a data-action="delete" role="button">{{ "Delete selected group"|t('app') }}</a></li>
+                </ul>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block content %}
+    {% if schedules|length %}
+        {% set sortable  = (schedules|length > 1) %}
+
+        <table id="schedules" class="data fullwidth collapsible">
+            <thead>
+            <th scope="col">{{ "Name"|t('app') }}</th>
+            <th scope="col">{{ "Handle"|t('app') }}</th>
+            <th scope="col">{{ "Type"|t('app') }}</th>
+            <th scope="col">{{ "Description"|t('app') }}</th>
+            {% if sortable %}<td class="thin"></td>{% endif %}
+            <td class="thin"></td>
+            </thead>
+            <tbody>
+            {% for schedule in schedules %}
+                <tr data-id="{{ schedule.id }}" data-name="{{ schedule.name|t('site') }}">
+                    <th scope="row" data-title="{{ 'Name'|t('app') }}"><a href="{{ url('schedule/' ~ schedule.id) }}">{{ schedule.name }}</a></th>
+                    <td scope="row" data-title="{{ 'Handle'|t('app') }}" class="code">{{ schedule.handle }}</td>
+                    <td data-title="{{ 'Type'|t('app') }}">
+                        {% if schedule is missing %}
+                            <span class="error">{{ schedule.expectedType }}</span>
+                        {% else %}
+                            {{ schedule.displayName() }}
+                        {% endif %}
+                    </td>
+                    <td data-title="{{ 'Type'|t('Description') }}">{{ schedule.description }}</td>
+                    {% if sortable %}<td class="thin"><a class="move icon" title="{{ 'Reorder'|t('app') }}" role="button"></a></td>{% endif %}
+                    <td class="thin"><a class="delete icon" title="{{ 'Delete'|t('app') }}" role="button"></a></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+{% endblock %}
+
+{% js %}
+    var adminTable = new Craft.AdminTable({
+        tableSelector: '#schedules',
+        noItemsSelector: '#noschedules',
+        sortable: true,
+        reorderAction: 'schedule/schedules/reorder-schedules',
+        deleteAction: 'schedule/schedules/delete-schedule',
+        onDeleteItem: function() {
+            if (adminTable.totalItems == 0) {
+                $('#nav-schedule').remove();
+            }
+        }
+    });
+{% endjs %}

@@ -18,6 +18,7 @@ use craft\db\ActiveRecord;
  * @property int $groupId
  * @property string $name
  * @property string $handle
+ * @property string $description
  * @property string $type
  * @property string $minute
  * @property string $hour
@@ -25,7 +26,8 @@ use craft\db\ActiveRecord;
  * @property string $month
  * @property string $week
  * @property string $user
- * @property string $setting
+ * @property string $timer
+ * @property string $settings
  * @property int $sortOrder
  * @property \DateTime $dateLastStarted
  * @property \DateTime $dateLastFinished

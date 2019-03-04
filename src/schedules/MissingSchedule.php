@@ -8,7 +8,10 @@
 
 namespace panlatent\schedule\schedules;
 
+use Craft;
+use craft\base\MissingComponentTrait;
 use panlatent\schedule\base\Schedule;
+use panlatent\schedule\Builder;
 use yii\base\NotSupportedException;
 
 /**
@@ -19,6 +22,19 @@ use yii\base\NotSupportedException;
  */
 class MissingSchedule extends Schedule
 {
+    use MissingComponentTrait;
+
+    /**
+     * @inheritdoc
+     */
+    public function build(Builder $builder)
+    {
+        Craft::warning('Missing build a schedule', __METHOD__);
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function execute()
     {
         throw new NotSupportedException();

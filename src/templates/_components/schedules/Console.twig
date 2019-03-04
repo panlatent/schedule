@@ -1,0 +1,19 @@
+{% import "_includes/forms" as forms %}
+
+{{ forms.autosuggestField({
+    label: 'Command'|t('schedule'),
+    requied: true,
+    id: 'command',
+    name: 'command',
+    value: schedule.command,
+    errors: schedule.getErrors('command'),
+    suggestions: suggestions,
+}) }}
+
+{{ forms.textField({
+    label: 'Arguments'|t('schedule'),
+    id: 'arguments',
+    name: 'arguments',
+    value: schedule.arguments,
+    errors: schedule.getErrors('arguments'),
+}) }}

@@ -8,19 +8,22 @@
 
 namespace panlatent\schedule\base;
 
-use craft\base\SavableComponentInterface;
 use panlatent\schedule\Builder;
 
 /**
- * Interface ScheduleInterface
+ * Trait ExecutableScheduleTrait
  *
  * @package panlatent\schedule\base
  * @author Panlatent <panlatent@gmail.com>
  */
-interface ScheduleInterface extends SavableComponentInterface
+trait ExecutableScheduleTrait
 {
     /**
-     * @param Builder $builder
+     * @inheritdoc
      */
-    public function build(Builder $builder);
+    public function build(Builder $builder)
+    {
+        $builder->command('schedules/do-schedule ' . $this->id)
+            ->cron($this->getCronExpression());
+    }
 }

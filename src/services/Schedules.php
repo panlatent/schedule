@@ -11,6 +11,7 @@ namespace panlatent\schedule\services;
 use Craft;
 use craft\errors\MissingComponentException;
 use craft\events\RegisterComponentTypesEvent;
+use craft\helpers\Component as ComponentHelper;
 use craft\helpers\Json;
 use panlatent\schedule\base\Schedule;
 use panlatent\schedule\base\ScheduleInterface;
@@ -21,11 +22,11 @@ use panlatent\schedule\events\ScheduleGroupEvent;
 use panlatent\schedule\models\ScheduleGroup;
 use panlatent\schedule\records\Schedule as ScheduleRecord;
 use panlatent\schedule\records\ScheduleGroup as ScheduleGroupRecord;
-use panlatent\schedule\schedules\ClosureSchedule;
-use panlatent\schedule\schedules\CommandSchedule;
-use panlatent\schedule\schedules\EventSchedule;
+use panlatent\schedule\schedules\Console;
+use panlatent\schedule\schedules\Event;
+use panlatent\schedule\schedules\HttpRequest;
 use panlatent\schedule\schedules\MissingSchedule;
-use panlatent\schedule\schedules\QueueSchedule;
+use panlatent\schedule\schedules\Queue;
 use yii\base\Component;
 use yii\db\Query;
 
@@ -277,7 +278,7 @@ class Schedules extends Component
         return true;
     }
 
-    //
+    // Schedules
     // =========================================================================
 
     /**
@@ -286,10 +287,10 @@ class Schedules extends Component
     public function getAllScheduleTypes(): array
     {
         $types = [
-            ClosureSchedule::class,
-            CommandSchedule::class,
-            EventSchedule::class,
-            QueueSchedule::class,
+            Console::class,
+            Event::class,
+            HttpRequest::class,
+            Queue::class,
         ];
 
         $event = new RegisterComponentTypesEvent([
@@ -324,6 +325,28 @@ class Schedules extends Component
         $this->_fetchedAllSchedules = true;
 
         return array_values($this->_schedulesById);
+    }
+
+    /**
+     * @param int|null $groupId
+     * @return ScheduleInterface[]
+     */
+    public function getSchedulesByGroupId(int $groupId = null)
+    {
+        $schedules = [];
+
+        $results = $this->_createScheduleQuery()
+            ->where(['groupId' => $groupId])
+            ->all();
+        foreach ($results as $result) {
+            /** @var Schedule $schedule */
+            $schedule = $this->createSchedule($result);
+            $this->_schedulesById[$schedule->id] = $schedule;
+            $this->_schedulesByHandle[$schedule->handle] = $schedule;
+            $schedules[] = $schedule;
+        }
+
+        return $schedules;
     }
 
     /**
@@ -374,14 +397,8 @@ class Schedules extends Component
      */
     public function createSchedule($config): ScheduleInterface
     {
-        if (is_string($config)) {
-            $config = [
-                'class' => $config,
-            ];
-        }
-
         try {
-            $schedule = \craft\helpers\Component::createComponent($config, ScheduleInterface::class);
+            $schedule = ComponentHelper::createComponent($config, ScheduleInterface::class);
         } catch (MissingComponentException $exception) {
             unset($config['type']);
             $schedule = new MissingSchedule($config);
@@ -391,12 +408,13 @@ class Schedules extends Component
     }
 
     /**
-     * @param Schedule $schedule
+     * @param ScheduleInterface $schedule
      * @param bool $runValidation
      * @return bool
      */
-    public function saveSchedule(Schedule $schedule, bool $runValidation = true): bool
+    public function saveSchedule(ScheduleInterface $schedule, bool $runValidation = true): bool
     {
+        /** @var Schedule $schedule */
         $isNewSchedule = $schedule->getIsNew();
 
         if ($this->hasEventHandlers(self::EVENT_AFTER_SAVE_SCHEDULE)) {
@@ -418,30 +436,32 @@ class Schedules extends Component
         $transaction = Craft::$app->getDb()->beginTransaction();
         try {
             if (!$isNewSchedule) {
-                $scheduleRecord = ScheduleRecord::findOne(['id' => $schedule->id]);
+                $record = ScheduleRecord::findOne(['id' => $schedule->id]);
                 if (!$schedule) {
                     throw new ScheduleException("No schedule exists with the ID: “{$schedule->id}“.");
                 }
             } else {
-                $scheduleRecord = new ScheduleRecord();
+                $record = new ScheduleRecord();
             }
 
-            $scheduleRecord->groupId = $schedule->groupId;
-            $scheduleRecord->name = $schedule->name;
-            $scheduleRecord->handle = $schedule->handle;
-            $scheduleRecord->type = get_class($schedule);
-            $scheduleRecord->minute = $schedule->minute;
-            $scheduleRecord->hour = $schedule->hour;
-            $scheduleRecord->day = $schedule->day;
-            $scheduleRecord->month = $schedule->month;
-            $scheduleRecord->week = $schedule->week;
-            $scheduleRecord->user = $schedule->user;
-            $scheduleRecord->setting = Json::encode($schedule->getSettings());
+            $record->groupId = $schedule->groupId;
+            $record->name = $schedule->name;
+            $record->handle = $schedule->handle;
+            $record->description = $schedule->description;
+            $record->type = get_class($schedule);
+            $record->minute = $schedule->minute ?? '*';
+            $record->hour = $schedule->hour ?? '*';
+            $record->day = $schedule->day ?? '*';
+            $record->month = $schedule->month ?? '*';
+            $record->week = $schedule->week ?? '*';
+            $record->user = $schedule->user;
+            $record->timer = $schedule->timer;
+            $record->settings = Json::encode($schedule->getSettings());
 
-            $scheduleRecord->save(false);
+            $record->save(false);
 
             if ($isNewSchedule) {
-                $schedule->id = $scheduleRecord->id;
+                $schedule->id = $record->id;
             }
 
             $schedule->afterSave($isNewSchedule);
@@ -467,13 +487,43 @@ class Schedules extends Component
     }
 
     /**
-     * Delete a schedule.
+     * Reorders schedules.
      *
-     * @param Schedule $schedule
+     * @param array $scheduleIds
      * @return bool
      */
-    public function deleteSchedule(Schedule $schedule): bool
+    public function reorderSchedules(array $scheduleIds): bool
     {
+        $db = Craft::$app->getDb();
+
+        $transaction = $db->beginTransaction();
+        try {
+            foreach ($scheduleIds as $scheduleOrder => $scheduleId) {
+                $db->createCommand()->update('{{%schedules}}', [
+                    'sortOrder' => $scheduleOrder,
+                ], [
+                    'id' => $scheduleId
+                ])->execute();
+            }
+            $transaction->commit();
+        } catch (\Throwable $e) {
+            $transaction->rollBack();
+
+            throw $e;
+        }
+
+        return true;
+    }
+
+    /**
+     * Delete a schedule.
+     *
+     * @param ScheduleInterface $schedule
+     * @return bool
+     */
+    public function deleteSchedule(ScheduleInterface $schedule): bool
+    {
+        /** @var Schedule $schedule */
         if ($this->hasEventHandlers(self::EVENT_BEFORE_DELETE_SCHEDULE)) {
             $this->trigger(self::EVENT_BEFORE_DELETE_SCHEDULE, new ScheduleEvent([
                 'schedule' => $schedule,
@@ -509,7 +559,7 @@ class Schedules extends Component
         return true;
     }
 
-    //
+    // Private Methods
     // =========================================================================
 
     /**
@@ -528,7 +578,7 @@ class Schedules extends Component
     private function _createScheduleQuery(): Query
     {
         return (new Query())
-            ->select(['id', 'groupId', 'name', 'handle', 'type', 'minute', 'hour', 'day', 'month', 'week', 'user', 'setting'])
+            ->select(['id', 'groupId', 'name', 'handle', 'description', 'type', 'minute', 'hour', 'day', 'month', 'week', 'user', 'timer', 'settings'])
             ->from('{{%schedules}}')
             ->orderBy('sortOrder');
     }

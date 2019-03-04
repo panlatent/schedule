@@ -8,10 +8,9 @@
 
 namespace panlatent\schedule;
 
-use Craft;
 use omnilight\scheduling\Schedule;
+use panlatent\schedule\base\ScheduleInterface;
 use panlatent\schedule\events\ScheduleBuildEvent;
-use yii\queue\JobInterface;
 
 /**
  * Class Builder
@@ -21,8 +20,17 @@ use yii\queue\JobInterface;
  */
 class Builder extends Schedule
 {
+    // Constants
+    // =========================================================================
+
+    /**
+     * @event ScheduleBuildEvent
+     */
     const EVENT_BEFORE_BUILD = 'beforeBuild';
 
+    /**
+     * @event ScheduleBuildEvent
+     */
     const EVENT_AFTER_BUILD = 'afterBuild';
 
     /**
@@ -31,20 +39,38 @@ class Builder extends Schedule
     public $cliScriptName = 'craft';
 
     /**
-     * @param JobInterface $job
-     * @return \omnilight\scheduling\Event
+     * @param ScheduleInterface $schedule
      */
-    public function job(JobInterface $job)
+    public function schedule(ScheduleInterface $schedule)
     {
-        return $this->call(function () use($job) {
-            Craft::$app->getQueue()->push($job);
-        });
+        $schedule->build($this);
     }
 
     /**
-     *
+     * Build schedules.
      */
     public function build()
+    {
+        if (!$this->beforeBuild()) {
+            return $this;
+        }
+
+        $schedules = Plugin::$plugin->getSchedules()->getAllSchedules();
+        foreach ($schedules as $schedule) {
+            $schedule->build($this);
+        }
+
+        $this->afterBuild();
+
+        return $this;
+    }
+
+    /**
+     * Before build.
+     *
+     * @return bool
+     */
+    public function beforeBuild(): bool
     {
         $event = new ScheduleBuildEvent([
             'builder' => $this,
@@ -53,14 +79,19 @@ class Builder extends Schedule
 
         if ($this->hasEventHandlers(static::EVENT_BEFORE_BUILD)) {
             $this->trigger(static::EVENT_BEFORE_BUILD, $event);
-        }
-        $this->_events = $event->events;
+            $this->_events = $event->events;
 
-        // Add schedule events from scripts.
-        if ($scripts = Plugin::$plugin->getSettings()->scripts) {
-            call_user_func($scripts, $this);
+            return $event->isValid;
         }
 
+        return true;
+    }
+
+    /**
+     * After build
+     */
+    public function afterBuild()
+    {
         $event = new ScheduleBuildEvent([
             'builder' => $this,
             'events' => $this->_events,
@@ -68,10 +99,7 @@ class Builder extends Schedule
 
         if ($this->hasEventHandlers(static::EVENT_AFTER_BUILD)) {
             $this->trigger(static::EVENT_AFTER_BUILD, $event);
+            $this->_events = $event->events;
         }
-
-        $this->_events = $event->events;
-
-        return $this;
     }
 }

@@ -1,0 +1,20 @@
+{% import "_includes/forms" as forms %}
+
+{% set options = [] %}
+{% for label, option in timer.options %}
+    {% set options = options|merge([
+        {
+            label: label|t('schedule'),
+            value: option
+        }
+    ]) %}
+{% endfor %}
+
+{{ forms.radioGroupField({
+    required: true,
+    id: 'value',
+    name: 'value',
+    value: timer.value,
+    options: options,
+    errors: timer.getErrors('value'),
+}) }}
