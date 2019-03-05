@@ -10,6 +10,7 @@ namespace panlatent\schedule\base;
 
 use craft\base\SavableComponent;
 use craft\validators\HandleValidator;
+use panlatent\schedule\helpers\CronHelper;
 
 /**
  * Class Schedule
@@ -49,7 +50,7 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
      */
     public function getCronExpression(): string
     {
-        return sprintf('%s %s %s %s %s *', $this->minute ?: '*', $this->hour ?: '*', $this->day ?: '*', $this->month ?: '*', $this->week ?: '*');
+        return CronHelper::toCronExpression([$this->minute, $this->hour, $this->day, $this->month, $this->week]);
     }
 
     /**
@@ -59,6 +60,6 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
      */
     public function getCronDescription(): string
     {
-        return '';
+        return CronHelper::toDescription($this->getCronExpression());
     }
 }

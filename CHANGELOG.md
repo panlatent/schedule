@@ -8,7 +8,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Added
 ### Updated
 ### Fixed
-- Remove duplicate command
+
+## [0.1.4] 2019-03-05
+### Added
+- Add `CronHelper` class.
+- Show schedule cron description `when` column in schedules list.
+
+### Fixed
+- Remove duplicate command.
+- Fixed schedule::getCronExpression() returns error expression.
 
 ## [0.1.3] 2019-03-04
 ### Fixed

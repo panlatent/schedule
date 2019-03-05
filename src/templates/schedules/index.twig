@@ -46,6 +46,8 @@
             <th scope="col">{{ "Handle"|t('app') }}</th>
             <th scope="col">{{ "Type"|t('app') }}</th>
             <th scope="col">{{ "Description"|t('app') }}</th>
+            <th scope="col">{{ "When"|t('schedule') }}</th>
+            <th></th>
             {% if sortable %}<td class="thin"></td>{% endif %}
             <td class="thin"></td>
             </thead>
@@ -61,7 +63,8 @@
                             {{ schedule.displayName() }}
                         {% endif %}
                     </td>
-                    <td data-title="{{ 'Type'|t('Description') }}">{{ schedule.description }}</td>
+                    <td data-title="{{ 'Description'|t('app') }}">{{ schedule.description }}</td>
+                    <td data-title="{{ 'When'|t('schedule') }}">{{ schedule.cronDescription }}</td>
                     {% if sortable %}<td class="thin"><a class="move icon" title="{{ 'Reorder'|t('app') }}" role="button"></a></td>{% endif %}
                     <td class="thin"><a class="delete icon" title="{{ 'Delete'|t('app') }}" role="button"></a></td>
                 </tr>
