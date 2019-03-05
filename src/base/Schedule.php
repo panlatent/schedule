@@ -9,11 +9,14 @@
 namespace panlatent\schedule\base;
 
 use craft\base\SavableComponent;
+use craft\validators\HandleValidator;
 
 /**
  * Class Schedule
  *
  * @package panlatent\schedule\base
+ * @property-read string $cronExpression
+ * @property-read string $cronDescription
  * @author Panlatent <panlatent@gmail.com>
  */
 abstract class Schedule extends SavableComponent implements ScheduleInterface
@@ -32,7 +35,10 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
     public function rules()
     {
         return [
-
+            [['name', 'handle', 'minute', 'hour', 'day', 'month', 'week', 'timer'], 'required'],
+            [['groupId'], 'integer'],
+            [['name', 'handle', 'description', 'minute', 'hour', 'day', 'month', 'week', 'user', 'timer'], 'string'],
+            [['handle'], HandleValidator::class]
         ];
     }
 
