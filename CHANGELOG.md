@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Updated
 ### Fixed
 - Fixed CronHelper::toDescription can't convert standard timer.
+- Fixed make ordinal numeral error when value is less than 1.
+
 
 ## [0.1.4] 2019-03-05
 ### Added

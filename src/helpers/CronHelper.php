@@ -143,7 +143,7 @@ class CronHelper
      */
     private static function _getNumLabel(int $value)
     {
-        if ($value > 3) {
+        if ($value > 3 || $value < 1) {
             return Craft::t('schedule', '{num}th', ['num' => $value]);
         }
 
