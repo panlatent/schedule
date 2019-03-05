@@ -57,22 +57,22 @@ class CronHelper
         $expression = self::toCronExpression($expression);
         switch ($expression) {
             case '* * * * * *':
-                $description = 'everyMinute';
+                $description = 'Every Minute';
                 break;
             case '0 * * * * *':
-                $description = 'hourly';
+                $description = 'Hourly';
                 break;
             case '0 0 * * * *':
-                $description = 'daily';
+                $description = 'Daily';
                 break;
             case '0 0 1 * * *':
-                $description = 'monthly';
+                $description = 'Monthly';
                 break;
             case '0 0 1 1 * *':
-                $description = 'yearly';
+                $description = 'Yearly';
                 break;
             case '0 0 * * 0 *':
-                $description = 'weekly';
+                $description = 'Weekly';
                 break;
         }
 

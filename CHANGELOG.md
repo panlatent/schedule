@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Added
 ### Updated
 ### Fixed
+- Fixed CronHelper::toDescription can't convert standard timer.
 
 ## [0.1.4] 2019-03-05
 ### Added
