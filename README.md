@@ -1,5 +1,5 @@
-Schedule plugin for CraftCMS 3
-====================================
+Schedule
+========
 [![Build Status](https://travis-ci.org/panlatent/schedule.svg)](https://travis-ci.org/panlatent/schedule)
 [![Coverage Status](https://coveralls.io/repos/github/panlatent/schedule/badge.svg?branch=master)](https://coveralls.io/github/panlatent/schedule?branch=master)
 [![Latest Stable Version](https://poser.pugx.org/panlatent/schedule/v/stable.svg)](https://packagist.org/packages/panlatent/schedule)
@@ -9,7 +9,9 @@ Schedule plugin for CraftCMS 3
 [![Craft CMS](https://img.shields.io/badge/Powered_by-Craft_CMS-orange.svg?style=flat)](https://craftcms.com/)
 [![Yii2](https://img.shields.io/badge/Powered_by-Yii_Framework-green.svg?style=flat)](https://www.yiiframework.com/)
 
-Schedule plugin for CraftCMS 3.
+Manage your CraftCMS application schedules in Cp. Run a command, trigger an event, 
+push a queue task, or access a URL at a specified time. You can flexibly customize
+the trigger time and even design your schedule type.
 
 Requirements
 ------------
@@ -35,4 +37,6 @@ To install the plugin, follow these instructions.
     
         * * * * * php /path/to/craft schedules/run 1>> /dev/null 2>&1
 
+Usages
+------
 
