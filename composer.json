@@ -41,5 +41,8 @@
         "hasCpSection": true,
         "changelogUrl": "https://raw.githubusercontent.com/panlatent/schedule/master/CHANGELOG.md",
         "class": "panlatent\\schedule\\Plugin"
+    },
+    "require-dev": {
+        "codeception/codeception": "^2.5"
     }
 }

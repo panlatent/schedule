@@ -6,4 +6,4 @@ actor: UnitTester
 modules:
     enabled:
         - Asserts
-        - \Helper\Unit
+        - \panlatent\schedule\tests\Helper\Unit

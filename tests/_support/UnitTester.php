@@ -1,5 +1,5 @@
 <?php
-
+namespace panlatent\schedule\tests;
 
 /**
  * Inherited Methods
