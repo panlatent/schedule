@@ -132,9 +132,7 @@ class CronHelper
             return reset($segments);
         }
 
-        $first = array_shift($segments);
-
-        return $first . ' (' . implode(' > ', array_reverse($segments)) . ')';
+        return implode(', ', $segments);
     }
 
     /**
