@@ -29,6 +29,9 @@
         "symfony/process": "^4.2",
         "guzzlehttp/guzzle": "^6.3"
     },
+    "suggest": {
+        "ext-intl": "Help translate cron express description"
+    },
     "autoload": {
         "psr-4": {
           "panlatent\\schedule\\": "src/"

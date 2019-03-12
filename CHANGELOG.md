@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ## [Unreleased]
 ### Added
 ### Updated
+- Advance cron description format. e.g. `1st to 20th minutes, every 2 hour, every 3 day`
+
 ### Fixed
 - Fixed CronHelper::toDescription can't convert standard timer.
 - Fixed make ordinal numeral error when value is less than 1.
