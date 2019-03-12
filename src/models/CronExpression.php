@@ -205,10 +205,17 @@ class CronExpression extends BaseObject
             // or a dupe description like "every day, every day".
             $description = '';
         } else {
-            $description = $this->getSegmentDescription($this->expression['week'], Craft::t('schedule', 'ComaEveryDay'),
+            $description = $this->getSegmentDescription($this->expression['week'],
+                Craft::t('schedule', 'ComaEveryDay'),
                 function ($s) {
                     $exp = ($pos = strpos($s, '#')) !== false ? substr($s, 0, $pos) . substr($s, $pos + 1)
-                        : (strpos($s, 'L') !== false) ? str_replace('L', '', $s) : $s;
+                        : ((strpos($s, 'L') !== false) ? str_replace('L', '', $s) : $s);
+
+                    if (extension_loaded('intl')) {
+                        $fmt = new IntlDateFormatter(Craft::$app ? Craft::$app->getTargetLanguage() : 'en',
+                            IntlDateFormatter::FULL, IntlDateFormatter::FULL, null, IntlDateFormatter::GREGORIAN, 'EEEE');
+                        return $fmt->format((new DateTime("$exp week"))->getTimestamp());
+                    }
 
                     return $exp;
                 },
@@ -269,7 +276,6 @@ class CronExpression extends BaseObject
                 $datetime = new DateTime("$s month 1 day");
                 if (extension_loaded('intl')) {
                     $fmt = new IntlDateFormatter(Craft::$app ? Craft::$app->getTargetLanguage() : 'en', IntlDateFormatter::FULL, IntlDateFormatter::FULL, null, IntlDateFormatter::GREGORIAN, 'LLLL');
-
                     return $fmt->format($datetime->getTimestamp());
                 }
 
