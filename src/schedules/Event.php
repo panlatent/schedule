@@ -9,8 +9,6 @@
 namespace panlatent\schedule\schedules;
 
 use Craft;
-use panlatent\schedule\base\ExecutableScheduleInterface;
-use panlatent\schedule\base\ExecutableScheduleTrait;
 use panlatent\schedule\base\Schedule;
 use yii\base\Event as BaseEvent;
 
@@ -20,13 +18,8 @@ use yii\base\Event as BaseEvent;
  * @package panlatent\schedule\schedules
  * @author Panlatent <panlatent@gmail.com>
  */
-class Event extends Schedule implements ExecutableScheduleInterface
+class Event extends Schedule
 {
-    // Traits
-    // =========================================================================
-
-    use ExecutableScheduleTrait;
-
     // Static Methods
     // =========================================================================
 
@@ -36,6 +29,14 @@ class Event extends Schedule implements ExecutableScheduleInterface
     public static function displayName(): string
     {
         return Craft::t('schedule', 'Event');
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function isRunnable(): bool
+    {
+        return true;
     }
 
     // Properties
@@ -57,20 +58,23 @@ class Event extends Schedule implements ExecutableScheduleInterface
     /**
      * @inheritdoc
      */
-    public function execute()
-    {
-        Craft::info("Event Schedule trigger event: {$this->className}::{$this->eventName}", __METHOD__);
-
-        BaseEvent::trigger($this->className, $this->eventName);
-    }
-
-    /**
-     * @inheritdoc
-     */
     public function getSettingsHtml()
     {
         return Craft::$app->getView()->renderTemplate('schedule/_components/schedules/Event', [
             'schedule' => $this,
         ]);
+    }
+
+    // Protected Methods
+    // =========================================================================
+
+    /**
+     * @inheritdoc
+     */
+    protected function execute()
+    {
+        Craft::info("Event Schedule trigger event: {$this->className}::{$this->eventName}", __METHOD__);
+
+        BaseEvent::trigger($this->className, $this->eventName);
     }
 }

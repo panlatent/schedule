@@ -47,6 +47,7 @@
             <th scope="col">{{ "Type"|t('app') }}</th>
             <th scope="col">{{ "Description"|t('app') }}</th>
             <th scope="col">{{ "When"|t('schedule') }}</th>
+            <th scope="col">{{ "Last Running Date"|t('schedule') }}</th>
             <th></th>
             {% if sortable %}<td class="thin"></td>{% endif %}
             <td class="thin"></td>
@@ -65,6 +66,11 @@
                     </td>
                     <td data-title="{{ 'Description'|t('app') }}">{{ schedule.description }}</td>
                     <td data-title="{{ 'When'|t('schedule') }}">{{ schedule.cronDescription }}</td>
+                    <td data-title="{{ 'Last Running Date'|t('schedule') }}">
+                        {% if schedule.dateLastStarted is not empty %}
+                            {{ schedule.dateLastStarted|datetime('short') }}
+                        {% endif %}
+                    </td>
                     {% if sortable %}<td class="thin"><a class="move icon" title="{{ 'Reorder'|t('app') }}" role="button"></a></td>{% endif %}
                     <td class="thin"><a class="delete icon" title="{{ 'Delete'|t('app') }}" role="button"></a></td>
                 </tr>

@@ -19,15 +19,7 @@ use yii\base\Model;
 class Settings extends Model
 {
     /**
-     * Callback function:
-     *
-     * ```php
-     * function (Builder $schedule) {
-     *     $schedule->command('list')->everyFiveMinutes();
-     * }
-     * ```php
-     *
-     * @var callable|null Use a callback function to register some schedule.
+     * @var string PHP CLI path.
      */
-    public $scripts;
+    public $cliPath = 'php';
 }

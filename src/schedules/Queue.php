@@ -10,8 +10,6 @@ namespace panlatent\schedule\schedules;
 
 use Craft;
 use craft\queue\QueueInterface;
-use panlatent\schedule\base\ExecutableScheduleInterface;
-use panlatent\schedule\base\ExecutableScheduleTrait;
 use panlatent\schedule\base\Schedule;
 use panlatent\schedule\errors\ScheduleException;
 
@@ -21,13 +19,8 @@ use panlatent\schedule\errors\ScheduleException;
  * @package panlatent\schedule\schedules
  * @author Panlatent <panlatent@gmail.com>
  */
-class Queue extends Schedule implements ExecutableScheduleInterface
+class Queue extends Schedule
 {
-    // Traits
-    // =========================================================================
-
-    use ExecutableScheduleTrait;
-
     // Static Methods
     // =========================================================================
 
@@ -37,6 +30,14 @@ class Queue extends Schedule implements ExecutableScheduleInterface
     public static function displayName(): string
     {
         return Craft::t('schedule', 'Queue');
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function isRunnable(): bool
+    {
+        return true;
     }
 
     // Properties
@@ -58,7 +59,20 @@ class Queue extends Schedule implements ExecutableScheduleInterface
     /**
      * @inheritdoc
      */
-    public function execute()
+    public function getSettingsHtml()
+    {
+        return Craft::$app->getView()->renderTemplate('schedule/_components/schedules/Queue', [
+            'schedule' => $this,
+        ]);
+    }
+
+    // Protected Methods
+    // =========================================================================
+
+    /**
+     * @inheritdoc
+     */
+    protected function execute()
     {
         $queue = Craft::$app->get($this->componentId);
         if (!$queue || $queue instanceof \yii\queue\Queue || $queue instanceof QueueInterface) {
@@ -71,15 +85,5 @@ class Queue extends Schedule implements ExecutableScheduleInterface
         $queue->push($job);
 
         Craft::info("Queue Schedule push a job: {$this->jobClass} to {$this->componentId} component.", __METHOD__);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getSettingsHtml()
-    {
-        return Craft::$app->getView()->renderTemplate('schedule/_components/schedules/Queue', [
-            'schedule' => $this,
-        ]);
     }
 }

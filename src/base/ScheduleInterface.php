@@ -20,7 +20,17 @@ use panlatent\schedule\Builder;
 interface ScheduleInterface extends SavableComponentInterface
 {
     /**
+     * @return bool
+     */
+    public static function isRunnable(): bool;
+
+    /**
      * @param Builder $builder
      */
     public function build(Builder $builder);
+
+    /**
+     * @return bool
+     */
+    public function run(): bool;
 }

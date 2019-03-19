@@ -9,11 +9,9 @@
 namespace panlatent\schedule\console;
 
 use Craft;
-use panlatent\schedule\base\ExecutableScheduleInterface;
 use panlatent\schedule\base\Schedule;
 use panlatent\schedule\Plugin;
 use yii\console\Controller;
-use yii\console\ExitCode;
 use yii\helpers\Console;
 
 /**
@@ -75,37 +73,5 @@ class SchedulesController extends Controller
         }
 
         Craft::info("Running scheduled event total: " . count($events), __METHOD__);
-    }
-
-    /**
-     * @param int $scheduleId
-     * @return int
-     */
-    public function actionDoSchedule(int $scheduleId)
-    {
-        $schedules = Plugin::$plugin->getSchedules();
-
-        $schedule = $schedules->getScheduleById($scheduleId);
-        if (!$schedule) {
-            $this->stderr("Not found a schedule with the ID: {$scheduleId}");
-
-            return ExitCode::USAGE;
-        }
-
-        if (!$schedule instanceof ExecutableScheduleInterface) {
-            $this->stderr("Only support class that implements" . ExecutableScheduleInterface::class);
-
-            return ExitCode::USAGE;
-        }
-
-        try {
-            $schedule->execute();
-        } catch (\Throwable $exception) {
-            Craft::error($exception->getMessage(), 'schedule');
-
-            return ExitCode::SOFTWARE;
-        }
-
-        return ExitCode::OK;
     }
 }

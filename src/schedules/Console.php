@@ -54,7 +54,11 @@ class Console extends Schedule
     public function build(Builder $builder)
     {
         $builder->command($this->command)
-            ->cron($this->getCronExpression());
+            ->cron($this->getCronExpression())
+            ->then(function() {
+                $this->beforeRun();
+            })
+            ->on(\omnilight\scheduling\Event::EVENT_BEFORE_RUN, [$this, 'afterRun']);
     }
 
     /**

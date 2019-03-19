@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ## [Unreleased]
 ### Added
 ### Updated
+- Advance schedule classes: Add run method and events.
+- Show last run date on CP.
+
 ### Fixed
 
 ## [0.1.5] - 2019-03-12

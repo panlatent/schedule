@@ -12,6 +12,7 @@ return [
     'Ungrouped' => '未分组',
     'New schedule' => '新建计划',
     'When to execute?' => '何时执行？',
+    'Last Running Date' => '最后运行时间',
     'New a schedule' => '新计划',
     'Edit: {name}' => '编辑：{name}',
     'Custom' => '自定义',
