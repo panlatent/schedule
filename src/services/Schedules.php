@@ -476,6 +476,8 @@ class Schedules extends Component
         $this->_schedulesById[$schedule->id] = $schedule;
         $this->_schedulesByHandle[$schedule->handle] = $schedule;
 
+        $schedule->afterSave($isNewSchedule);
+
         if ($this->hasEventHandlers(self::EVENT_AFTER_SAVE_SCHEDULE)) {
             $this->trigger(self::EVENT_AFTER_SAVE_SCHEDULE, new ScheduleEvent([
                 'schedule' => $schedule,
