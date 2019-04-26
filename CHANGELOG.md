@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 - Show last run date on CP.
 
 ### Fixed
+- Fixed [#1](https://github.com/panlatent/schedule/issues/1) console schedule arguments property is invalid.
 
 ## [0.1.5] - 2019-03-12
 ### Added

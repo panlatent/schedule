@@ -53,7 +53,7 @@ class Console extends Schedule
      */
     public function build(Builder $builder)
     {
-        $builder->command($this->command)
+        $builder->command($this->command . ' ' . $this->arguments)
             ->cron($this->getCronExpression())
             ->then(function() {
                 $this->beforeRun();
