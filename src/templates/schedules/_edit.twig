@@ -10,7 +10,6 @@
 
 {% set tabs = [
     {label: "Settings"|t('app'), url: '#settings'},
-    {label: "Timers"|t('schedule'), url: '#timers'},
 ] %}
 
 {% import "_includes/forms" as forms %}
@@ -45,25 +44,6 @@
             value: schedule.handle,
             errors: schedule.getErrors('handle'),
         }) }}
-
-        {#options: [#}
-        {#{'label': 'Every Minute'|t('schedule'), value: 'erveryMinute'},#}
-        {#{'label': 'Hourly'|t('schedule'), value: 'hourly'},#}
-        {#{'label': 'Daily'|t('schedule'), value: 'daily'},#}
-        {#{'label': 'Weekly'|t('schedule'), value: 'weekly'},#}
-        {#{'label': 'Monthly'|t('schedule'), value: 'monthly'},#}
-        {#{'label': 'Yearly'|t('schedule'), value: 'yearly'},#}
-
-        {#{'label': 'At Time'|t('schedule'), value: 'atTime'},#}
-        {#{'label': 'Daily At'|t('schedule'), value: 'hourlyAt'},#}
-        {#{'label': 'Weekdays'|t('schedule'), value: 'weekdays'},#}
-
-        {#{'label': 'Mondays'|t('schedule'), value: 'mondays'},#}
-        {#{'label': 'Days'|t('schedule'), value: 'days'},#}
-
-
-        {#{'label': 'Custom'|t('schedule'), value: 'custom'}#}
-        {#],#}
 
         <hr>
 
@@ -100,30 +80,4 @@
         }) }}
 
     </div>
-
-    <div id="timers" class="hidden">
-
-        {{ forms.selectField({
-            label: "When to execute?"|t('schedule'),
-            id: 'timerType',
-            name: 'timerType',
-            value: schedule.timer,
-            options: timerTypeOptions,
-            toggle: true,
-        }) }}
-
-        <div id="timers">
-            {% for timerType in timerTypes %}
-                {% set isCurrent = (timerType == schedule.timer or (isCurrent is not defined and schedule.timer == null)) %}
-
-                <div id="{{ timerType|id }}"{% if not isCurrent %} class="hidden"{% endif %}>
-                    {% namespace "timers[" ~ timerType ~ "]" %}
-                        {{ timerInstances[timerType].settingsHtml|raw }}
-                    {% endnamespace %}
-                </div>
-            {% endfor %}
-        </div>
-
-    </div>
-
 {% endblock %}

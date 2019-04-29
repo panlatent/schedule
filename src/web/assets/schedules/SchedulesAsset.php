@@ -3,13 +3,14 @@
  * Schedule plugin for CraftCMS 3
  *
  * @link      https://panlatent.com/
- * @copyright Copyright (c) 2018 panlatent@gmail.com
+ * @copyright Copyright (c) 2019 panlatent@gmail.com
  */
 
-namespace panlatent\schedule\assets;
+namespace panlatent\schedule\web\assets\schedules;
 
 use craft\web\AssetBundle;
 use craft\web\assets\cp\CpAsset;
+use craft\web\assets\vue\VueAsset;
 use craft\web\View;
 
 /**
@@ -18,25 +19,26 @@ use craft\web\View;
  * @package panlatent\schedule\assets
  * @author Panlatent <panlatent@gmail.com>
  */
-class ScheduleAsset extends AssetBundle
+class SchedulesAsset extends AssetBundle
 {
     /**
      * @inheritdoc
      */
-    public $sourcePath = '@panlatent/schedule/assets/dist';
+    public $sourcePath = '@schedule/web/assets/schedules/dist';
 
     /**
      * @inheritdoc
      */
     public $depends = [
         CpAsset::class,
+        VueAsset::class,
     ];
 
     /**
      * @inheritdoc
      */
     public $js = [
-        'Schedule.js',
+        'schedule.js',
     ];
 
     /**

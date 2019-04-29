@@ -8,6 +8,8 @@
 
 namespace panlatent\schedule\models;
 
+use Craft;
+use panlatent\schedule\validators\PhpBinaryValidator;
 use yii\base\Model;
 
 /**
@@ -18,8 +20,44 @@ use yii\base\Model;
  */
 class Settings extends Model
 {
+    // Properties
+    // =========================================================================
+
     /**
-     * @var string PHP CLI path.
+     * @var string PHP binary path.
      */
     public $cliPath = 'php';
+
+    /**
+     * @var string|null
+     */
+    public $customName;
+
+    /**
+     * @var bool
+     */
+    public $modifyPluginName = false;
+
+    // Public Methods
+    // =========================================================================
+
+    /**
+     * @inheritdoc
+     */
+    public function rules()
+    {
+        return [
+            [['cliPath', 'customName'], 'string'],
+            [['modifyPluginName'], 'boolean'],
+            [['cliPath'], PhpBinaryValidator::class, 'minVersion' => '7.1'],
+        ];
+    }
+
+    /**
+     * @return string
+     */
+    public function getCliPath(): string
+    {
+        return Craft::parseEnv($this->cliPath) ?: 'php';
+    }
 }

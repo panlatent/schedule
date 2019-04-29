@@ -8,6 +8,7 @@
 
 namespace panlatent\schedule;
 
+use omnilight\scheduling\Event;
 use omnilight\scheduling\Schedule;
 use panlatent\schedule\base\ScheduleInterface;
 use panlatent\schedule\events\ScheduleBuildEvent;
@@ -16,6 +17,7 @@ use panlatent\schedule\events\ScheduleBuildEvent;
  * Class Builder
  *
  * @package panlatent\schedule
+ * @method  Event call(callable $callback, array $parameters = [])
  * @author Panlatent <panlatent@gmail.com>
  */
 class Builder extends Schedule

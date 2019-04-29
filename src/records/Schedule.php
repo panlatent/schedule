@@ -20,13 +20,7 @@ use craft\db\ActiveRecord;
  * @property string $handle
  * @property string $description
  * @property string $type
- * @property string $minute
- * @property string $hour
- * @property string $day
- * @property string $month
- * @property string $week
  * @property string $user
- * @property string $timer
  * @property string $settings
  * @property int $sortOrder
  * @property \DateTime $dateLastStarted

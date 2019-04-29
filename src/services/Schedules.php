@@ -449,13 +449,7 @@ class Schedules extends Component
             $record->handle = $schedule->handle;
             $record->description = $schedule->description;
             $record->type = get_class($schedule);
-            $record->minute = $schedule->minute ?? '*';
-            $record->hour = $schedule->hour ?? '*';
-            $record->day = $schedule->day ?? '*';
-            $record->month = $schedule->month ?? '*';
-            $record->week = $schedule->week ?? '*';
             $record->user = $schedule->user;
-            $record->timer = $schedule->timer;
             $record->settings = Json::encode($schedule->getSettings());
 
             $record->save(false);
@@ -504,7 +498,7 @@ class Schedules extends Component
                 $db->createCommand()->update('{{%schedules}}', [
                     'sortOrder' => $scheduleOrder,
                 ], [
-                    'id' => $scheduleId
+                    'id' => $scheduleId,
                 ])->execute();
             }
             $transaction->commit();
@@ -580,7 +574,19 @@ class Schedules extends Component
     private function _createScheduleQuery(): Query
     {
         return (new Query())
-            ->select(['id', 'groupId', 'name', 'handle', 'description', 'type', 'minute', 'hour', 'day', 'month', 'week', 'user', 'timer', 'settings'])
+            ->select([
+                'id',
+                'groupId',
+                'name',
+                'handle',
+                'description',
+                'type',
+                'user',
+                'settings',
+                'lastStartedTime',
+                'lastFinishedTime',
+                'lastStatus',
+            ])
             ->from('{{%schedules}}')
             ->orderBy('sortOrder');
     }

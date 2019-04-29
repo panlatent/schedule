@@ -71,10 +71,12 @@ class Event extends Schedule
     /**
      * @inheritdoc
      */
-    protected function execute()
+    protected function execute(int $logId): bool
     {
         Craft::info("Event Schedule trigger event: {$this->className}::{$this->eventName}", __METHOD__);
 
         BaseEvent::trigger($this->className, $this->eventName);
+
+        return true;
     }
 }

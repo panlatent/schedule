@@ -8,15 +8,18 @@
 
 namespace panlatent\schedule\base;
 
+/**
+ * Interface TimerInterface
+ *
+ * @package panlatent\schedule\base
+ * @author Panlatent <panlatent@gmail.com>
+ */
 interface TimerInterface
 {
-    public function getMinute(): string;
-
-    public function getHour(): string;
-
-    public function getDay(): string;
-
-    public function getMonth(): string;
-
-    public function getWeek(): string;
+    /**
+     * Returns cron expression.
+     *
+     * @return string
+     */
+    public function getCronExpression(): string;
 }

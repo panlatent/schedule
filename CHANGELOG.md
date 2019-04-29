@@ -9,7 +9,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Updated
 ### Fixed
 
-### [0.1.6] -2019-04-26
+### [0.2.0]
+
+
+### [0.1.6] - 2019-04-26
 ### Added
 ### Updated
 - Advance schedule classes: Add run method and events.

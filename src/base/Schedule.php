@@ -10,21 +10,30 @@ namespace panlatent\schedule\base;
 
 use Craft;
 use craft\base\SavableComponent;
-use craft\helpers\DateTimeHelper;
+use craft\db\mysql\Schema as MysqlSchema;
 use craft\validators\HandleValidator;
 use DateTime;
-use DateTimeZone;
 use panlatent\schedule\Builder;
+use panlatent\schedule\db\Table;
 use panlatent\schedule\events\ScheduleEvent;
-use panlatent\schedule\helpers\CronHelper;
+use panlatent\schedule\models\ScheduleGroup;
+use panlatent\schedule\models\ScheduleLog;
+use panlatent\schedule\Plugin;
 use yii\db\Query;
+
 
 /**
  * Class Schedule
  *
  * @package panlatent\schedule\base
+ * @property ScheduleGroup $group
+ * @property TimerInterface[] $timers
+ * @property-read ScheduleLog[] $logs
+ * @property-read int $totalLogs
  * @property-read string $cronExpression
  * @property-read string $cronDescription
+ * @property-read DateTime $lastFinishedDate
+ * @property-read int $lastDuration
  * @author Panlatent <panlatent@gmail.com>
  */
 abstract class Schedule extends SavableComponent implements ScheduleInterface
@@ -34,7 +43,7 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
 
     use ScheduleTrait;
 
-    // Constants
+    // Events
     // =========================================================================
 
     /**
@@ -47,6 +56,17 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
      */
     const EVENT_AFTER_RUN = 'afterRun';
 
+    // Statuses
+    // =========================================================================
+
+    const STATUS_PREPARING = 'preparing';
+
+    const STATUS_PROCESSING = 'processing';
+
+    const STATUS_SUCCESSFUL = 'successful';
+
+    const STATUS_FAILED = 'failed';
+
     // Static Methods
     // =========================================================================
 
@@ -58,8 +78,29 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
         return false;
     }
 
+    // Properties
+    // =========================================================================
+
+    /**
+     * @var ScheduleGroup|null
+     */
+    private $_group;
+
+    /**
+     * @var TimerInterface[]|null
+     */
+    private $_timers;
+
     // Public Methods
     // =========================================================================
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return (string)$this->name;
+    }
 
     /**
      * @inheritdoc
@@ -67,47 +108,102 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
     public function rules()
     {
         return [
-            [['name', 'handle', 'minute', 'hour', 'day', 'month', 'week', 'timer'], 'required'],
+            [['name', 'handle'], 'required'],
             [['groupId'], 'integer'],
-            [['name', 'handle', 'description', 'minute', 'hour', 'day', 'month', 'week', 'user', 'timer'], 'string'],
+            [['name', 'handle', 'description', 'user'], 'string'],
             [['handle'], HandleValidator::class],
         ];
     }
 
     /**
-     * Returns cron expression.
-     *
-     * @return string
+     * @return ScheduleGroup|null
      */
-    public function getCronExpression(): string
+    public function getGroup()
     {
-        return CronHelper::toCronExpression([$this->minute, $this->hour, $this->day, $this->month, $this->week]);
+        if ($this->_group !== null) {
+            return $this->_group;
+        }
+
+        if (!$this->groupId) {
+            return null;
+        }
+
+        return $this->_group = Plugin::$plugin->getSchedules()->getGroupById($this->groupId);
     }
 
     /**
-     * Returns cron expression description.
-     *
-     * @return string
+     * @return TimerInterface[]|null
      */
-    public function getCronDescription(): string
+    public function getTimers(): array
     {
-        return CronHelper::toDescription($this->getCronExpression());
+        if ($this->_timers !== null) {
+            return $this->_timers;
+        }
+
+        if (!$this->id) {
+            return [];
+        }
+
+        $this->_timers = Plugin::getInstance()->getTimers()->getTimersByScheduleId($this->id);
+
+        return $this->_timers;
+    }
+
+    /**
+     * @param TimerInterface[]|null $timers
+     */
+    public function setTimers(array $timers)
+    {
+        $this->_timers = $timers;
+    }
+
+    /**
+     * @return ScheduleLog[]
+     */
+    public function getLogs(): array
+    {
+        if (!$this->id) {
+            return [];
+        }
+
+        return Plugin::$plugin->getLogs()
+            ->findLogs(['scheduleId' => $this->id]);
+    }
+
+    /**
+     * @return int
+     */
+    public function getTotalLogs(): int
+    {
+        if (!$this->id) {
+            return 0;
+        }
+
+        return Plugin::$plugin->getLogs()->getTotalLogs(['scheduleId' => $this->id]);
     }
 
     /**
      * @return DateTime|null
      */
-    public function getDateLastStarted()
+    public function getLastFinishedDate()
     {
-        return $this->_getLastDate('dateLastStarted');
+        if (!$this->lastFinishedTime) {
+            return null;
+        }
+
+        return new DateTime(date('Y-m-d H:i:s', (int)($this->lastFinishedTime / 1000)));
     }
 
     /**
-     * @return DateTime|null
+     * @return int
      */
-    public function getDateLastFinished()
+    public function getLastDuration(): int
     {
-        return $this->_getLastDate('dateLastFinished');
+        if (!$this->lastStartedTime || !$this->lastFinishedTime) {
+            return 0;
+        }
+
+        return $this->lastFinishedTime - $this->lastStartedTime;
     }
 
     /**
@@ -117,8 +213,10 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
     {
         if (static::isRunnable()) {
             /** @noinspection PhpParamsInspection */
-            $builder->call([$this, 'run'])
-                ->cron($this->getCronExpression());
+            foreach ($this->getTimers() as $timer) {
+                $builder->call([$this, 'run'])
+                    ->cron($timer->getCronExpression());
+            }
 
             return;
         }
@@ -133,9 +231,43 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
             return false;
         }
 
-        $this->execute();
+        $db = Craft::$app->getDb();
 
-        $this->afterRun();
+        $sortOrderQuery = (new Query())
+            ->select(['[[sortOrder]] + 1 AS sortOrder'])
+            ->from(Table::SCHEDULELOGS)
+            ->where([
+                'scheduleId' => $this->id,
+            ])
+            ->orderBy(['sortOrder' => SORT_DESC])
+            ->limit(1);
+
+        $db->createCommand()
+            ->insert(Table::SCHEDULELOGS, [
+                'scheduleId' => $this->id,
+                'status' => self::STATUS_PREPARING,
+                'startTime' => round(microtime(true) * 1000),
+                'output' => '',
+                'sortOrder' => $db->getSchema() instanceof MysqlSchema ?  // MySQL not support same table sub query on insert.
+                    $sortOrderQuery->scalar() :
+                    $sortOrderQuery,
+            ])
+            ->execute();
+
+        $id = $db->getLastInsertID();
+
+        $successful = $this->execute($id);
+
+        $db->createCommand()
+            ->update(Table::SCHEDULELOGS, [
+                'status' => $successful ? self::STATUS_SUCCESSFUL : self::STATUS_FAILED,
+                'endTime' => round(microtime(true) * 1000),
+            ], [
+                'id' => $id,
+            ])
+            ->execute();
+
+        $this->afterRun($successful);
 
         return true;
     }
@@ -151,7 +283,13 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
             ]));
         }
 
-        $this->_updateLastDate('dateLastStarted');
+        Craft::$app->getDb()->createCommand()
+            ->update('{{%schedules}}', [
+                'lastStartedTime' => round(microtime(true) * 1000),
+            ], [
+                'id' => $this->id,
+            ])
+            ->execute();
 
         return true;
     }
@@ -159,9 +297,16 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
     /**
      * @inheritdoc
      */
-    public function afterRun()
+    public function afterRun(bool $successful)
     {
-        $this->_updateLastDate('dateLastFinished');
+        Craft::$app->getDb()->createCommand()
+            ->update('{{%schedules}}', [
+                'lastFinishedTime' => round(microtime(true) * 1000),
+                'lastStatus' => $successful,
+            ], [
+                'id' => $this->id,
+            ])
+            ->execute();
 
         if ($this->hasEventHandlers(self::EVENT_AFTER_RUN)) {
             $this->trigger(self::EVENT_AFTER_RUN, new ScheduleEvent([
@@ -173,44 +318,16 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
     // Protected Methods
     // =========================================================================
 
-    protected function execute()
-    {
-
-    }
-
-    // Private Methods
-    // =========================================================================
-
     /**
-     * @param string $field
+     * Execute somethings.
+     *
+     * @param int $logId
+     * @return bool
      */
-    private function _updateLastDate(string $field)
+    protected function execute(int $logId): bool
     {
-        Craft::$app->getDb()->createCommand()
-            ->update('{{%schedules}}', [
-                $field => (new DateTime())->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s'),
-            ], [
-                'id' => $this->id,
-            ])
-            ->execute();
-    }
+        Craft::info(sprintf("Schedule #%d running with log ID: #%d", $this->id, $logId), __METHOD__);
 
-    /**
-     * @param string $field
-     * @return DateTime|false|null
-     */
-    private function _getLastDate(string $field)
-    {
-        $date = (new Query())
-            ->select($field)
-            ->from('{{%schedules}}')
-            ->where(['id' => $this->id])
-            ->scalar();
-
-        if (!$date) {
-            return null;
-        }
-
-        return DateTimeHelper::toDateTime($date);
+        return true;
     }
 }

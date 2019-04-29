@@ -1,0 +1,58 @@
+{% extends "_layouts/cp" %}
+
+{% do view.registerAssetBundle("panlatent\\schedule\\web\\assets\\logs\\LogsAsset") %}
+{% set title = "Logs"|t('schedule') %}
+{% set currentSchedule = null %}
+{% set selectedSubnavItem = 'logs' %}
+
+{% if scheduleHandle is defined and scheduleHandle is not empty %}
+    {% set schedule = craft.schedule.schedules.getScheduleByHandle(scheduleHandle) %}
+{% else %}
+    {% set schedule = craft.schedule.schedules.getAllSchedules()|first %}
+{% endif %}
+
+{% if not schedule %}
+    {% exit 404 %}
+{% endif %}
+
+{% block content %}
+    <div id="logs">
+        {% verbatim %}
+            <el-container>
+                <el-aside>
+                    <div class="search">
+                        <el-input placeholder="Search all schedules" learable suffix-icon="el-icon-search" size="small"></el-input>
+                    </div>
+                    <template>
+                        <div class="schedules" v-loading="loading">
+                            <el-card class="box-card" shadow="never" v-bind:class="{passed: schedule.status}" v-for="schedule in schedules">
+                                <h2>
+                                    <router-link :to="'/admin/schedule/logs/' + schedule.handle">
+                                        <span>
+                                            <i class="el-icon-check" v-if="schedule.status === true"></i>
+                                            <i class="el-icon-check" v-else-if="schedule.status === false"></i>
+                                            <i class="el-icon-close" v-else="schedule.status"></i>
+                                        </span>
+                                        <span>{{ schedule.name }}</span>
+                                    </router-link>
+                                </h2>
+                                <p class="right"><i class="el-icon-caret-right"></i> {{ schedule.total }}</p>
+                                <p><i class="el-icon-time"></i> Duration: {{ schedule.duration }} ms</p>
+                                <p><i class="el-icon-date"></i> Finished: {{ schedule.finished }}</p>
+                            </el-card>
+                        </div>
+                    </template>
+                </el-aside>
+                <el-main>
+                    <router-view></router-view>
+                </el-main>
+            </el-container>
+        {% endverbatim %}
+    </div>
+{% endblock %}
+
+{% do view.registerJsVar('api', {
+    schedulesUrl: url('schedule/logs/get-schedules'),
+    logsUrl: url('schedule/logs/get-logs'),
+    scheduleId: schedule.id,
+}) %}

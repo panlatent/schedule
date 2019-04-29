@@ -1,0 +1,42 @@
+{% extends "_layouts/cp" %}
+
+{% set fullPageForm = true %}
+
+{% import "_includes/forms" as forms %}
+
+{% block content %}
+    <input type="hidden" name="action" value="schedule/timers/save-timer">
+    <input type="hidden" name="scheduleId" value="{{ timer.scheduleId }}">
+    <input type="hidden" name="timerId" value="{{ timer.id }}">
+
+    {{ redirectInput('schedule/' ~ timer.scheduleId ~ '/timers') }}
+
+    {{ forms.lightSwitchField({
+        label: "Enabled"|t('app'),
+        id: "enabled",
+        name: "enabled",
+        on: timer.enabled,
+        errors: timer.getErrors('enabled'),
+    }) }}
+
+    {{ forms.selectField({
+        label: "When to execute?"|t('schedule'),
+        id: 'type',
+        name: 'type',
+        value: className(timer),
+        options: timerTypeOptions,
+        toggle: true,
+    }) }}
+
+    <div id="timers">
+        {% for timerType in timerTypes %}
+            {% set isCurrent = (timerType == className(timer) or (isCurrent is not defined and timer == null)) %}
+
+            <div id="{{ timerType|id }}"{% if not isCurrent %} class="hidden"{% endif %}>
+                {% namespace "types[" ~ timerType ~ "]" %}
+                    {{ timerInstances[timerType].settingsHtml|raw }}
+                {% endnamespace %}
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

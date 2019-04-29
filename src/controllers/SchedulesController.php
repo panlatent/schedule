@@ -27,7 +27,12 @@ use yii\web\Response;
  */
 class SchedulesController extends Controller
 {
+    // Public Methods
+    // =========================================================================
+
     /**
+     * Save a schedule group.
+     *
      * @return Response
      */
     public function actionSaveGroup(): Response
@@ -61,6 +66,8 @@ class SchedulesController extends Controller
     }
 
     /**
+     * Delete a schedule group.
+     *
      * @return Response
      */
     public function actionDeleteGroup(): Response
@@ -86,6 +93,8 @@ class SchedulesController extends Controller
     }
 
     /**
+     * Edit a schedule.
+     *
      * @param int|null $scheduleId
      * @param ScheduleInterface|null $schedule
      * @return Response
@@ -93,7 +102,7 @@ class SchedulesController extends Controller
     public function actionEditSchedule(int $scheduleId = null, ScheduleInterface $schedule = null): Response
     {
         $schedules = Plugin::$plugin->getSchedules();
-        $timers = Plugin::$plugin->getTimers();
+
 
         /** @var Schedule $schedule */
         if ($schedule === null) {
@@ -111,7 +120,6 @@ class SchedulesController extends Controller
 
         $allGroups = $schedules->getAllGroups();
         $allScheduleTypes = $schedules->getAllScheduleTypes();
-        $allTimerTypes = $timers->getAllTimerTypes();
 
         $groupOptions = [
             [
@@ -138,32 +146,13 @@ class SchedulesController extends Controller
             ];
         }
 
-        $timerInstances = [];
-        $timerTypeOptions = [];
-        foreach ($allTimerTypes as $class) {
-            $timerInstances[$class] = new $class([
-                'minute' => $schedule->minute,
-                'hour' => $schedule->hour,
-                'day' => $schedule->day,
-                'month' => $schedule->month,
-                'week' => $schedule->week,
-            ]);
-            $timerTypeOptions[] = [
-                'label' => $class::displayName(),
-                'value' => $class,
-            ];
-        }
-
-        return $this->renderTemplate('schedule/_edit', [
+        return $this->renderTemplate('schedule/schedules/_edit', [
             'isNewSchedule' => $isNewSchedule,
             'groupOptions' => $groupOptions,
             'schedule' => $schedule,
             'scheduleInstances' => $scheduleInstances,
             'scheduleTypes' => $allScheduleTypes,
             'scheduleTypeOptions' => $scheduleTypeOptions,
-            'timerInstances' => $timerInstances,
-            'timerTypes' => $allTimerTypes,
-            'timerTypeOptions' => $timerTypeOptions,
         ]);
     }
 
@@ -177,16 +166,8 @@ class SchedulesController extends Controller
         $this->requirePostRequest();
 
         $schedules = Plugin::$plugin->getSchedules();
-        $timers = Plugin::$plugin->getTimers();
         $request = Craft::$app->getRequest();
-
         $type = $request->getBodyParam('type');
-        $timerType = $request->getBodyParam('timerType');
-
-        $timer = $timers->createTimer([
-            'type' => $timerType,
-            'settings' => $request->getBodyParam('timers.' . $timerType)
-        ]);
 
         /** @var Schedule $schedule */
         $schedule = $schedules->createSchedule([
@@ -196,12 +177,6 @@ class SchedulesController extends Controller
             'handle' => $request->getBodyParam('handle'),
             'description' => $request->getBodyParam('description'),
             'type' => $type,
-            'minute' => $timer->getMinute(),
-            'hour' => $timer->getHour(),
-            'day' => $timer->getDay(),
-            'month' => $timer->getMonth(),
-            'week' => $timer->getWeek(),
-            'timer' => $timerType,
             'settings' => $request->getBodyParam('types.' . $type, [])
         ]);
 

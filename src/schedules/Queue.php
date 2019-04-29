@@ -72,7 +72,7 @@ class Queue extends Schedule
     /**
      * @inheritdoc
      */
-    protected function execute()
+    protected function execute(int $logId): bool
     {
         $queue = Craft::$app->get($this->componentId);
         if (!$queue || $queue instanceof \yii\queue\Queue || $queue instanceof QueueInterface) {
@@ -85,5 +85,7 @@ class Queue extends Schedule
         $queue->push($job);
 
         Craft::info("Queue Schedule push a job: {$this->jobClass} to {$this->componentId} component.", __METHOD__);
+
+        return true;
     }
 }

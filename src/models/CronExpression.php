@@ -50,6 +50,9 @@ class CronExpression extends BaseObject
     // Public Methods
     // =========================================================================
 
+    /**
+     * @inheritdoc
+     */
     public function init()
     {
         parent::init();

@@ -9,6 +9,7 @@
 namespace panlatent\schedule;
 
 use Craft;
+use craft\helpers\UrlHelper;
 use craft\web\twig\variables\CraftVariable;
 use panlatent\schedule\console\SchedulesController;
 use panlatent\schedule\models\Settings;
@@ -22,6 +23,8 @@ use yii\console\Application;
  * Class Plugin
  *
  * @package panlatent\schedule
+ * @method Settings getSettings()
+ * @property-read Settings $settings
  * @author Panlatent <panlatent@gmail.com>
  */
 class Plugin extends \craft\base\Plugin
@@ -42,7 +45,7 @@ class Plugin extends \craft\base\Plugin
     /**
      * @var string
      */
-    public $schemaVersion = '0.1.6';
+    public $schemaVersion = '0.2.0-alpha.1';
 
     /**
      * @var string
@@ -59,9 +62,10 @@ class Plugin extends \craft\base\Plugin
     {
         parent::init();
         self::$plugin = $this;
-
         Craft::setAlias('@schedule', $this->getBasePath());
-        $this->name = Craft::t('schedule', 'Schedule');
+        if ($this->getSettings()->customName && $this->getSettings()->modifyPluginName) {
+            $this->name = Craft::t('schedule', 'Schedule');
+        }
 
         // Replace omnilight controller to this plugin controller in console.
         if (Craft::$app instanceof Application) {
@@ -71,9 +75,48 @@ class Plugin extends \craft\base\Plugin
             }
         }
 
-        $this->_setComponents();
         $this->_registerCpRoutes();
         $this->_registerVariables();
+        $this->_setComponents();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getCpNavItem()
+    {
+        $ret = parent::getCpNavItem();
+
+        if ($this->getSettings()->customName) {
+            $ret['label'] = $this->getSettings()->customName;
+        } else {
+            $ret['label'] = Craft::t('schedule', 'Schedule');
+        }
+
+        $ret['subnav'][''] = [
+            'label' => Craft::t('schedule', 'Schedules'),
+            'url' => 'schedule',
+        ];
+
+        $ret['subnav']['logs'] = [
+            'label' => Craft::t('schedule', 'Logs'),
+            'url' => 'schedule/logs',
+        ];
+
+        $ret['subnav']['settings'] = [
+            'label' => Craft::t('schedule', 'Settings'),
+            'url' => 'schedule/settings',
+        ];
+
+        return $ret;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getSettingsResponse()
+    {
+        return Craft::$app->getResponse()->redirect(UrlHelper::cpUrl('schedule/settings'));
     }
 
     // Protected Methods
@@ -85,16 +128,6 @@ class Plugin extends \craft\base\Plugin
     protected function createSettingsModel(): Settings
     {
         return new Settings();
-    }
-
-    /**
-     * @return string
-     */
-    protected function settingsHtml(): string
-    {
-        return Craft::$app->getView()->renderTemplate('schedule/_settings', [
-            'settings' => $this->getSettings(),
-        ]);
     }
 
     // Private Methods

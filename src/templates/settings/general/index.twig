@@ -1,0 +1,42 @@
+{% extends "schedule/_layouts/settings" %}
+
+{% set fullPageFomr = true %}
+{% set settings = craft.schedule.settings %}
+
+{% import "_includes/forms" as forms %}
+
+{% block content %}
+    <h2>{{ "General Settings"|t('schedule') }}</h2>
+
+    <form method="post" accept-charset="UTF-8">
+        <input type="hidden" name="action" value="schedule/settings/save-general">
+        {{ csrfInput() }}
+
+        {{ forms.textField({
+            label: "Custom Name"|t('schedule'),
+            id: "customName",
+            name: "customName",
+            value: settings.customName,
+            errors: settings.getErrors('customName'),
+        }) }}
+
+        {{ forms.checkboxField({
+            label: "Also modify the plugin name"|t('schedule'),
+            id: "modifyPluginName",
+            name: "mocheckeddifyPluginName",
+            checked: settings.modifyPluginName,
+            errors: settings.getErrors('modifyPluginName'),
+        }) }}
+
+        {{ forms.autoSuggestField({
+            label: "CLI Path"|t('schedule'),
+            id: "cliPath",
+            name: "cliPath",
+            value: settings.getCliPath(),
+            errors: settings.getErrors('cliPath'),
+            suggestEnvVars: true,
+        }) }}
+
+        <button class="btn submit">{{ "Save"|t('app') }}</button>
+    </form>
+{% endblock %}

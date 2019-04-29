@@ -8,8 +8,8 @@
 
 namespace panlatent\schedule\plugin;
 
-
 use panlatent\schedule\Builder;
+use panlatent\schedule\services\Logs;
 use panlatent\schedule\services\Schedules;
 use panlatent\schedule\services\Timers;
 
@@ -19,6 +19,7 @@ use panlatent\schedule\services\Timers;
  * @package panlatent\schedule\plugin
  * @property-read Builder $builder
  * @property-read Schedules $schedules
+ * @property-read Logs $logs
  * @author Panlatent <panlatent@gmail.com>
  */
 trait Services
@@ -48,6 +49,14 @@ trait Services
     }
 
     /**
+     * @return Logs
+     */
+    public function getLogs(): Logs
+    {
+        return $this->get('logs');
+    }
+
+    /**
      * Set service components.
      */
     private function _setComponents()
@@ -56,6 +65,7 @@ trait Services
             'builder' => Builder::class,
             'schedules' => Schedules::class,
             'timers' => Timers::class,
+            'logs' => Logs::class,
         ]);
     }
 }

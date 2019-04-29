@@ -22,6 +22,9 @@ use yii\helpers\Console;
  */
 class SchedulesController extends Controller
 {
+    // Public Methods
+    // =========================================================================
+
     /**
      * List all schedules.
      */

@@ -1,0 +1,69 @@
+{% extends "_layouts/cp" %}
+
+{% set schedule = schedule is defined ? schedule : craft.schedule.schedules.getScheduleById(scheduleId) %}
+{% set timers = timers is defined ? timers : schedule.timers %}
+{% set title = "Timers"|t('schedule') %}
+{% set crumbs = [
+    {label: "Schedule"|t('schedule'), url: url('schedule')},
+] %}
+
+{% if schedule.group %}
+    {% set crumbs = crumbs|merge([
+        {label: schedule.group, url: url('schedule/groups/' ~ schedule.groupId)}
+    ]) %}
+{% endif %}
+
+{% set crumbs = crumbs|merge([
+    {label: schedule, url: url('schedule/' ~ schedule.id)},
+]) %}
+
+{% block actionButton %}
+    <a href="{{ url('schedule/' ~ schedule.id ~ '/timers/new') }}" class="btn submit icon add">{{ "New timer"|t('schedule') }}</a>
+{% endblock %}
+
+{% block content %}
+    <div id="notimers"{% if timers %} class="hidden"{% endif %}>
+        <p>{{ "No timers exist yet."|t('schedule') }}</p>
+    </div>
+
+    {% if timers|length %}
+        {% set sortable  = (timers|length > 1) %}
+        <table id="timers" class="data fullwidth collapsible">
+            <thead>
+                <th scope="col">{{ "No."|t('schedules') }}</th>
+                <th scope="col">{{ "Type"|t('app') }}</th>
+                <th scope="col">{{ "When"|t('schedule') }}</th>
+                <th scope="col">{{ "Enabled"|t('app') }}</th>
+                {% if sortable %}<td class="thin"></td>{% endif %}
+                <td class="thin"></td>
+            </thead>
+            <tbody>
+            {% for timer in timers %}
+                <tr data-id="{{ timer.id }}" data-name="{{ timer }}">
+                    <th scope="row" data-title="{{ 'No.'|t('schedule') }}"><a href="{{ url('schedule/' ~ timer.scheduleId ~ '/timers/' ~ timer.id) }}">{{ timer }}</a></th>
+                    <td data-title="{{ 'Type'|t('app') }}">{{ timer.displayName|title|t('app') }}</td>
+                    <td data-title="{{ 'When'|t('schedule') }}">{{ timer.cronDescription }}</td>
+                    <td>{% if timer.enabled %}<span data-icon="check"></span>{% endif %}</td>
+                    {% if sortable %}<td class="thin"><a class="move icon" title="{{ 'Reorder'|t('app') }}" role="button"></a></td>{% endif %}
+                    <td class="thin"><a class="delete icon" title="{{ 'Delete'|t('app') }}" role="button"></a></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+{% endblock %}
+
+{% js %}
+    var adminTable = new Craft.AdminTable({
+        tableSelector: '#timers',
+        noItemsSelector: '#notimers',
+        sortable: true,
+        reorderAction: 'schedule/timers/reorder-timers',
+        deleteAction: 'schedule/timers/delete-timer',
+        onDeleteItem: function() {
+            if (adminTable.totalItems == 0) {
+                $('#nav-entries').remove();
+            }
+        }
+    });
+{% endjs %}
