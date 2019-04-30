@@ -89,6 +89,11 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
      */
     private $_timers;
 
+    /**
+     * @var DateTime|null
+     */
+    private $_lastFinishedDate;
+
     // Public Methods
     // =========================================================================
 
@@ -194,11 +199,17 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
      */
     public function getLastFinishedDate()
     {
+        if ($this->_lastFinishedDate !== null) {
+            return $this->_lastFinishedDate;
+        }
+
         if (!$this->lastFinishedTime) {
             return null;
         }
 
-        return new DateTime(date('Y-m-d H:i:s', (int)($this->lastFinishedTime / 1000)));
+        $this->_lastFinishedDate = new DateTime(date('Y-m-d H:i:s', (int)($this->lastFinishedTime / 1000)));
+
+        return $this->_lastFinishedDate;
     }
 
     /**

@@ -9,6 +9,8 @@
 namespace panlatent\schedule\timers;
 
 use Craft;
+use DateInterval;
+use panlatent\schedule\base\Schedule;
 use panlatent\schedule\base\Timer;
 
 /**
@@ -40,6 +42,44 @@ class Relay extends Timer
 
     // Public Methods
     // =========================================================================
+
+    /**
+     * @inheritdoc
+     */
+    public function rules()
+    {
+        $rules = parent::rules();
+        $rules[] = [['wait'], 'integer'];
+
+        return $rules;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getCronExpression(): string
+    {
+        /** @var Schedule $schedule */
+        $schedule = $this->getSchedule();
+
+        if (!$schedule->getLastFinishedDate()) {
+            return '* * * * * *';
+        }
+
+        $date = $schedule->getLastFinishedDate()->add(new DateInterval($this->wait . 'M'));
+
+        return $date->format('i H d m * *');
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getCronDescription(): string
+    {
+        return Craft::t('schedule', 'Wait {wait} minutes after last executed', [
+            'wait' => $this->wait,
+        ]);
+    }
 
     /**
      * @inheritdoc

@@ -79,7 +79,9 @@ class LogsController extends Controller
     {
         $this->requireAcceptsJson();
 
-        $data = Plugin::$plugin->getSchedules()->getAllSchedules();
+        $data = Plugin::$plugin->getSchedules()->findSchedules([
+            'hasLogs' => true,
+        ]);
 
         return $this->asJson([
             'success' => true,
@@ -90,7 +92,7 @@ class LogsController extends Controller
                     'name' => $ret->name,
                     'total' => $ret->totalLogs,
                     'duration' => $ret->lastDuration,
-                    'finished' => $ret->lastFinishedDate->format('Y-m-d H:i:s'),
+                    'finished' => $ret->lastFinishedDate ? $ret->lastFinishedDate->format('Y-m-d H:i:s') : null,
                     'status' => $ret->lastStatus !== null ? (bool)$ret->lastStatus : null,
                     'logsUri' => UrlHelper::actionUrl('schedule/logs/' . $ret->handle),
                 ];
