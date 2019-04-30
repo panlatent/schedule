@@ -308,7 +308,7 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
      */
     protected function execute(int $logId = null): bool
     {
-        if ($this->enableLog) {
+        if ($this->enabledLog) {
             Craft::info(sprintf("Schedule #%d running with log ID: #%d", $this->id, $logId), __METHOD__);
         } else {
             Craft::info(sprintf("Schedule #%d running without log", $this->id), __METHOD__);
