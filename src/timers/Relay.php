@@ -66,7 +66,7 @@ class Relay extends Timer
             return '* * * * * *';
         }
 
-        $date = $schedule->getLastFinishedDate()->add(new DateInterval($this->wait . 'M'));
+        $date = $schedule->getLastFinishedDate()->add(new DateInterval("PT{$this->wait}M"));
 
         return $date->format('i H d m * *');
     }
