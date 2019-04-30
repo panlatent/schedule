@@ -366,7 +366,19 @@ class Timers extends Component
     private function _createQuery(): Query
     {
         return (new Query())
-            ->select(['id', 'scheduleId', 'type', 'minute', 'hour', 'day', 'month', 'week', 'settings', 'enabled', 'sortOrder'])
+            ->select([
+                'id',
+                'scheduleId',
+                'type',
+                'minute',
+                'hour',
+                'day',
+                'month',
+                'week',
+                'settings',
+                'enabled',
+                'sortOrder'
+            ])
             ->from(Table::SCHEDULETIMERS)
             ->orderBy(['sortOrder' => SORT_ASC]);
     }

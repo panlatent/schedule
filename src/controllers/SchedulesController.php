@@ -177,7 +177,8 @@ class SchedulesController extends Controller
             'handle' => $request->getBodyParam('handle'),
             'description' => $request->getBodyParam('description'),
             'type' => $type,
-            'settings' => $request->getBodyParam('types.' . $type, [])
+            'settings' => $request->getBodyParam('types.' . $type, []),
+            'enabledLog' => $request->getBodyParam('enabledLog'),
         ]);
 
         if (!$schedules->saveSchedule($schedule)) {

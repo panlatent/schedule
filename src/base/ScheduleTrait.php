@@ -42,6 +42,11 @@ trait ScheduleTrait
     public $user;
 
     /**
+     * @var bool|null
+     */
+    public $enabledLog;
+
+    /**
      * @var int|null
      */
     public $lastStartedTime;

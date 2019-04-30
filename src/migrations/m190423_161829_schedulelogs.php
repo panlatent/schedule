@@ -31,7 +31,7 @@ class m190423_161829_schedulelogs extends Migration
         ]);
 
         $this->createIndex(null, '{{%schedulelogs}}', 'scheduleId');
-        $this->createTable(null, '{{%schedulelogs}}', ['scheduleId', 'sortOrder']);
+        $this->createIndex(null, '{{%schedulelogs}}', ['scheduleId', 'sortOrder']);
         $this->addForeignKey(null, '{{%schedulelogs}}', 'scheduleId', '{{%schedules}}', 'id', 'CASCADE');
     }
 

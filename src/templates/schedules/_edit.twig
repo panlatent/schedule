@@ -45,6 +45,14 @@
             errors: schedule.getErrors('handle'),
         }) }}
 
+        {{ forms.lightswitchField({
+            label: 'Enabled Log'|t('schedule'),
+            id: 'enabledLog',
+            name: 'enabledLog',
+            on: schedule.enabledLog,
+            errors: schedule.getErrors('enabledLog'),
+        }) }}
+
         <hr>
 
         {{ forms.selectField({

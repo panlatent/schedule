@@ -8,6 +8,7 @@
 
 namespace panlatent\schedule\models;
 
+use panlatent\schedule\base\Schedule;
 use yii\base\Model;
 
 /**
@@ -25,6 +26,11 @@ class LogCriteria extends Model
      * @var int[]|int|null
      */
     public $scheduleId;
+
+    /**
+     * @var Schedule|string|null
+     */
+    public $schedule;
 
     /**
      * @var string|null

@@ -53,6 +53,12 @@
         mounted: function () {
             this.getLogs()
         },
+        created() {
+            this.getLogs()
+        },
+        watch: {
+            '$route': 'getLogs'
+        },
         methods: {
             indexMethod(index) {
                 return this.tableData[index].sortOrder
@@ -65,7 +71,7 @@
 
                 this.$http.post(api.logsUrl, {
                     criteria: {
-                        scheduleId: api.scheduleId,
+                        schedule: vm.$route.params['handle'],
                         offset: (vm.currentPage - 1) * vm.pageSize,
                         limit: vm.pageSize,
                     }
@@ -83,17 +89,17 @@
                 this.currentPage = val
                 this.getLogs()
             },
-        },
-        beforeRouteUpdate(to, from, next) {
-            this.getLogs()
-            next()
-        },
+        }
     }
 
     const router = new VueRouter({
         mode: 'history',
         routes: [
-            {path: '/admin/schedule/logs/:handle', component: LogList}
+            {
+                path: '/admin/schedule/logs/:handle',
+                name: 'logs',
+                component: LogList
+            }
         ]
     })
 
@@ -115,7 +121,6 @@
         mounted: function () {
             this.getSchedules()
         },
-        computed: {},
         methods: {
             getSchedules: function () {
                 var vm = this;

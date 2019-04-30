@@ -10,6 +10,7 @@ namespace panlatent\schedule\services;
 
 use craft\db\Query;
 use craft\helpers\Db;
+use panlatent\schedule\base\Schedule;
 use panlatent\schedule\db\Table;
 use panlatent\schedule\models\LogCriteria;
 use panlatent\schedule\models\ScheduleLog;
@@ -37,7 +38,15 @@ class Logs extends Component
         }
 
         $query = (new Query())
-            ->select(['id', 'scheduleId', 'status', 'startTime', 'endTime', 'output', 'sortOrder'])
+            ->select([
+                'logs.id',
+                'logs.scheduleId',
+                'logs.status',
+                'logs.startTime',
+                'logs.endTime',
+                'logs.output',
+                'logs.sortOrder'
+            ])
             ->from(['logs' => Table::SCHEDULELOGS])
             ->orderBy($criteria->sortOrder)
             ->offset($criteria->offset)
@@ -100,6 +109,15 @@ class Logs extends Component
     {
         if ($criteria->scheduleId) {
             $query->andWhere(Db::parseParam('logs.scheduleId', $criteria->scheduleId));
+        }
+
+        if ($criteria->schedule) {
+            if ($criteria->schedule instanceof Schedule) {
+                $query->andWhere(Db::parseParam('logs.scheduleId', $criteria->schedule->id));
+            } else {
+                $query->leftJoin(Table::SCHEDULES . ' schedules', '[[schedules.id]] = [[logs.scheduleId]]');
+                $query->andWhere(Db::parseParam('schedules.handle', $criteria->schedule));
+            }
         }
     }
 }

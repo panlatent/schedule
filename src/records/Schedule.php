@@ -9,6 +9,7 @@
 namespace panlatent\schedule\records;
 
 use craft\db\ActiveRecord;
+use panlatent\schedule\db\Table;
 
 /**
  * Class Schedule
@@ -22,9 +23,11 @@ use craft\db\ActiveRecord;
  * @property string $type
  * @property string $user
  * @property string $settings
+ * @property bool $enabledLog
+ * @property int $lastStartedTime
+ * @property int $lastFinishedTime
+ * @property bool $lastStatus
  * @property int $sortOrder
- * @property \DateTime $dateLastStarted
- * @property \DateTime $dateLastFinished
  * @author Panlatent <panlatent@gmail.com>
  */
 class Schedule extends ActiveRecord
@@ -34,6 +37,6 @@ class Schedule extends ActiveRecord
      */
     public static function tableName()
     {
-        return '{{%schedules}}';
+        return Table::SCHEDULES;
     }
 }

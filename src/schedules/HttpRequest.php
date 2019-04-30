@@ -113,7 +113,7 @@ class HttpRequest extends Schedule
     /**
      * @inheritdoc
      */
-    protected function execute(int $logId): bool
+    protected function execute(int $logId = null): bool
     {
         $client = new Client();
 

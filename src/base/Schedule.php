@@ -11,6 +11,7 @@ namespace panlatent\schedule\base;
 use Craft;
 use craft\base\SavableComponent;
 use craft\db\mysql\Schema as MysqlSchema;
+use craft\helpers\ArrayHelper;
 use craft\validators\HandleValidator;
 use DateTime;
 use panlatent\schedule\Builder;
@@ -60,11 +61,8 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
     // =========================================================================
 
     const STATUS_PREPARING = 'preparing';
-
     const STATUS_PROCESSING = 'processing';
-
     const STATUS_SUCCESSFUL = 'successful';
-
     const STATUS_FAILED = 'failed';
 
     // Static Methods
@@ -109,9 +107,10 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
     {
         return [
             [['name', 'handle'], 'required'],
-            [['groupId'], 'integer'],
+            [['groupId', 'lastStartedTime', 'lastFinishedTime'], 'integer'],
             [['name', 'handle', 'description', 'user'], 'string'],
             [['handle'], HandleValidator::class],
+            [['enabledLog', 'lastStatus'], 'boolean'],
         ];
     }
 
@@ -132,7 +131,15 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
     }
 
     /**
-     * @return TimerInterface[]|null
+     * @return TimerInterface[]
+     */
+    public function getActiveTimers(): array
+    {
+        return ArrayHelper::filterByValue($this->getTimers(), 'enabled', true);
+    }
+
+    /**
+     * @return TimerInterface[]
      */
     public function getTimers(): array
     {
@@ -213,7 +220,7 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
     {
         if (static::isRunnable()) {
             /** @noinspection PhpParamsInspection */
-            foreach ($this->getTimers() as $timer) {
+            foreach ($this->getActiveTimers() as $timer) {
                 $builder->call([$this, 'run'])
                     ->cron($timer->getCronExpression());
             }
@@ -231,41 +238,16 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
             return false;
         }
 
-        $db = Craft::$app->getDb();
-
-        $sortOrderQuery = (new Query())
-            ->select(['[[sortOrder]] + 1 AS sortOrder'])
-            ->from(Table::SCHEDULELOGS)
-            ->where([
-                'scheduleId' => $this->id,
-            ])
-            ->orderBy(['sortOrder' => SORT_DESC])
-            ->limit(1);
-
-        $db->createCommand()
-            ->insert(Table::SCHEDULELOGS, [
-                'scheduleId' => $this->id,
-                'status' => self::STATUS_PREPARING,
-                'startTime' => round(microtime(true) * 1000),
-                'output' => '',
-                'sortOrder' => $db->getSchema() instanceof MysqlSchema ?  // MySQL not support same table sub query on insert.
-                    $sortOrderQuery->scalar() :
-                    $sortOrderQuery,
-            ])
-            ->execute();
-
-        $id = $db->getLastInsertID();
+        $id = null;
+        if ($this->enabledLog) {
+            $id = $this->beginLog();
+        }
 
         $successful = $this->execute($id);
 
-        $db->createCommand()
-            ->update(Table::SCHEDULELOGS, [
-                'status' => $successful ? self::STATUS_SUCCESSFUL : self::STATUS_FAILED,
-                'endTime' => round(microtime(true) * 1000),
-            ], [
-                'id' => $id,
-            ])
-            ->execute();
+        if ($this->enabledLog) {
+            $this->endLog($id, $successful ? self::STATUS_SUCCESSFUL : self::STATUS_FAILED);
+        }
 
         $this->afterRun($successful);
 
@@ -299,6 +281,12 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
      */
     public function afterRun(bool $successful)
     {
+        if ($this->hasEventHandlers(self::EVENT_AFTER_RUN)) {
+            $this->trigger(self::EVENT_AFTER_RUN, new ScheduleEvent([
+                'schedule' => $this,
+            ]));
+        }
+
         Craft::$app->getDb()->createCommand()
             ->update('{{%schedules}}', [
                 'lastFinishedTime' => round(microtime(true) * 1000),
@@ -307,12 +295,6 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
                 'id' => $this->id,
             ])
             ->execute();
-
-        if ($this->hasEventHandlers(self::EVENT_AFTER_RUN)) {
-            $this->trigger(self::EVENT_AFTER_RUN, new ScheduleEvent([
-                'schedule' => $this,
-            ]));
-        }
     }
 
     // Protected Methods
@@ -321,13 +303,64 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
     /**
      * Execute somethings.
      *
-     * @param int $logId
+     * @param int|null $logId
      * @return bool
      */
-    protected function execute(int $logId): bool
+    protected function execute(int $logId = null): bool
     {
-        Craft::info(sprintf("Schedule #%d running with log ID: #%d", $this->id, $logId), __METHOD__);
+        if ($this->enableLog) {
+            Craft::info(sprintf("Schedule #%d running with log ID: #%d", $this->id, $logId), __METHOD__);
+        } else {
+            Craft::info(sprintf("Schedule #%d running without log", $this->id), __METHOD__);
+        }
 
         return true;
+    }
+
+    /**
+     * @return int Log ID
+     */
+    protected function beginLog(): int
+    {
+        $db = Craft::$app->getDb();
+
+        $sortOrderQuery = (new Query())
+            ->select(['[[sortOrder]] + 1 AS sortOrder'])
+            ->from(Table::SCHEDULELOGS)
+            ->where([
+                'scheduleId' => $this->id,
+            ])
+            ->orderBy(['sortOrder' => SORT_DESC])
+            ->limit(1);
+
+        $db->createCommand()
+            ->insert(Table::SCHEDULELOGS, [
+                'scheduleId' => $this->id,
+                'status' => self::STATUS_PREPARING,
+                'startTime' => round(microtime(true) * 1000),
+                'output' => '',
+                'sortOrder' => $db->getSchema() instanceof MysqlSchema ?  // MySQL not support same table sub query on insert.
+                    $sortOrderQuery->scalar() :
+                    $sortOrderQuery,
+            ])
+            ->execute();
+
+        return $db->getLastInsertID();
+    }
+
+    /**
+     * @param int $id Log ID
+     * @param string $status
+     */
+    protected function endLog(int $id, string $status)
+    {
+        Craft::$app->getDb()->createCommand()
+            ->update(Table::SCHEDULELOGS, [
+                'status' => $status,
+                'endTime' => round(microtime(true) * 1000),
+            ], [
+                'id' => $id,
+            ])
+            ->execute();
     }
 }

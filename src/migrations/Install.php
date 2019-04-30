@@ -44,6 +44,7 @@ class Install extends Migration
             'type' => $this->string()->notNull(),
             'user' => $this->string(),
             'settings' => $this->text(),
+            'enabledLog' => $this->boolean()->defaultValue(false),
             'lastStartedTime' =>  $this->bigInteger(),
             'lastFinishedTime' =>  $this->bigInteger(),
             'lastStatus' => $this->boolean(),
@@ -102,7 +103,7 @@ class Install extends Migration
         ]);
 
         $this->createIndex(null, '{{%schedulelogs}}', 'scheduleId');
-        $this->createTable(null, '{{%schedulelogs}}', ['scheduleId', 'sortOrder']);
+        $this->createIndex(null, '{{%schedulelogs}}', ['scheduleId', 'sortOrder']);
         $this->addForeignKey(null, '{{%schedulelogs}}', 'scheduleId', '{{%schedules}}', 'id', 'CASCADE');
     }
 

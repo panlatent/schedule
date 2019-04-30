@@ -71,7 +71,7 @@ class Event extends Schedule
     /**
      * @inheritdoc
      */
-    protected function execute(int $logId): bool
+    protected function execute(int $logId = null): bool
     {
         Craft::info("Event Schedule trigger event: {$this->className}::{$this->eventName}", __METHOD__);
 

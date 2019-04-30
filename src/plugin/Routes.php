@@ -34,8 +34,6 @@ trait Routes
                 'schedule/<scheduleId:\d+>/timers' => ['template' => 'schedule/schedules/timers'],
                 'schedule/<scheduleId:\d+>/timers/new' => 'schedule/timers/edit-timer',
                 'schedule/<scheduleId:\d+>/timers/<timerId:\d+>' => 'schedule/timers/edit-timer',
-                'schedule/logs/get-schedules' => 'schedule/logs/get-schedules',
-                'schedule/logs/get-logs' => 'schedule/logs/get-logs',
                 'schedule/logs/<scheduleHandle:{handle}>' => ['template' => 'schedule/logs'],
             ]);
         });

@@ -10,6 +10,7 @@ namespace panlatent\schedule\controllers;
 
 use Craft;
 use craft\helpers\Json;
+use craft\helpers\UrlHelper;
 use craft\web\Controller;
 use panlatent\schedule\base\Schedule;
 use panlatent\schedule\models\ScheduleLog;
@@ -24,7 +25,9 @@ use yii\web\Response;
  */
 class LogsController extends Controller
 {
-    //
+    // Properties
+    // =========================================================================
+
     /**
      * @var bool
      */
@@ -47,7 +50,7 @@ class LogsController extends Controller
 
         $criteria = $params['criteria'] ?? [];
         if (!isset($criteria['sortOrder']) || $criteria['sortOrder'] == '') {
-            $criteria['sortOrder'] = 'id DESC';
+            $criteria['sortOrder'] = 'logs.sortOrder DESC';
         }
 
         $data = $logs->findLogs($criteria);
@@ -89,6 +92,7 @@ class LogsController extends Controller
                     'duration' => $ret->lastDuration,
                     'finished' => $ret->lastFinishedDate->format('Y-m-d H:i:s'),
                     'status' => $ret->lastStatus !== null ? (bool)$ret->lastStatus : null,
+                    'logsUri' => UrlHelper::actionUrl('schedule/logs/' . $ret->handle),
                 ];
             }, $data),
         ]);

@@ -63,33 +63,6 @@ class Console extends Schedule
     // =========================================================================
 
     /**
-     * @inheritdoc
-     */
-    public function execute(int $logId): bool
-    {
-        $process = new Process($this->buildCommand(), dirname(Craft::$app->request->getScriptFile()));
-
-        $process->run(function ($type, $buffer) use ($logId) {
-            if (Process::ERR === $type) {
-                $output = 'ERR > ' . $buffer;
-            } else {
-                $output = 'OUT > ' . $buffer;
-            }
-
-            Craft::$app->getDb()->createCommand()
-                ->update(Table::SCHEDULELOGS, [
-                    'status' => self::STATUS_PROCESSING,
-                    'output' => new Expression("CONCAT([[output]],:output)", ['output' => $output]),
-                ], [
-                    'id' => $logId,
-                ])
-                ->execute();
-        });
-
-        return $process->isSuccessful();
-    }
-
-    /**
      * Build the command array.
      *
      * @return array
@@ -148,5 +121,35 @@ class Console extends Schedule
             'schedule' => $this,
             'suggestions' => $suggestions,
         ]);
+    }
+
+    // Protected Methods
+    // =========================================================================
+
+    /**
+     * @inheritdoc
+     */
+    protected function execute(int $logId = null): bool
+    {
+        $process = new Process($this->buildCommand(), dirname(Craft::$app->request->getScriptFile()));
+
+        $process->run(function ($type, $buffer) use ($logId) {
+            if (Process::ERR === $type) {
+                $output = 'ERR > ' . $buffer;
+            } else {
+                $output = 'OUT > ' . $buffer;
+            }
+
+            Craft::$app->getDb()->createCommand()
+                ->update(Table::SCHEDULELOGS, [
+                    'status' => self::STATUS_PROCESSING,
+                    'output' => new Expression("CONCAT([[output]],:output)", ['output' => $output]),
+                ], [
+                    'id' => $logId,
+                ])
+                ->execute();
+        });
+
+        return $process->isSuccessful();
     }
 }

@@ -54,3 +54,9 @@
 .el-aside .el-card.failed {
     background: linear-gradient(to right,#db4545 0,#db4545 8px,#fff 8px,#fff 100%) no-repeat;
 }
+.el-aside .el-card.failed a {
+    color: #db4545;
+}
+.el-aside .el-card.failed p.right {
+    color: #db4545;
+}

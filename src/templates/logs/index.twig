@@ -25,9 +25,9 @@
                     </div>
                     <template>
                         <div class="schedules" v-loading="loading">
-                            <el-card class="box-card" shadow="never" v-bind:class="{passed: schedule.status}" v-for="schedule in schedules">
+                            <el-card class="box-card" shadow="never" v-bind:class="{passed: schedule.status, failed: !schedule.status}" v-for="schedule in schedules">
                                 <h2>
-                                    <router-link :to="'/admin/schedule/logs/' + schedule.handle">
+                                    <router-link :to="{ name: 'logs', params: { handle: schedule.handle }}">
                                         <span>
                                             <i class="el-icon-check" v-if="schedule.status === true"></i>
                                             <i class="el-icon-check" v-else-if="schedule.status === false"></i>
@@ -52,7 +52,6 @@
 {% endblock %}
 
 {% do view.registerJsVar('api', {
-    schedulesUrl: url('schedule/logs/get-schedules'),
-    logsUrl: url('schedule/logs/get-logs'),
-    scheduleId: schedule.id,
+    schedulesUrl: actionUrl('schedule/logs/get-schedules'),
+    logsUrl: actionUrl('schedule/logs/get-logs'),
 }) %}

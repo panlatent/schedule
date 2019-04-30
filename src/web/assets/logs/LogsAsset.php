@@ -50,8 +50,8 @@ class LogsAsset extends AssetBundle
      * @inheritdoc
      */
     public $js = [
-        '//unpkg.com/element-ui/lib/index.js',
-        '//unpkg.com/vue-resource@1.5.1/dist/vue-resource.min.js',
+        'https://unpkg.com/element-ui@2.8.2/lib/index.js',
+        'https://unpkg.com/vue-resource@1.5.1/dist/vue-resource.min.js',
 
     ];
 
@@ -75,7 +75,7 @@ class LogsAsset extends AssetBundle
 
         $language = Craft::$app->language;
         if (isset($this->languages[$language])) {
-            $this->js[] = '//unpkg.com/element-ui/lib/umd/locale/' . $this->languages[$language] .'.js';
+            $this->js[] = 'https://unpkg.com/element-ui@2.8.2/lib/umd/locale/' . $this->languages[$language] .'.js';
 
             Craft::$app->getView()->registerJsVar('language', $language);
         }

@@ -72,7 +72,7 @@ class Queue extends Schedule
     /**
      * @inheritdoc
      */
-    protected function execute(int $logId): bool
+    protected function execute(int $logId = null): bool
     {
         $queue = Craft::$app->get($this->componentId);
         if (!$queue || $queue instanceof \yii\queue\Queue || $queue instanceof QueueInterface) {

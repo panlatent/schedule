@@ -451,6 +451,7 @@ class Schedules extends Component
             $record->type = get_class($schedule);
             $record->user = $schedule->user;
             $record->settings = Json::encode($schedule->getSettings());
+            $record->enabledLog = (bool)$schedule->enabledLog;
 
             $record->save(false);
 
@@ -583,6 +584,7 @@ class Schedules extends Component
                 'type',
                 'user',
                 'settings',
+                'enabledLog',
                 'lastStartedTime',
                 'lastFinishedTime',
                 'lastStatus',

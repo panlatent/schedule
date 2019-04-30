@@ -1,0 +1,27 @@
+<?php
+
+namespace panlatent\schedule\migrations;
+
+use craft\db\Migration;
+
+/**
+ * m190430_045833_add_schedules_enabledLog_column migration.
+ */
+class m190430_045833_add_schedules_enabledLog_column extends Migration
+{
+    /**
+     * @inheritdoc
+     */
+    public function safeUp()
+    {
+        $this->addColumn('{{%schedules}}', 'enabledLog', $this->boolean()->defaultValue(false)->after('settings'));
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function safeDown()
+    {
+        $this->dropColumn('{{%schedules}}', 'enabledLog');
+    }
+}
