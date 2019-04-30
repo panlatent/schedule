@@ -19,6 +19,9 @@ use panlatent\schedule\base\Timer;
  */
 class Custom extends Timer
 {
+    // Static Methods
+    // =========================================================================
+
     /**
      * @inheritdoc
      */
@@ -26,6 +29,9 @@ class Custom extends Timer
     {
         return Craft::t('schedule', 'Custom');
     }
+
+    // Public Methods
+    // =========================================================================
 
     /**
      * @inheritdoc

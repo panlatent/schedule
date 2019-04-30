@@ -45,7 +45,6 @@ class Every extends Timer
     {
         parent::init();
 
-
     }
 
     /**

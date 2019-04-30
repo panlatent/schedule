@@ -39,35 +39,30 @@ trait ScheduleTrait
     /**
      * @var string|null
      */
-    public $minute;
-
-    /**
-     * @var string|null
-     */
-    public $hour;
-
-    /**
-     * @var string|null
-     */
-    public $day;
-
-    /**
-     * @var string|null
-     */
-    public $month;
-
-    /**
-     * @var string|null
-     */
-    public $week;
-
-    /**
-     * @var string|null
-     */
     public $user;
 
     /**
+     * @var bool|null
+     */
+    public $enabledLog;
+
+    /**
+     * @var int|null
+     */
+    public $lastStartedTime;
+
+    /**
+     * @var int|null
+     */
+    public $lastFinishedTime;
+
+    /**
      * @var string|null
      */
-    public $timer;
+    public $lastStatus;
+
+    /**
+     * @var int|null
+     */
+    public $sortOrder;
 }

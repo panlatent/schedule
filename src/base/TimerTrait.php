@@ -16,6 +16,14 @@ namespace panlatent\schedule\base;
  */
 trait TimerTrait
 {
+    // Properties
+    // =========================================================================
+
+    /**
+     * @var int|null
+     */
+    public $scheduleId;
+
     /**
      * @var string|null
      */
@@ -40,4 +48,14 @@ trait TimerTrait
      * @var string|null
      */
     public $week;
+
+    /**
+     * @var bool|null
+     */
+    public $enabled = true;
+
+    /**
+     * @var int|null
+     */
+    public $sortOrder;
 }

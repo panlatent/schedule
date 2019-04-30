@@ -1,0 +1,12 @@
+{% import "_includes/forms" as forms %}
+
+{{ forms.textField({
+    label: 'Waiting time (minute)'|t('schedule'),
+    introductions: 'Waiting time after the execution of the plan is completed.'|t('schedule'),
+    required: true,
+    id: 'wait',
+    name: 'wait',
+    value: timer.wait,
+    size: 10,
+    errors: timer.getErrors('waitSec'),
+}) }}

@@ -12,6 +12,7 @@ use Craft;
 use craft\helpers\Json;
 use GuzzleHttp\Client;
 use panlatent\schedule\base\Schedule;
+use panlatent\schedule\db\Table;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -113,7 +114,7 @@ class HttpRequest extends Schedule
     /**
      * @inheritdoc
      */
-    protected function execute()
+    protected function execute(int $logId = null): bool
     {
         $client = new Client();
 
@@ -138,10 +139,23 @@ class HttpRequest extends Schedule
         $response = $client->{$this->method}($this->url, $options);
         $statusCode = $response->getStatusCode();
 
-        if ($statusCode >= 200 && $statusCode < 300) {
+        $successful = $statusCode >= 200 && $statusCode < 300;
+        if ($successful) {
             Craft::info("Http Request Schedule: a http request has been sent to {$this->url}({$statusCode}) successfully.", __METHOD__);
         } else {
             Craft::warning("Http Request Schedule: a http request has been sent to {$this->url}({$statusCode}) failed.", __METHOD__);
         }
+
+        if ($logId) {
+            Craft::$app->getDb()->createCommand()
+                ->update(Table::SCHEDULELOGS, [
+                    'output' => (string)$response->getBody(),
+                ], [
+                    'id' => $logId,
+                ])
+                ->execute();
+        }
+
+        return $successful;
     }
 }

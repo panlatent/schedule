@@ -10,8 +10,9 @@ namespace panlatent\schedule\schedules;
 
 use Craft;
 use panlatent\schedule\base\Schedule;
-use panlatent\schedule\Builder;
+use panlatent\schedule\db\Table;
 use Symfony\Component\Process\Process;
+use yii\db\Expression;
 
 /**
  * Class CommandSchedule
@@ -21,6 +22,11 @@ use Symfony\Component\Process\Process;
  */
 class Console extends Schedule
 {
+    // Constants
+    // =========================================================================
+
+    const CRAFT_CLI_SCRIPT = 'craft';
+
     // Static Methods
     // =========================================================================
 
@@ -30,6 +36,14 @@ class Console extends Schedule
     public static function displayName(): string
     {
         return Craft::t('schedule', 'Console');
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function isRunnable(): bool
+    {
+        return true;
     }
 
     // Properties
@@ -49,16 +63,24 @@ class Console extends Schedule
     // =========================================================================
 
     /**
-     * @inheritdoc
+     * Build the command array.
+     *
+     * @return array
      */
-    public function build(Builder $builder)
+    public function buildCommand(): array
     {
-        $builder->command($this->command . ' ' . $this->arguments)
-            ->cron($this->getCronExpression())
-            ->then(function() {
-                $this->beforeRun();
-            })
-            ->on(\omnilight\scheduling\Event::EVENT_BEFORE_RUN, [$this, 'afterRun']);
+        $command = [
+            PHP_BINARY,
+            self::CRAFT_CLI_SCRIPT,
+            $this->command,
+            $this->arguments,
+        ];
+
+        if ($this->user) {
+            $command = array_merge(['sudo -u', $this->user], $command);
+        }
+
+        return $command;
     }
 
     /**
@@ -99,5 +121,35 @@ class Console extends Schedule
             'schedule' => $this,
             'suggestions' => $suggestions,
         ]);
+    }
+
+    // Protected Methods
+    // =========================================================================
+
+    /**
+     * @inheritdoc
+     */
+    protected function execute(int $logId = null): bool
+    {
+        $process = new Process($this->buildCommand(), dirname(Craft::$app->request->getScriptFile()));
+
+        $process->run(function ($type, $buffer) use ($logId) {
+            if (Process::ERR === $type) {
+                $output = 'ERR > ' . $buffer;
+            } else {
+                $output = 'OUT > ' . $buffer;
+            }
+
+            Craft::$app->getDb()->createCommand()
+                ->update(Table::SCHEDULELOGS, [
+                    'status' => self::STATUS_PROCESSING,
+                    'output' => new Expression("CONCAT([[output]],:output)", ['output' => $output]),
+                ], [
+                    'id' => $logId,
+                ])
+                ->execute();
+        });
+
+        return $process->isSuccessful();
     }
 }

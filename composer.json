@@ -2,7 +2,7 @@
     "name": "panlatent/schedule",
     "description": "Schedule plugin for CraftCMS 3",
     "type": "craft-plugin",
-    "version": "0.1.6",
+    "version": "0.2.0-alpha.1",
     "keywords": [
         "craft",
         "cms",
@@ -43,7 +43,10 @@
         "hasCpSettings": true,
         "hasCpSection": true,
         "changelogUrl": "https://raw.githubusercontent.com/panlatent/schedule/master/CHANGELOG.md",
-        "class": "panlatent\\schedule\\Plugin"
+        "class": "panlatent\\schedule\\Plugin",
+        "branch-alias": {
+            "dev-master": "0.2.x-dev"
+        }
     },
     "require-dev": {
         "codeception/codeception": "^2.5"

@@ -12,13 +12,16 @@ use Craft;
 use craft\errors\MissingComponentException;
 use craft\events\RegisterComponentTypesEvent;
 use craft\helpers\Component as ComponentHelper;
+use craft\helpers\Db;
 use craft\helpers\Json;
 use panlatent\schedule\base\Schedule;
 use panlatent\schedule\base\ScheduleInterface;
+use panlatent\schedule\db\Table;
 use panlatent\schedule\errors\ScheduleException;
 use panlatent\schedule\errors\ScheduleGroupException;
 use panlatent\schedule\events\ScheduleEvent;
 use panlatent\schedule\events\ScheduleGroupEvent;
+use panlatent\schedule\models\ScheduleCriteria;
 use panlatent\schedule\models\ScheduleGroup;
 use panlatent\schedule\records\Schedule as ScheduleRecord;
 use panlatent\schedule\records\ScheduleGroup as ScheduleGroupRecord;
@@ -28,6 +31,7 @@ use panlatent\schedule\schedules\HttpRequest;
 use panlatent\schedule\schedules\MissingSchedule;
 use panlatent\schedule\schedules\Queue;
 use yii\base\Component;
+use yii\db\Expression;
 use yii\db\Query;
 
 /**
@@ -338,6 +342,7 @@ class Schedules extends Component
         $results = $this->_createScheduleQuery()
             ->where(['groupId' => $groupId])
             ->all();
+
         foreach ($results as $result) {
             /** @var Schedule $schedule */
             $schedule = $this->createSchedule($result);
@@ -389,6 +394,67 @@ class Schedules extends Component
             ->one();
 
         return $this->_schedulesByHandle[$handle] = $result ? $this->createSchedule($result) : null;
+    }
+
+    /**
+     * @param ScheduleCriteria|array $criteria
+     * @return ScheduleInterface[]
+     */
+    public function findSchedules($criteria): array
+    {
+        if (!$criteria instanceof ScheduleCriteria) {
+            $criteria = new ScheduleCriteria($criteria);
+        }
+
+        $query = $this->_createScheduleQuery()
+            ->orderBy($criteria->sortOrder)
+            ->offset($criteria->offset)
+            ->limit($criteria->limit);
+
+        $this->_applyConditions($query, $criteria);
+
+        $schedules = [];
+        $results = $query->all();
+        foreach ($results as $result) {
+            $schedules[] = $this->createSchedule($result);
+        }
+
+        return $schedules;
+    }
+
+    /**
+     * @param ScheduleCriteria|array $criteria
+     * @return ScheduleInterface|null
+     */
+    public function findSchedule($criteria)
+    {
+        if (!$criteria instanceof ScheduleCriteria) {
+            $criteria = new ScheduleCriteria($criteria);
+        }
+
+        $criteria->limit = 1;
+
+        $results = $this->findSchedules($criteria);
+        if (!$results) {
+            return null;
+        }
+
+        return array_pop($results);
+    }
+
+    /**
+     * @param ScheduleCriteria|array $criteria
+     * @return int
+     */
+    public function getTotalSchedules($criteria = []): int
+    {
+        if (!$criteria instanceof ScheduleCriteria) {
+            $criteria = new ScheduleCriteria($criteria);
+        }
+        $query = $this->_createScheduleQuery();
+        $this->_applyConditions($query, $criteria);
+
+        return $query->count('[[schedules.id]]');
     }
 
     /**
@@ -449,14 +515,9 @@ class Schedules extends Component
             $record->handle = $schedule->handle;
             $record->description = $schedule->description;
             $record->type = get_class($schedule);
-            $record->minute = $schedule->minute ?? '*';
-            $record->hour = $schedule->hour ?? '*';
-            $record->day = $schedule->day ?? '*';
-            $record->month = $schedule->month ?? '*';
-            $record->week = $schedule->week ?? '*';
             $record->user = $schedule->user;
-            $record->timer = $schedule->timer;
             $record->settings = Json::encode($schedule->getSettings());
+            $record->enabledLog = (bool)$schedule->enabledLog;
 
             $record->save(false);
 
@@ -504,7 +565,7 @@ class Schedules extends Component
                 $db->createCommand()->update('{{%schedules}}', [
                     'sortOrder' => $scheduleOrder,
                 ], [
-                    'id' => $scheduleId
+                    'id' => $scheduleId,
                 ])->execute();
             }
             $transaction->commit();
@@ -541,7 +602,6 @@ class Schedules extends Component
             $db->createCommand()->delete('{{%schedules}}', [
                 'id' => $schedule->id,
             ])->execute();
-
 
             $transaction->commit();
 
@@ -580,8 +640,50 @@ class Schedules extends Component
     private function _createScheduleQuery(): Query
     {
         return (new Query())
-            ->select(['id', 'groupId', 'name', 'handle', 'description', 'type', 'minute', 'hour', 'day', 'month', 'week', 'user', 'timer', 'settings'])
-            ->from('{{%schedules}}')
-            ->orderBy('sortOrder');
+            ->select([
+                'schedules.id',
+                'schedules.groupId',
+                'schedules.name',
+                'schedules.handle',
+                'schedules.description',
+                'schedules.type',
+                'schedules.user',
+                'schedules.settings',
+                'schedules.enabledLog',
+                'schedules.lastStartedTime',
+                'schedules.lastFinishedTime',
+                'schedules.lastStatus',
+            ])
+            ->from('{{%schedules}} schedules')
+            ->orderBy('schedules.sortOrder');
+    }
+
+    /**
+     * @param Query $query
+     * @param ScheduleCriteria $criteria
+     */
+    private function _applyConditions(Query $query, ScheduleCriteria $criteria)
+    {
+        if ($criteria->enabledLog !== null) {
+            $query->andWhere(Db::parseParam('schedules.enabledLog', $criteria->enabledLog));
+        }
+
+        if ($criteria->hasLogs !== null) {
+            $query->andWhere([
+                '=',
+                'schedules.id',
+                (new Query())
+                    ->select('logs.scheduleId')
+                    ->from(Table::SCHEDULELOGS . ' logs')
+                    ->where([
+                        'logs.scheduleId' => new Expression('schedules.id')
+                    ])
+                    ->limit(1),
+            ]);
+        }
+
+        if ($criteria->search) {
+            $query->andWhere(['like', 'schedules.name',  $criteria->search]);
+        }
     }
 }

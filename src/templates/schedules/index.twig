@@ -1,6 +1,6 @@
 {% extends "_layouts/cp" %}
 
-{% do view.registerAssetBundle('panlatent\\schedule\\assets\\ScheduleAsset') %}
+{% do view.registerAssetBundle('panlatent\\schedule\\web\\assets\\schedules\\SchedulesAsset') %}
 {% set title = "Schedules"|t("schedule") %}
 {% set groups = craft.schedule.schedules.getAllGroups() %}
 {% set groupId = groupId is defined ? groupId : null %}
@@ -45,8 +45,7 @@
             <th scope="col">{{ "Name"|t('app') }}</th>
             <th scope="col">{{ "Handle"|t('app') }}</th>
             <th scope="col">{{ "Type"|t('app') }}</th>
-            <th scope="col">{{ "Description"|t('app') }}</th>
-            <th scope="col">{{ "When"|t('schedule') }}</th>
+            <th scope="col">{{ "Timers"|t('schedule') }}</th>
             <th scope="col">{{ "Last Running Date"|t('schedule') }}</th>
             <th></th>
             {% if sortable %}<td class="thin"></td>{% endif %}
@@ -56,7 +55,7 @@
             {% for schedule in schedules %}
                 <tr data-id="{{ schedule.id }}" data-name="{{ schedule.name|t('site') }}">
                     <th scope="row" data-title="{{ 'Name'|t('app') }}"><a href="{{ url('schedule/' ~ schedule.id) }}">{{ schedule.name }}</a></th>
-                    <td scope="row" data-title="{{ 'Handle'|t('app') }}" class="code">{{ schedule.handle }}</td>
+                    <td data-title="{{ 'Handle'|t('app') }}" class="code">{{ schedule.handle }}</td>
                     <td data-title="{{ 'Type'|t('app') }}">
                         {% if schedule is missing %}
                             <span class="error">{{ schedule.expectedType }}</span>
@@ -64,11 +63,29 @@
                             {{ schedule.displayName() }}
                         {% endif %}
                     </td>
-                    <td data-title="{{ 'Description'|t('app') }}">{{ schedule.description }}</td>
-                    <td data-title="{{ 'When'|t('schedule') }}">{{ schedule.cronDescription }}</td>
+                    <td data-title="{{ 'Timers'|t('schedule') }}">
+                        {% if schedule.timers|length == 0 %}
+                            <a href="{{ url('schedule/' ~ schedule.id ~ '/timers') }}">{{ "Edit Timers"|t('schedule') }}</a>
+                        {% else %}
+                            <a href="{{ url('schedule/' ~ schedule.id ~ '/timers') }}">{{ "Edit Timers ({count})"|t('schedule', { count: schedule.timers|length }) }}</a>
+                            <a class="menubtn" title="{{ 'Timers'|t('schedule') }}"></a>
+                            <div class="menu">
+                                <ul>
+                                    {% for timer in schedule.timers %}
+                                        <li><a href="{{ url('schedule/' ~ schedule.id ~ '/timers/' ~ timer.id) }}">{{ timer ~ ' ' ~ timer.cronDescription }}</a></li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+                    </td>
                     <td data-title="{{ 'Last Running Date'|t('schedule') }}">
-                        {% if schedule.dateLastStarted is not empty %}
-                            {{ schedule.dateLastStarted|datetime('short') }}
+                        {% if schedule.lastFinishedDate is not empty %}
+                            {% if schedule.lastStatus %}
+                                <span class="status green"></span>
+                            {% else %}
+                                <span class="status red"></span>
+                            {% endif %}
+                            {{ schedule.lastFinishedDate|datetime('short') }}
                         {% endif %}
                     </td>
                     {% if sortable %}<td class="thin"><a class="move icon" title="{{ 'Reorder'|t('app') }}" role="button"></a></td>{% endif %}

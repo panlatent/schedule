@@ -22,6 +22,9 @@ use panlatent\schedule\records\ScheduleGroup as ScheduleGroupRecord;
  */
 class ScheduleGroup extends Model
 {
+    // Properties
+    // =========================================================================
+
     /**
      * @var int|null
      */
@@ -37,6 +40,20 @@ class ScheduleGroup extends Model
      */
     private $_schedules;
 
+    // Public Methods
+    // =========================================================================
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return (string)$this->name;
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function rules()
     {
         return [
