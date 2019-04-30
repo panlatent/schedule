@@ -254,10 +254,18 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
             $id = $this->beginLog();
         }
 
-        $successful = $this->execute($id);
+        try {
+            $successful = $this->execute($id);
+        } catch (\Throwable $exception) {
+            $reason = $exception->getMessage();
+            Craft::error($reason, __METHOD__);
+
+            $successful = false;
+
+        }
 
         if ($this->enabledLog) {
-            $this->endLog($id, $successful ? self::STATUS_SUCCESSFUL : self::STATUS_FAILED);
+            $this->endLog($id, $successful ? self::STATUS_SUCCESSFUL : self::STATUS_FAILED, $reason ?? null);
         }
 
         $this->afterRun($successful);
@@ -362,12 +370,14 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
     /**
      * @param int $id Log ID
      * @param string $status
+     * @param string|null $reason
      */
-    protected function endLog(int $id, string $status)
+    protected function endLog(int $id, string $status, string $reason = null)
     {
         Craft::$app->getDb()->createCommand()
             ->update(Table::SCHEDULELOGS, [
                 'status' => $status,
+                'reason' => $reason,
                 'endTime' => round(microtime(true) * 1000),
             ], [
                 'id' => $id,

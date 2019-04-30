@@ -42,6 +42,7 @@ class Logs extends Component
                 'logs.id',
                 'logs.scheduleId',
                 'logs.status',
+                'logs.reason',
                 'logs.startTime',
                 'logs.endTime',
                 'logs.output',

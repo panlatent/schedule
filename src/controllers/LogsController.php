@@ -64,7 +64,7 @@ class LogsController extends Controller
                     'status' => $ret->status,
                     'startTime' => date('Y-m-d H:i:s', (int)($ret->startTime/1000)) . '.' . $ret->startTime%1000,
                     'endTime' => date('Y-m-d H:i:s', (int)($ret->endTime/1000)) . '.' . $ret->endTime%1000,
-                    'duration' => $ret->endTime - $ret->startTime,
+                    'duration' => $ret->duration,
                     'sortOrder' => $ret->sortOrder,
                     'output' => $ret->output,
                 ];

@@ -91,7 +91,7 @@ class Install extends Migration
             'scheduleId' => $this->integer()->notNull(),
             'status' => $this->string()->notNull(),
             'attempts' => $this->tinyInteger(3),
-            'settings' => $this->text(),
+            'reason' => $this->string(),
             'trigger' => $this->string(),
             'startTime' => $this->bigInteger(),
             'endTime' => $this->bigInteger(),
