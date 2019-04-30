@@ -95,7 +95,7 @@ class Install extends Migration
             'trigger' => $this->string(),
             'startTime' => $this->bigInteger(),
             'endTime' => $this->bigInteger(),
-            'output' => $this->text(),
+            'output' => $this->mediumText(),
             'sortOrder' => $this->integer()->defaultValue(0),
             'dateCreated' => $this->dateTime()->notNull(),
             'dateUpdated' => $this->dateTime()->notNull(),
