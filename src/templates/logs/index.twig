@@ -21,7 +21,7 @@
             <el-container>
                 <el-aside>
                     <div class="search">
-                        <el-input placeholder="Search all schedules" learable suffix-icon="el-icon-search" size="small"></el-input>
+                        <el-input v-model="search" placeholder="Search all schedules" learable suffix-icon="el-icon-search" size="small"></el-input>
                     </div>
                     <template>
                         <div class="schedules" v-loading="loading">

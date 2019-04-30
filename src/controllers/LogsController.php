@@ -78,11 +78,19 @@ class LogsController extends Controller
      */
     public function actionGetSchedules(): Response
     {
+        $this->requirePostRequest();
         $this->requireAcceptsJson();
 
-        $data = Plugin::$plugin->getSchedules()->findSchedules([
-            'hasLogs' => true,
-        ]);
+        $data = Craft::$app->getRequest()->getRawBody();
+        $params = Json::decodeIfJson($data);
+
+        $criteria = $params['criteria'] ?? [];
+        if (!isset($criteria['sortOrder']) || $criteria['sortOrder'] == '') {
+            $criteria['sortOrder'] = 'schedules.lastFinishedTime DESC';
+        }
+        $criteria['hasLogs'] = true;
+
+        $data = Plugin::$plugin->getSchedules()->findSchedules($criteria);
 
         return $this->asJson([
             'success' => true,

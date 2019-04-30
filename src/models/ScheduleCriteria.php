@@ -19,6 +19,11 @@ use yii\base\Model;
 class ScheduleCriteria extends Model
 {
     /**
+     * @var string|null
+     */
+    public $search;
+
+    /**
      * @var bool|null
      */
     public $hasLogs;

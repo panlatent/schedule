@@ -126,7 +126,13 @@
         data() {
             return {
                 schedules: [],
+                search: '',
                 loading: true
+            }
+        },
+        watch: {
+            search: function () {
+                this.getSchedules()
             }
         },
         mounted: function () {
@@ -135,7 +141,11 @@
         methods: {
             getSchedules: function () {
                 var vm = this;
-                this.$http.get(api.schedulesUrl).then(response => {
+                this.$http.post(api.schedulesUrl, {
+                    criteria: {
+                        search: vm.search
+                    }
+                }).then(response => {
                     vm.loading = false
                     vm.schedules = response.data.data
                 })

@@ -603,7 +603,6 @@ class Schedules extends Component
                 'id' => $schedule->id,
             ])->execute();
 
-
             $transaction->commit();
 
             $schedule->afterDelete();
@@ -656,7 +655,7 @@ class Schedules extends Component
                 'schedules.lastStatus',
             ])
             ->from('{{%schedules}} schedules')
-            ->orderBy('sortOrder');
+            ->orderBy('schedules.sortOrder');
     }
 
     /**
@@ -681,6 +680,10 @@ class Schedules extends Component
                     ])
                     ->limit(1),
             ]);
+        }
+
+        if ($criteria->search) {
+            $query->andWhere(['like', 'schedules.name',  $criteria->search]);
         }
     }
 }
