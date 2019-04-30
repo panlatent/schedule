@@ -33,7 +33,7 @@
             '            {{ props.row.duration }} ms\n' +
             '         </template>\n' +
             '     </el-table-column>\n' +
-            '     <el-table-column prop="output" :label="translations.Output" type="expand">\n' +
+            '     <el-table-column prop="output" :label="translations.Output" type="expand" width="100">\n' +
             '        <template slot-scope="props">\n' +
             '            <el-form label-position="left" inline class="demo-table-expand">\n' +
             '              <div style="background-color: black;">{{ props.row.output }}</div>\n' +
@@ -58,11 +58,25 @@
                 total: 0,
                 currentPage: 1,
                 pageSize: 20,
-                translations: window.Craft.translations.schedule,
+                translations: {},
             }
         },
         mounted: function () {
             this.getLogs()
+
+            if (typeof(window.Craft.translations.schedule) !== "undefined") {
+                this.translations = window.Craft.translations.schedule
+            } else {
+                this.translations = {
+                    'Status': 'Status',
+                    'Date': 'Date',
+                    'Reason': 'Reason',
+                    'Start Date': 'Start Date',
+                    'End Date': 'End Date',
+                    'Duration': 'Duration',
+                    'Output': 'Output',
+                }
+            }
         },
         created() {
             this.getLogs()
