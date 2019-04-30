@@ -10,6 +10,7 @@ namespace panlatent\schedule\timers;
 
 use Craft;
 use DateInterval;
+use DateTime;
 use panlatent\schedule\base\Schedule;
 use panlatent\schedule\base\Timer;
 
@@ -67,6 +68,9 @@ class Relay extends Timer
         }
 
         $date = $schedule->getLastFinishedDate()->add(new DateInterval("PT{$this->wait}M"));
+        if ($date->format('YmdHi') < date('YmdHi')) {
+            $date = new DateTime('now');
+        }
 
         return $date->format('i H d m * *');
     }
