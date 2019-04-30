@@ -11,7 +11,6 @@ namespace panlatent\schedule\web\assets\logs;
 use Craft;
 use craft\web\AssetBundle;
 use craft\web\assets\cp\CpAsset;
-use craft\web\assets\vue\VueAsset;
 use craft\web\View;
 
 /**
@@ -35,40 +34,86 @@ class LogsAsset extends AssetBundle
      */
     public $depends = [
         CpAsset::class,
-        VueAsset::class,
     ];
 
     /**
      * @inheritdoc
      */
     public $css = [
-        'https://unpkg.com/element-ui/lib/theme-chalk/index.css',
-        'logs.css',
+        'css/chunk-vendors.css',
+        'css/app.css',
     ];
 
     /**
      * @inheritdoc
      */
     public $js = [
-        'https://unpkg.com/element-ui@2.8.2/lib/index.js',
-        'https://unpkg.com/vue-resource@1.5.1/dist/vue-resource.min.js',
-
+        'js/chunk-vendors.js',
+        'js/app.js',
     ];
 
     /**
      * @var array
      */
     public $languages = [
-        'en' => 'en',
         'zh' => 'zh-CN',
         'zh-Hans' => 'zh-CN',
         'zh-Hant' =>'zh-TW',
-        'de' => 'de'
+        'de' => 'de',
+        'pt' => 'pt',
+        'es' => 'es',
+        'da' => 'da',
+        'fr' => 'fr',
+        'nb-NO' => 'nb-NO',
+        'it' => 'it',
+        'ko' => 'ko',
+        'ja' => 'ja',
+        'nl' => 'nl',
+        'vi' => 'vi',
+        'ru-RU' => 'ru-RU',
+        'tr-TR' => 'tr-TR',
+        'pt-br' => 'pt-br',
+        'fa' => 'fa',
+        'th' => 'th',
+        'id' => 'id',
+        'bg' => 'bg',
+        'pl' => 'pl',
+        'fi' => 'fi',
+        'sv-SE' => 'sv-SE',
+        'el' => 'el',
+        'sk' => 'sk',
+        'ca' => 'ca',
+        'cs-CZ' => 'cs-CZ',
+        'ua' => 'ua',
+        'tk' => 'tk',
+        'ta' => 'ta',
+        'lv' => 'lv',
+        'af-ZA' => 'af-ZA',
+        'ee' => 'ee',
+        'sl' => 'sl',
+        'ar' => 'ar',
+        'he' => 'he',
+        'lt' => 'lt',
+        'mn' => 'mn',
+        'kz' => 'kz',
+        'hu' => 'hu',
+        'ro' => 'ro',
+        'ku' => 'ku',
+        'ug-CN' => 'ug-CN',
+        'km' => 'km',
+        'sr' => 'sr',
+        'eu' => 'eu',
+        'kg' => 'kg',
+        'hy' => 'hy',
+        'hr' => 'hr',
     ];
 
     // Public Methods
     // =========================================================================
 
+    /**
+     * @inheritdoc
+     */
     public function init()
     {
         parent::init();
@@ -76,11 +121,9 @@ class LogsAsset extends AssetBundle
         $language = Craft::$app->language;
         if (isset($this->languages[$language])) {
             $this->js[] = 'https://unpkg.com/element-ui@2.8.2/lib/umd/locale/' . $this->languages[$language] .'.js';
-
-            Craft::$app->getView()->registerJsVar('language', $language);
+            $file = str_replace('-', '', $this->languages[$language]);
+            Craft::$app->getView()->registerJs("ELEMENT.locale(ELEMENT.lang.{$file});", View::POS_END);
         }
-
-        $this->js[] = 'logs.js';
     }
 
     /**

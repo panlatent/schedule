@@ -16,42 +16,28 @@
 {% endif %}
 
 {% block content %}
-    <div id="logs">
-        {% verbatim %}
-            <el-container>
-                <el-aside>
-                    <div class="search">
-                        <el-input v-model="search" placeholder="Search all schedules" learable suffix-icon="el-icon-search" size="small"></el-input>
-                    </div>
-                    <template>
-                        <div class="schedules" v-loading="loading">
-                            <el-card class="box-card" shadow="never" v-bind:class="{passed: schedule.status, failed: !schedule.status}" v-for="schedule in schedules">
-                                <h2>
-                                    <router-link :to="{ name: 'logs', params: { handle: schedule.handle }}">
-                                        <span>
-                                            <i class="el-icon-check" v-if="schedule.status === true"></i>
-                                            <i class="el-icon-check" v-else-if="schedule.status === false"></i>
-                                            <i class="el-icon-close" v-else="schedule.status"></i>
-                                        </span>
-                                        <span>{{ schedule.name }}</span>
-                                    </router-link>
-                                </h2>
-                                <p class="right"><i class="el-icon-caret-right"></i> {{ schedule.total }}</p>
-                                <p><i class="el-icon-time"></i> Duration: {{ schedule.duration }} ms</p>
-                                <p><i class="el-icon-date"></i> Finished: {{ schedule.finished }}</p>
-                            </el-card>
-                        </div>
-                    </template>
-                </el-aside>
-                <el-main>
-                    <router-view></router-view>
-                </el-main>
-            </el-container>
-        {% endverbatim %}
-    </div>
+    <div id=app></div>
 {% endblock %}
 
-{% do view.registerJsVar('api', {
-    schedulesUrl: actionUrl('schedule/logs/get-schedules'),
-    logsUrl: actionUrl('schedule/logs/get-logs'),
-}) %}
+{% css %}
+#main-container #main #main-content #content-container #content {
+    padding: 0;
+}
+{% endcss %}
+
+{% block js %}
+if (typeof Craft.schedule === 'undefined') {
+    Craft.schedule = {
+        logs: {}
+    }
+}
+Craft.schedule.logs = {
+    api: {
+        schedules: {{ actionUrl('schedule/logs/get-schedules')|json_encode|raw }},
+        logs: {{ actionUrl('schedule/logs/get-logs')|json_encode|raw }},
+    },
+    cpTrigger: {{ craft.app.config.general.cpTrigger|json_encode|raw }},
+}
+{% endblock %}
+
+{% do view.registerJs(block('js'), POS_BEGIN) %}
