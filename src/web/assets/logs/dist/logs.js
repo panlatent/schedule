@@ -12,7 +12,18 @@
             '    <el-table-column type="index" :index="indexMethod"> </el-table-column>\n' +
             '    <el-table-column prop="status" :label="translations.Status" width="180">\n' +
             '        <template slot-scope="props">\n' +
-            '            <el-tag type="success">{{ props.row.status }}</el-tag>\n' +
+            '            <el-tag type="success" size="medium" v-if="props.row.status == \'successful\'">{{ props.row.status }}</el-tag>\n' +
+            '         <template slot-scope="props" v-else-if="props.row.status == \'failed\'">\n' +
+            '             <el-popover\n' +
+            '              placement="top-start"\n' +
+            '              width="200"\n' +
+            '              trigger="hover"\n' +
+            '              :title="translations.Reason"\n' +
+            '              :content="props.row.reason">\n' +
+            '                  <el-tag type="danger" size="medium" slot="reference">{{ props.row.status }}</el-tag>\n' +
+            '              </el-popover>' +
+            '        </template>\n' +
+            '        <el-tag type="info" size="medium" v-else>{{ props.row.status }}</el-tag>\n' +
             '        </template>\n' +
             '     </el-table-column>\n' +
             '     <el-table-column prop="startTime" :label="translations[\'Start Date\']" width="200"></el-table-column>\n' +

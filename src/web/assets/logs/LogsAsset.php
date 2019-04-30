@@ -94,6 +94,7 @@ class LogsAsset extends AssetBundle
             $view->registerTranslations('schedule', [
                 'Status',
                 'Date',
+                'Reason',
                 'Start Date',
                 'End Date',
                 'Duration',

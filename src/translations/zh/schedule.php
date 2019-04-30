@@ -71,6 +71,7 @@ return [
     'Wait {wait} minutes after last executed' => '在上次运行后等待 {wait} 分钟',
     'Status' => '状态',
     'Date' => '日期',
+    'Reason' => '原因',
     'Start Date' => '开始时间',
     'End Date' => '结束时间',
     'Duration' => '耗时',
