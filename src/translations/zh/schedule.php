@@ -69,6 +69,8 @@ return [
     'Request Body' => '请求Body',
     'Every' => '每',
     'Wait {wait} minutes after last executed' => '在上次运行后等待 {wait} 分钟',
+    'Settings saved.' => '设置已保存。',
+    'Couldn’t save settings.' => '无法保存设置。',
     'Status' => '状态',
     'Date' => '日期',
     'Reason' => '原因',
