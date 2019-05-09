@@ -235,11 +235,11 @@ class Timers extends Component
             }
 
             $record->type = get_class($timer);
-            $record->minute = $timer->minute ?? '*';
-            $record->hour = $timer->hour ?? '*';
-            $record->day = $timer->day ?? '*';
-            $record->month = $timer->month ?? '*';
-            $record->week = $timer->week ?? '*';
+            $record->minute = $this->_normalizeCronExpress($timer->minute);
+            $record->hour = $this->_normalizeCronExpress($timer->hour);
+            $record->day = $this->_normalizeCronExpress($timer->day);
+            $record->month = $this->_normalizeCronExpress($timer->month);
+            $record->week = $this->_normalizeCronExpress($timer->week);
             $record->enabled = $timer->enabled;
             $record->settings = Json::encode($timer->getSettings());
 
@@ -381,5 +381,14 @@ class Timers extends Component
             ])
             ->from(Table::SCHEDULETIMERS)
             ->orderBy(['sortOrder' => SORT_ASC]);
+    }
+
+    /**
+     * @param string $express
+     * @return string
+     */
+    private function _normalizeCronExpress(string $express): string
+    {
+        return ($express !== '' && $express !== null) ? $express : '*';
     }
 }
