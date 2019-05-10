@@ -83,7 +83,7 @@ class Install extends Migration
         $this->createIndex(null, '{{%scheduletimers}}', 'type');
         $this->createIndex(null, '{{%scheduletimers}}', ['enabled', 'dateCreated']);
         $this->createIndex(null, '{{%scheduletimers}}', ['scheduleId', 'sortOrder']);
-        $this->addForeignKey(null, '{{%scheduletimers}}', 'scheduleId', '{{%schedule}}', 'id', 'CASCADE');
+        $this->addForeignKey(null, '{{%scheduletimers}}', 'scheduleId', '{{%schedules}}', 'id', 'CASCADE');
 
         // Schedule Logs
         $this->createTable('{{%schedulelogs}}', [
