@@ -11,10 +11,6 @@
     {% set schedule = craft.schedule.schedules.getAllSchedules()|first %}
 {% endif %}
 
-{% if not schedule %}
-    {% exit 404 %}
-{% endif %}
-
 {% block content %}
     <div id=app></div>
 {% endblock %}
