@@ -9,12 +9,15 @@
 namespace panlatent\schedule;
 
 use Craft;
+use craft\events\RegisterUserPermissionsEvent;
 use craft\helpers\UrlHelper;
+use craft\services\UserPermissions;
 use craft\web\twig\variables\CraftVariable;
 use panlatent\schedule\console\SchedulesController;
 use panlatent\schedule\models\Settings;
 use panlatent\schedule\plugin\Routes;
 use panlatent\schedule\plugin\Services;
+use panlatent\schedule\user\Permissions;
 use panlatent\schedule\web\twig\CraftVariableBehavior;
 use yii\base\Event;
 use yii\console\Application;
@@ -75,9 +78,10 @@ class Plugin extends \craft\base\Plugin
             }
         }
 
-        $this->_registerCpRoutes();
-        $this->_registerVariables();
         $this->_setComponents();
+        $this->_registerCpRoutes();
+        $this->_registerUserPermissions();
+        $this->_registerVariables();
     }
 
     /**
@@ -93,20 +97,27 @@ class Plugin extends \craft\base\Plugin
             $ret['label'] = Craft::t('schedule', 'Schedule');
         }
 
-        $ret['subnav'][''] = [
-            'label' => Craft::t('schedule', 'Schedules'),
-            'url' => 'schedule',
-        ];
+        $user = Craft::$app->getUser();
+        if ($user->checkPermission(Permissions::MANAGE_SCHEDULES)) {
+            $ret['subnav']['schedules'] = [
+                'label' => Craft::t('schedule', 'Schedules'),
+                'url' => 'schedule',
+            ];
+        }
 
-        $ret['subnav']['logs'] = [
-            'label' => Craft::t('schedule', 'Logs'),
-            'url' => 'schedule/logs',
-        ];
+        if ($user->checkPermission(Permissions::MANAGE_LOGS)) {
+            $ret['subnav']['logs'] = [
+                'label' => Craft::t('schedule', 'Logs'),
+                'url' => 'schedule/logs',
+            ];
+        }
 
-        $ret['subnav']['settings'] = [
-            'label' => Craft::t('schedule', 'Settings'),
-            'url' => 'schedule/settings',
-        ];
+        if ($user->checkPermission(Permissions::MANAGE_SETTINGS)) {
+            $ret['subnav']['settings'] = [
+                'label' => Craft::t('schedule', 'Settings'),
+                'url' => 'schedule/settings',
+            ];
+        }
 
         return $ret;
     }
@@ -132,6 +143,26 @@ class Plugin extends \craft\base\Plugin
 
     // Private Methods
     // =========================================================================
+
+    /**
+     * Register user permissions.
+     */
+    private function _registerUserPermissions()
+    {
+        Event::on(UserPermissions::class, UserPermissions::EVENT_REGISTER_PERMISSIONS, function(RegisterUserPermissionsEvent $event) {
+            $event->permissions[Craft::t('schedule', 'Schedules')] = [
+                Permissions::MANAGE_SCHEDULES => [
+                    'label' => Craft::t('schedule', 'Manage Schedules'),
+                ],
+                Permissions::MANAGE_LOGS => [
+                    'label' => Craft::t('schedule', 'Manage Logs'),
+                ],
+                Permissions::MANAGE_SETTINGS => [
+                    'label' => Craft::t('schedule', 'Manage Settings'),
+                ],
+            ];
+        });
+    }
 
     /**
      * Register the plugin template variable.
