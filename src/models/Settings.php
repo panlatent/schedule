@@ -49,7 +49,7 @@ class Settings extends Model
         return [
             [['cliPath', 'customName'], 'string'],
             [['modifyPluginName'], 'boolean'],
-            [['cliPath'], PhpBinaryValidator::class, 'minVersion' => '7.1'],
+            [['cliPath'], PhpBinaryValidator::class, 'minVersion' => '7.1', 'allowParseEnv' => true],
         ];
     }
 
