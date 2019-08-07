@@ -74,11 +74,14 @@ class Queue extends Schedule
      */
     protected function execute(int $logId = null): bool
     {
-        $queue = Craft::$app->get($this->componentId);
-        if (!$queue || $queue instanceof \yii\queue\Queue || $queue instanceof QueueInterface) {
+        $queue = Craft::$app->get($this->componentId, false);
+        if ($queue === null) {
+            throw new ScheduleException("No queue component exists with the ID: {$this->componentId}");
+        }
+
+        if (!$queue instanceof \yii\queue\Queue && !$queue instanceof QueueInterface) {
             throw new ScheduleException('Invalid queue component');
         }
-        Craft::info("x__x");
 
         /** @var \yii\queue\Queue $queue */
         $job = new $this->jobClass();
