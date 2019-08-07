@@ -8,7 +8,8 @@
 
 namespace panlatent\schedule\helpers;
 
-use panlatent\schedule\models\CronExpression;
+use Craft;
+use Panlatent\CronExpressionDescriptor\ExpressionDescriptor;
 
 /**
  * Class CronHelper
@@ -50,17 +51,18 @@ class CronHelper
 
     /**
      * @param array|string $expression
-     * @param bool $use24HourTimeFormat
      * @return string
      */
-    public static function toDescription($expression, bool $use24HourTimeFormat = false): string
+    public static function toDescription($expression): string
     {
         $expression = self::toCronExpression($expression);
 
-        $descriptor = new CronExpression([
-            'expression' => $expression,
-            'use24HourTimeFormat' => $use24HourTimeFormat
-        ]);
+        $targetLanguage = Craft::$app->getTargetLanguage();
+        if ($targetLanguage == 'zh') {
+            $targetLanguage = 'zh-Hans';
+        }
+
+        $descriptor = new ExpressionDescriptor($expression, $targetLanguage);
 
         return $descriptor->getDescription();
     }
