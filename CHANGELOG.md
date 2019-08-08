@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Updated
 ### Fixed
 
-### [0.2.0] - 2019-08-08
+## [0.2.0] - 2019-08-08
 ### Added
 - Add schedule logs.
 - Add relay timer.
@@ -23,7 +23,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 - Fix #4 unable to run queue schedule.
 - Fix plugin setting cliPath validator.
 
-### [0.1.6] - 2019-04-26
+## [0.1.6] - 2019-04-26
 ### Added
 ### Updated
 - Advance schedule classes: Add run method and events.
