@@ -17,6 +17,7 @@ use DateTime;
 use panlatent\schedule\Builder;
 use panlatent\schedule\db\Table;
 use panlatent\schedule\events\ScheduleEvent;
+use panlatent\schedule\helpers\PrecisionDateTimeHelper;
 use panlatent\schedule\models\ScheduleGroup;
 use panlatent\schedule\models\ScheduleLog;
 use panlatent\schedule\Plugin;
@@ -120,6 +121,30 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
     }
 
     /**
+     * @inheritdoc
+     */
+    public function attributes()
+    {
+        $attributes = parent::attributes();
+        $attributes[] = 'lastFinishedDate';
+        $attributes[] = 'lastDuration';
+
+        return $attributes;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function attributeLabels()
+    {
+        return [
+            'name' => Craft::t('app', 'Name'),
+            'handle' => Craft::t('app', 'Handle'),
+            'groupId' => Craft::t('app', 'Group'),
+        ];
+    }
+
+    /**
      * @return ScheduleGroup|null
      */
     public function getGroup()
@@ -207,7 +232,7 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
             return null;
         }
 
-        $this->_lastFinishedDate = new DateTime(date('Y-m-d H:i:s', (int)($this->lastFinishedTime / 1000)));
+        $this->_lastFinishedDate = PrecisionDateTimeHelper::toDateTime($this->lastFinishedTime);
 
         return $this->_lastFinishedDate;
     }
@@ -241,6 +266,14 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
     }
 
     /**
+     * @inheritdoc
+     */
+    public function renderLogOutput(string $content): string
+    {
+        return $content;
+    }
+
+    /**
      * @return bool
      */
     public function run(): bool
@@ -261,7 +294,6 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
             Craft::error($reason, __METHOD__);
 
             $successful = false;
-
         }
 
         if ($this->enabledLog) {
@@ -285,7 +317,7 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
         }
 
         Craft::$app->getDb()->createCommand()
-            ->update('{{%schedules}}', [
+            ->update(Table::SCHEDULES, [
                 'lastStartedTime' => round(microtime(true) * 1000),
             ], [
                 'id' => $this->id,
@@ -307,8 +339,8 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
         }
 
         Craft::$app->getDb()->createCommand()
-            ->update('{{%schedules}}', [
-                'lastFinishedTime' => round(microtime(true) * 1000),
+            ->update(Table::SCHEDULES, [
+                'lastFinishedTime' => PrecisionDateTimeHelper::time(),
                 'lastStatus' => $successful,
             ], [
                 'id' => $this->id,
@@ -356,7 +388,7 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
             ->insert(Table::SCHEDULELOGS, [
                 'scheduleId' => $this->id,
                 'status' => self::STATUS_PREPARING,
-                'startTime' => round(microtime(true) * 1000),
+                'startTime' => PrecisionDateTimeHelper::time(),
                 'output' => '',
                 'sortOrder' => $db->getSchema() instanceof MysqlSchema ?  // MySQL not support same table sub query on insert.
                     $sortOrderQuery->scalar() :
@@ -378,7 +410,7 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
             ->update(Table::SCHEDULELOGS, [
                 'status' => $status,
                 'reason' => $reason,
-                'endTime' => round(microtime(true) * 1000),
+                'endTime' => PrecisionDateTimeHelper::time(),
             ], [
                 'id' => $id,
             ])

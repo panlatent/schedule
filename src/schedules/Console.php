@@ -123,6 +123,16 @@ class Console extends Schedule
         ]);
     }
 
+    /**
+     * @inheritdoc
+     */
+    public function renderLogOutput(string $content): string
+    {
+        $content = str_replace("\n", '<br>', $content);
+
+        return $content;
+    }
+
     // Protected Methods
     // =========================================================================
 
@@ -134,10 +144,11 @@ class Console extends Schedule
         $process = new Process($this->buildCommand(), dirname(Craft::$app->request->getScriptFile()));
 
         $process->run(function ($type, $buffer) use ($logId) {
+
             if (Process::ERR === $type) {
-                $output = 'ERR > ' . $buffer;
+                $output = $buffer . "\n";
             } else {
-                $output = 'OUT > ' . $buffer;
+                $output = $buffer . "\n";;
             }
 
             Craft::$app->getDb()->createCommand()

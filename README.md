@@ -40,3 +40,6 @@ To install the plugin, follow these instructions.
 Usages
 ------
 
+License
+-------
+The Schedule is open-sourced software licensed under the [MIT license](http://opensource.org/licenses/MIT).

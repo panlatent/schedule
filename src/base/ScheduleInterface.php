@@ -33,4 +33,10 @@ interface ScheduleInterface extends SavableComponentInterface
      * @return bool
      */
     public function run(): bool;
+
+    /**
+     * @param string $content
+     * @return string
+     */
+    public function renderLogOutput(string $content): string;
 }

@@ -1,39 +1,50 @@
 {% extends "_layouts/cp" %}
 
-{% do view.registerAssetBundle("panlatent\\schedule\\web\\assets\\logs\\LogsAsset") %}
 {% set title = "Logs"|t('schedule') %}
-{% set currentSchedule = null %}
 {% set selectedSubnavItem = 'logs' %}
-
-{% if scheduleHandle is defined and scheduleHandle is not empty %}
-    {% set schedule = craft.schedule.schedules.getScheduleByHandle(scheduleHandle) %}
-{% else %}
-    {% set schedule = craft.schedule.schedules.getAllSchedules()|first %}
-{% endif %}
+{% set logs = craft.schedule.logs.findLogs({
+    limit: 50,
+    sortOrder: 'logs.id DESC',
+}) %}
 
 {% block content %}
-    <div id=app></div>
+    <table id="logs" class="fullwidth data">
+        <thead>
+           <tr>
+               <th>{{ '#'|t('schedule') }}</th>
+               <th>{{ 'Status'|t('schedule') }}</th>
+               <th>{{ 'Reason'|t('schedule') }}</th>
+               <th>{{ 'Date'|t('schedule') }}</th>
+               <th>{{ 'Duration'|t('schedule') }}</th>
+               <th>{{ 'Schedule'|t('schedule') }}</th>
+           </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+                <tr>
+                    <th class="code">
+                        <a href="{{ url('schedule/logs/' ~ log.id) }}" data-id="{{ log.id }}" target="_blank">
+                            <span>{{ ' #' ~ log.sortOrder}}</span>
+                            <span></span>
+                        </a>
+                    </th>
+                    <td>
+                        {% if log.status == 'successful' %}
+                            <span class="status green"></span>
+                            <span class="code">{{ 'Successful'|t('schedule') }}</span>
+                        {% elseif log.status == 'failed' %}
+                            <span class="status red"></span>
+                            <span class="code">{{ 'Failed'|t('schedule') }}</span>
+                        {% else %}
+                            <span class="light">{{ log.status|capitalize|t('schedule') }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ log.reason }}</td>
+                    <td>{{ log.startDate|datetime('short') }}</td>
+                    <td>{{ log.duration >= 1000 ? log.duration/1000|round ~ 's' : log.duration ~ 'ms' }}</td>
+                    <td><a class="go" href="{{ url('schedule/' ~ log.schedule.id ) }}">{{ log.schedule }}</a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {% endblock %}
-
-{% css %}
-#main-container #main #main-content #content-container #content {
-    padding: 0;
-}
-{% endcss %}
-
-{% block js %}
-if (typeof Craft.schedule === 'undefined') {
-    Craft.schedule = {
-        logs: {}
-    }
-}
-Craft.schedule.logs = {
-    api: {
-        schedules: {{ actionUrl('schedule/logs/get-schedules')|json_encode|raw }},
-        logs: {{ actionUrl('schedule/logs/get-logs')|json_encode|raw }},
-    },
-    cpTrigger: {{ craft.app.config.general.cpTrigger|json_encode|raw }},
-}
-{% endblock %}
-
-{% do view.registerJs(block('js'), POS_BEGIN) %}

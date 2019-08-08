@@ -37,18 +37,7 @@ class Logs extends Component
             $criteria = new LogCriteria($criteria);
         }
 
-        $query = (new Query())
-            ->select([
-                'logs.id',
-                'logs.scheduleId',
-                'logs.status',
-                'logs.reason',
-                'logs.startTime',
-                'logs.endTime',
-                'logs.output',
-                'logs.sortOrder'
-            ])
-            ->from(['logs' => Table::SCHEDULELOGS])
+        $query = $this->_createQuery()
             ->orderBy($criteria->sortOrder)
             ->offset($criteria->offset)
             ->limit($criteria->limit);
@@ -99,8 +88,40 @@ class Logs extends Component
         return $query->count('[[logs.id]]');
     }
 
+    /**
+     * @param int $logId
+     * @return ScheduleLog|null
+     */
+    public function getLogById(int $logId)
+    {
+        $result = $this->_createQuery()
+            ->where(['id' => $logId])
+            ->one();
+
+        return $result ? new ScheduleLog($result) : null;
+    }
+
     // Private Methods
     // =========================================================================
+
+    /**
+     * @return Query
+     */
+    private function _createQuery(): Query
+    {
+        return (new Query())
+            ->select([
+                'logs.id',
+                'logs.scheduleId',
+                'logs.status',
+                'logs.reason',
+                'logs.startTime',
+                'logs.endTime',
+                'logs.output',
+                'logs.sortOrder'
+            ])
+            ->from(['logs' => Table::SCHEDULELOGS]);
+    }
 
     /**
      * @param Query $query

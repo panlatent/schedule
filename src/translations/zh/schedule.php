@@ -83,4 +83,5 @@ return [
     'Output' => '输出',
     'Enabled Log' => '启用日志',
     'Waiting time after the execution of the plan is completed' => '在计划执行完成后的等待时间。',
+    'Waiting time (minute)' => '等待时间（分钟）',
 ];

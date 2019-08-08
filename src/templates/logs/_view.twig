@@ -1,0 +1,60 @@
+{% extends "_layouts/cp" %}
+
+{% set log = craft.schedule.logs.getLogById(logId) %}
+{% if not log %}
+    {% exit 404 %}
+{% endif %}
+
+{% set selectedSubnavItem = 'logs' %}
+{% set title = log.schedule ~ ' #' ~ log.sortOrder %}
+{% set crumbs = [
+    {
+        label: 'Logs'|t('schedule'),
+        url: url('schedule/logs')
+    }
+] %}
+
+{% block content %}
+    <div id="output">
+        <h2>{{ 'Output'|t('schedule') }}</h2>
+
+        <div class="">
+            {{ log.outputHtml|raw }}
+        </div>
+    </div>
+{% endblock %}
+
+{% block details %}
+    <div class="meta read-only">
+        <div class="data">
+            <h5 class="heading">{{ 'Status'|t('schedule') }}</h5>
+            <div class="value">
+                {% if log.status == 'successful' %}
+                    <span class="status green"></span>
+                    <span class="code">{{ 'Successful'|t('schedule') }}</span>
+                {% elseif log.status == 'failed' %}
+                    <span class="status red"></span>
+                    <span class="code">{{ 'Failed'|t('schedule') }}</span>
+                {% else %}
+                    <span class="light">{{ log.status|capitalize|t('schedule') }}</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="data">
+            <h5 class="heading">{{ 'Reason'|t('schedule') }}</h5>
+            <div class="value">{{ log.reason }}</div>
+        </div>
+        <div class="data">
+            <h5 class="heading">{{ 'Date'|t('schedule') }}</h5>
+            <div class="value">{{ log.startDate|datetime('short') }}</div>
+        </div>
+        <div class="data">
+            <h5 class="heading">{{ 'Duration'|t('schedule') }}</h5>
+            <div class="value">{{ log.duration >= 1000 ? log.duration/1000|round ~ 's' : log.duration ~ 'ms' }}</div>
+        </div>
+        <div class="data">
+            <h5 class="heading">{{ 'Schedule'|t('schedule') }}</h5>
+            <div class="value"><a class="go" href="{{ url('schedule/' ~ log.schedule.id ) }}">{{ log.schedule }}</a></div>
+        </div>
+    </div>
+{% endblock %}
