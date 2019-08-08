@@ -1,19 +1,21 @@
 {% import "_includes/forms" as forms %}
 
-{{ forms.textField({
+{{ forms.autosuggestField({
     label: "Queue Component ID"|t('schedule'),
     required: true,
     id: 'componentId',
     name: 'componentId',
     value: schedule.componentId,
     errors: schedule.getErrors('componentId'),
+    suggestions: componentSuggestions,
 }) }}
 
-{{ forms.textField({
+{{ forms.autosuggestField({
     label: "Job Class Name"|t('schedule'),
     required: true,
     id: 'jobClass',
     name: 'jobClass',
     value: schedule.jobClass,
     errors: schedule.getErrors('jobClass'),
+    suggestions: jobClassSuggestions,
 }) }}
