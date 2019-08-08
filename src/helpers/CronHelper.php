@@ -46,7 +46,7 @@ class CronHelper
         $month = $value['month'] ?? $value[3] ?? '*';
         $week = $value['week'] ?? $value[4] ?? '*';
 
-        return implode(' ', [$minute, $hour, $day, $month, $week, '*']);
+        return implode(' ', [$minute, $hour, $day, $month, $week]);
     }
 
     /**
