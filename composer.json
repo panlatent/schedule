@@ -2,7 +2,7 @@
     "name": "panlatent/schedule",
     "description": "Schedule plugin for CraftCMS 3",
     "type": "craft-plugin",
-    "version": "0.2.0-alpha.5",
+    "version": "0.2.0",
     "keywords": [
         "craft",
         "cms",

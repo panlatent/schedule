@@ -6,13 +6,22 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## [Unreleased]
 ### Added
-- Add schedule logs 
-
 ### Updated
 ### Fixed
 
-### [0.2.0]
+### [0.2.0] - 2019-08-08
+### Added
+- Add schedule logs.
+- Add relay timer.
 
+### Updated
+- Now require new library process cron expression description.
+- Advance queue schedule edit page.
+
+### Fixed
+- Fix #3 not normalize relay timer express.
+- Fix #4 unable to run queue schedule.
+- Fix plugin setting cliPath validator.
 
 ### [0.1.6] - 2019-04-26
 ### Added
