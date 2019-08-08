@@ -384,10 +384,10 @@ class Timers extends Component
     }
 
     /**
-     * @param string $express
+     * @param mixed $express
      * @return string
      */
-    private function _normalizeCronExpress(string $express): string
+    private function _normalizeCronExpress($express): string
     {
         return ($express !== '' && $express !== null) ? $express : '*';
     }

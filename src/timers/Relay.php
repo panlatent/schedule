@@ -37,9 +37,9 @@ class Relay extends Timer
     // =========================================================================
 
     /**
-     * @var int
+     * @var int Wait time (minute)
      */
-    public $wait = 0;
+    public $wait = 1;
 
     // Public Methods
     // =========================================================================
@@ -50,9 +50,20 @@ class Relay extends Timer
     public function rules()
     {
         $rules = parent::rules();
-        $rules[] = [['wait'], 'integer'];
+        $rules[] = [['wait'], 'integer', 'min' => 1];
 
         return $rules;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function attributeLabels()
+    {
+        $attributeLabels = parent::attributeLabels();
+        $attributeLabels['wait'] = Craft::t('schedule', 'Wait Time');
+
+        return $attributeLabels;
     }
 
     /**
