@@ -1,0 +1,46 @@
+{% extends "schedule/_layouts/logs" %}
+
+{% set schedule = craft.schedule.schedules.getScheduleById(scheduleId) %}
+{% if not schedule %}
+    {% exit 404 %}
+{% endif %}
+
+{% set showSchedule = false %}
+{% set selectedSubnavItem = 'schedule' %}
+{% set title = "Logs"|t('schedule') %}
+{% set crumbs = [
+    {
+        label: 'Schedules'|t('schedule'),
+        url: url('schedule')
+    },
+    {
+        label: schedule,
+        url: url('schedule/' ~ schedule.id)
+    }
+] %}
+
+{% set criteria = {
+    scheduleId: scheduleId,
+    limit: 50,
+    sortOrder: 'logs.id DESC',
+} %}
+
+{% block actionButton %}
+    <a id="delete-all" class="btn submit">{{ 'Delete all logs'|t('schedule') }}</a>
+{% endblock %}
+
+{% js %}
+    $('#delete-all').click(function() {
+        Craft.postActionRequest('schedule/logs/delete-logs-by-schedule-id', {
+            scheduleId: {{ schedule.id }}
+        }, $.proxy(function(response, textStatus) {
+            if (textStatus === 'success') {
+                window.location = '{{ url('schedule') }}';
+            } else {
+                Craft.cp.displayError('{{ 'Delete failed.'|t('schedule') }}')
+            }
+        }));
+
+        return false;
+    });
+{% endjs %}

@@ -118,7 +118,7 @@ class Console extends Schedule
             }
         }
 
-        return Craft::$app->getView()->renderTemplate('schedule/_components/schedules/Console', [
+        return Craft::$app->getView()->renderTemplate('schedule/_components/schedules/Console/settings', [
             'schedule' => $this,
             'suggestions' => $suggestions,
         ]);
@@ -127,11 +127,13 @@ class Console extends Schedule
     /**
      * @inheritdoc
      */
-    public function renderLogOutput(ScheduleLog $log): string
+    public function renderLogContent(ScheduleLog $log): string
     {
         $content = str_replace("\n", '<br>', $log->output);
 
-        return $content;
+        return Craft::$app->getView()->renderTemplate('schedule/_components/schedules/Console/log', [
+            'content' => $content,
+        ]);
     }
 
     // Protected Methods

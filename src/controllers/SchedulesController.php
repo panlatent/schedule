@@ -146,7 +146,7 @@ class SchedulesController extends Controller
             ];
         }
 
-        return $this->renderTemplate('schedule/schedules/_edit', [
+        return $this->renderTemplate('schedule/_edit', [
             'isNewSchedule' => $isNewSchedule,
             'groupOptions' => $groupOptions,
             'schedule' => $schedule,

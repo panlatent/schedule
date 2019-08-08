@@ -1,0 +1,18 @@
+<hr>
+
+<h4>Request</h4>
+
+<div class="meta">
+    <div class="data">
+        <div class="heading">{{ 'URL'|t('schedule') }}</div>
+        <div class="value code">{{ log.schedule.method|upper }} {{ log.schedule.url }}</div>
+    </div>
+</div>
+
+<hr>
+
+<h4>Response</h4>
+
+<div class="pane code last">
+{{ log.output }}
+</div>

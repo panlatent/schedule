@@ -79,7 +79,7 @@ class Queue extends Schedule
             ]
         ];
 
-        return Craft::$app->getView()->renderTemplate('schedule/_components/schedules/Queue', [
+        return Craft::$app->getView()->renderTemplate('schedule/_components/schedules/Queue/settings', [
             'schedule' => $this,
             'componentSuggestions' => $componentSuggestions,
             'jobClassSuggestions' => $jobClassSuggestions,

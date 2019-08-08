@@ -39,5 +39,5 @@ interface ScheduleInterface extends SavableComponentInterface
      * @param ScheduleLog $log
      * @return string
      */
-    public function renderLogOutput(ScheduleLog $log): string;
+    public function renderLogContent(ScheduleLog $log): string;
 }

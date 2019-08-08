@@ -6,22 +6,24 @@
 {% endif %}
 
 {% set selectedSubnavItem = 'logs' %}
-{% set title = log.schedule ~ ' #' ~ log.sortOrder %}
+{% set title = '#' ~ log.sortOrder %}
 {% set crumbs = [
     {
+        label: 'Schedules'|t('schedule'),
+        url: url('schedule')
+    },
+    {
+        label: log.schedule,
+        url: url('schedule/' ~ log.schedule.id)
+    },
+    {
         label: 'Logs'|t('schedule'),
-        url: url('schedule/logs')
-    }
+        url:url('schedule/' ~ log.schedule.id ~ '/logs')
+    },
 ] %}
 
 {% block content %}
-    <div id="output">
-        <h2>{{ 'Output'|t('schedule') }}</h2>
-
-        <div class="">
-            {{ log.outputHtml|raw }}
-        </div>
-    </div>
+    {{ log.outputHtml|raw }}
 {% endblock %}
 
 {% block details %}

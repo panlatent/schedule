@@ -70,7 +70,7 @@ class Event extends Schedule
             ]
         ];
 
-        return Craft::$app->getView()->renderTemplate('schedule/_components/schedules/Event', [
+        return Craft::$app->getView()->renderTemplate('schedule/_components/schedules/Event/settings', [
             'schedule' => $this,
             'classSuggestions' => $classSuggestions,
         ]);

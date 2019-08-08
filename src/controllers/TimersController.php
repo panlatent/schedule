@@ -93,7 +93,7 @@ class TimersController extends Controller
         $crumbs[] = ['label' => Craft::t('schedule', 'Timers'), 'url' => UrlHelper::cpUrl('schedule/'. $schedule->id . '/timers')];
 
 
-        return $this->renderTemplate('schedule/schedules/timers/_edit', [
+        return $this->renderTemplate('schedule/timers/_edit', [
             'timer' => $timer,
             'timerInstances' => $timerInstances,
             'timerTypes' => $allTimerTypes,

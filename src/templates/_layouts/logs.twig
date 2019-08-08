@@ -1,0 +1,87 @@
+{% extends "_layouts/cp" %}
+
+{% set showSchedule = showSchedule is defined ? showSchedule : true %}
+{% set criteria = criteria is defined ? criteria : {} %}
+{% set title = "Logs"|t('schedule') %}
+
+{% set page = page is defined ? page : craft.app.request.getQueryParam('page', 1) %}
+{% set pageSize = pageSize is defined ? pageSize : 50 %}
+
+{% if page < 1 %}
+    {% set page = 1 %}
+{% endif %}
+
+{% set criteria = criteria|merge({
+    offset: (page - 1)*pageSize,
+    limit: pageSize,
+}) %}
+
+{% set totalLogs = craft.schedule.logs.getTotalLogs(criteria) %}
+{% set totalPages = (totalLogs/pageSize)|round(0, 'ceil') %}
+{% set logs = craft.schedule.logs.findLogs(criteria) %}
+
+{% block content %}
+    <div id="nologs"{% if logs %} class="hidden"{% endif %}>{{ 'No logs exists yet.'|t('schedule') }}</div>
+
+    {% if logs|length %}
+        <table id="logs" class="fullwidth data">
+            <thead>
+            <tr>
+                <th>{{ '#'|t('schedule') }}</th>
+                <th>{{ 'Status'|t('schedule') }}</th>
+                <th>{{ 'Reason'|t('schedule') }}</th>
+                <th>{{ 'Date'|t('schedule') }}</th>
+                <th>{{ 'Duration'|t('schedule') }}</th>
+                {% if showSchedule %}<th>{{ 'Schedule'|t('schedule') }}</th>{% endif %}
+            </tr>
+            </thead>
+            <tbody>
+            {% for log in logs %}
+                <tr>
+                    <th class="code">
+                        <a href="{{ url('schedule/' ~ log.schedule.id ~ '/logs/' ~ log.id) }}" data-id="{{ log.id }}"
+                           target="_blank">
+                            <span>{{ ' #' ~ log.sortOrder }}</span>
+                            <span></span>
+                        </a>
+                    </th>
+                    <td>
+                        {% if log.status == 'successful' %}
+                            <span class="status green"></span>
+                            <span class="code">{{ 'Successful'|t('schedule') }}</span>
+                        {% elseif log.status == 'failed' %}
+                            <span class="status red"></span>
+                            <span class="code">{{ 'Failed'|t('schedule') }}</span>
+                        {% else %}
+                            <span class="light">{{ log.status|capitalize|t('schedule') }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ log.reason }}</td>
+                    <td>{{ log.startDate|datetime('short') }}</td>
+                    <td>{{ log.duration >= 1000 ? log.duration/1000|round ~ 's' : log.duration ~ 'ms' }}</td>
+                    {% if showSchedule %}
+                        <td><a class="go" href="{{ url('schedule/' ~ log.schedule.id ) }}">{{ log.schedule }}</a>
+                        </td>{% endif %}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="flex pagination">
+            <div class="page-info">
+                {{ '{start}-{end} of {total}'|t('dingtalk', {
+                    start: criteria.offset + 1,
+                    end: criteria.offset + logs|length,
+                    total: totalLogs
+                }) }}
+            </div>
+
+            {% set baseUrl = craft.app.request.getUrl() %}
+            {% set hasPrev = (page != 1) %}
+            {% set hasNext = (page < totalPages) %}
+
+            <a class="page-link{% if not hasPrev %} disabled{% endif %}"{% if hasPrev %} href="{{ url(baseUrl, {page:  page - 1}) }}"{% endif %} data-icon="leftangle" title="Newer requests"></a>
+            <a class="page-link{% if not hasNext %} disabled{% endif %}"{% if hasNext %} href="{{ url(baseUrl, {page: page + 1}) }}"{% endif %} data-icon="rightangle" title="Older requests"></a>
+        </div>
+    {% endif %}
+{% endblock %}

@@ -13,6 +13,7 @@ use craft\helpers\Json;
 use GuzzleHttp\Client;
 use panlatent\schedule\base\Schedule;
 use panlatent\schedule\db\Table;
+use panlatent\schedule\models\ScheduleLog;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -103,8 +104,18 @@ class HttpRequest extends Schedule
      */
     public function getSettingsHtml()
     {
-        return Craft::$app->getView()->renderTemplate('schedule/_components/schedules/HttpRequest', [
+        return Craft::$app->getView()->renderTemplate('schedule/_components/schedules/HttpRequest/settings', [
             'schedule' => $this,
+        ]);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function renderLogContent(ScheduleLog $log): string
+    {
+        return Craft::$app->getView()->renderTemplate('schedule/_components/schedules/HttpRequest/log', [
+            'log' => $log,
         ]);
     }
 

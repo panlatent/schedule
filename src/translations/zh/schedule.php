@@ -84,4 +84,9 @@ return [
     'Enabled Log' => '启用日志',
     'Waiting time after the execution of the plan is completed' => '在计划执行完成后的等待时间。',
     'Waiting time (minute)' => '等待时间（分钟）',
+    'No logs exists yet.' => '还没有日志。',
+    'Delete all logs' => '删除所有日志',
+    'Console Output' => '控制台输出',
+    'Successful' => '成功',
+    'Failed' => '失败',
 ];

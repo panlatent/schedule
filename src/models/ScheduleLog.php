@@ -148,6 +148,6 @@ class ScheduleLog extends Model
      */
     public function getOutputHtml(): string
     {
-        return $this->getSchedule()->renderLogOutput($this);
+        return $this->getSchedule()->renderLogContent($this);
     }
 }

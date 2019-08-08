@@ -1,0 +1,12 @@
+<h4>{{ "Console Output"|t('schedule') }}</h4>
+
+<div class="pane code last console">
+    {{ content|raw }}
+</div>
+
+{% css %}
+    .console {
+        background-color: #000;
+        color: #969696;
+    }
+{% endcss %}

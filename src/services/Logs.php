@@ -8,6 +8,7 @@
 
 namespace panlatent\schedule\services;
 
+use Craft;
 use craft\db\Query;
 use craft\helpers\Db;
 use panlatent\schedule\base\Schedule;
@@ -99,6 +100,22 @@ class Logs extends Component
             ->one();
 
         return $result ? new ScheduleLog($result) : null;
+    }
+
+    /**
+     * @param int $scheduleId
+     * @return bool
+     */
+    public function deleteLogsByScheduleId(int $scheduleId): bool
+    {
+        Craft::$app->getDb()
+            ->createCommand()
+            ->delete(Table::SCHEDULELOGS, [
+                'scheduleId' => $scheduleId,
+            ])
+            ->execute();
+
+        return true;
     }
 
     // Private Methods

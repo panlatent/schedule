@@ -14,9 +14,13 @@
 {% block sidebar %}
     <nav>
         <ul id="groups">
-            <li><a href="{{ url('schedule') }}"{% if not groupId %} class="sel"{% endif %}>{{ 'Ungrouped'|t('schedule') }}</a></li>
+            <li>
+                <a href="{{ url('schedule') }}"{% if not groupId %} class="sel"{% endif %}>{{ 'Ungrouped'|t('schedule') }}</a>
+            </li>
             {% for group in groups %}
-                <li><a href="{{ url('schedule/groups/'~group.id) }}"{% if groupId is defined and group.id == groupId %} class="sel"{% endif %} data-id="{{ group.id }}">{{ group.name|t('site') }}</a></li>
+                <li>
+                    <a href="{{ url('schedule/groups/'~group.id) }}"{% if groupId is defined and group.id == groupId %} class="sel"{% endif %}
+                       data-id="{{ group.id }}">{{ group.name|t('site') }}</a></li>
             {% endfor %}
         </ul>
     </nav>
@@ -47,6 +51,7 @@
             <th scope="col">{{ "Type"|t('app') }}</th>
             <th scope="col">{{ "Timers"|t('schedule') }}</th>
             <th scope="col">{{ "Last Running Date"|t('schedule') }}</th>
+            <th scope="col">{{ "Logs"|t('schedule') }}</th>
             <th></th>
             {% if sortable %}<td class="thin"></td>{% endif %}
             <td class="thin"></td>
@@ -54,7 +59,8 @@
             <tbody>
             {% for schedule in schedules %}
                 <tr data-id="{{ schedule.id }}" data-name="{{ schedule.name|t('site') }}">
-                    <th scope="row" data-title="{{ 'Name'|t('app') }}"><a href="{{ url('schedule/' ~ schedule.id) }}">{{ schedule.name }}</a></th>
+                    <th scope="row" data-title="{{ 'Name'|t('app') }}"><a
+                                href="{{ url('schedule/' ~ schedule.id) }}">{{ schedule.name }}</a></th>
                     <td data-title="{{ 'Handle'|t('app') }}" class="code">{{ schedule.handle }}</td>
                     <td data-title="{{ 'Type'|t('app') }}">
                         {% if schedule is missing %}
@@ -72,7 +78,9 @@
                             <div class="menu">
                                 <ul>
                                     {% for timer in schedule.timers %}
-                                        <li><a href="{{ url('schedule/' ~ schedule.id ~ '/timers/' ~ timer.id) }}">{{ timer ~ ' ' ~ timer.cronDescription }}</a></li>
+                                        <li>
+                                            <a href="{{ url('schedule/' ~ schedule.id ~ '/timers/' ~ timer.id) }}">{{ timer ~ ' ' ~ timer.cronDescription }}</a>
+                                        </li>
                                     {% endfor %}
                                 </ul>
                             </div>
@@ -88,7 +96,10 @@
                             {{ schedule.lastFinishedDate|datetime('short') }}
                         {% endif %}
                     </td>
-                    {% if sortable %}<td class="thin"><a class="move icon" title="{{ 'Reorder'|t('app') }}" role="button"></a></td>{% endif %}
+                    <td><a class="go" href="{{ url('schedule/' ~ schedule.id ~ '/logs') }}"></a></td>
+                    {% if sortable %}
+                        <td class="thin"><a class="move icon" title="{{ 'Reorder'|t('app') }}" role="button"></a>
+                        </td>{% endif %}
                     <td class="thin"><a class="delete icon" title="{{ 'Delete'|t('app') }}" role="button"></a></td>
                 </tr>
             {% endfor %}
@@ -99,15 +110,15 @@
 
 {% js %}
     var adminTable = new Craft.AdminTable({
-        tableSelector: '#schedules',
-        noItemsSelector: '#noschedules',
-        sortable: true,
-        reorderAction: 'schedule/schedules/reorder-schedules',
-        deleteAction: 'schedule/schedules/delete-schedule',
-        onDeleteItem: function() {
-            if (adminTable.totalItems == 0) {
-                $('#nav-schedule').remove();
-            }
-        }
+    tableSelector: '#schedules',
+    noItemsSelector: '#noschedules',
+    sortable: true,
+    reorderAction: 'schedule/schedules/reorder-schedules',
+    deleteAction: 'schedule/schedules/delete-schedule',
+    onDeleteItem: function() {
+    if (adminTable.totalItems == 0) {
+    $('#nav-schedule').remove();
+    }
+    }
     });
 {% endjs %}
