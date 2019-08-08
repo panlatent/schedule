@@ -1,12 +1,13 @@
 {% import "_includes/forms" as forms %}
 
-{{ forms.textField({
+{{ forms.autosuggestField({
     label: "Class Name"|t('schedule'),
     required: true,
     id: 'className',
     name: 'className',
     value: schedule.className,
     errors: schedule.getErrors('className'),
+    suggestions: classSuggestions,
 }) }}
 
 {{ forms.textField({

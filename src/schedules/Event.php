@@ -10,6 +10,9 @@ namespace panlatent\schedule\schedules;
 
 use Craft;
 use panlatent\schedule\base\Schedule;
+use panlatent\schedule\helpers\ClassHelper;
+use ReflectionClass;
+use yii\base\Component;
 use yii\base\Event as BaseEvent;
 
 /**
@@ -60,8 +63,16 @@ class Event extends Schedule
      */
     public function getSettingsHtml()
     {
+        $classSuggestions = [
+            [
+                'label' => '',
+                'data' => $this->_getClassSuggestions(),
+            ]
+        ];
+
         return Craft::$app->getView()->renderTemplate('schedule/_components/schedules/Event', [
             'schedule' => $this,
+            'classSuggestions' => $classSuggestions,
         ]);
     }
 
@@ -78,5 +89,26 @@ class Event extends Schedule
         BaseEvent::trigger($this->className, $this->eventName);
 
         return true;
+    }
+
+    // Private Methods
+    // =========================================================================
+
+    /**
+     * @return array
+     */
+    private function _getClassSuggestions(): array
+    {
+        $suggestions = [];
+        foreach (ClassHelper::findClasses() as $class) {
+            if (is_subclass_of($class, Component::class)) {
+                $suggestions[] = [
+                    'name' => $class,
+                    'hint' => ClassHelper::getPhpDocSummary((new ReflectionClass($class))->getDocComment()),
+                ];
+            }
+        }
+
+        return $suggestions;
     }
 }
