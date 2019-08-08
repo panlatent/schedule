@@ -11,6 +11,7 @@ namespace panlatent\schedule\schedules;
 use Craft;
 use panlatent\schedule\base\Schedule;
 use panlatent\schedule\db\Table;
+use panlatent\schedule\models\ScheduleLog;
 use Symfony\Component\Process\Process;
 use yii\db\Expression;
 
@@ -126,9 +127,9 @@ class Console extends Schedule
     /**
      * @inheritdoc
      */
-    public function renderLogOutput(string $content): string
+    public function renderLogOutput(ScheduleLog $log): string
     {
-        $content = str_replace("\n", '<br>', $content);
+        $content = str_replace("\n", '<br>', $log->output);
 
         return $content;
     }

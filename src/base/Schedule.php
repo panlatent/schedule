@@ -268,9 +268,9 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
     /**
      * @inheritdoc
      */
-    public function renderLogOutput(string $content): string
+    public function renderLogOutput(ScheduleLog $log): string
     {
-        return $content;
+        return $log->output;
     }
 
     /**

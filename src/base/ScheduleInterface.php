@@ -10,6 +10,7 @@ namespace panlatent\schedule\base;
 
 use craft\base\SavableComponentInterface;
 use panlatent\schedule\Builder;
+use panlatent\schedule\models\ScheduleLog;
 
 /**
  * Interface ScheduleInterface
@@ -35,8 +36,8 @@ interface ScheduleInterface extends SavableComponentInterface
     public function run(): bool;
 
     /**
-     * @param string $content
+     * @param ScheduleLog $log
      * @return string
      */
-    public function renderLogOutput(string $content): string;
+    public function renderLogOutput(ScheduleLog $log): string;
 }
