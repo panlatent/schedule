@@ -10,7 +10,7 @@ Schedule
 [![Yii2](https://img.shields.io/badge/Powered_by-Yii_Framework-green.svg?style=flat)](https://www.yiiframework.com/)
 
 Manage your CraftCMS application schedules in Cp. Run a command, trigger an event, 
-push a queue task, or access a URL at a specified time. You can flexibly customize
+push a queue task, or send HTTP request at a specified time. You can flexibly customize
 the trigger time and even design your schedule type.
 
 Requirements
@@ -37,8 +37,9 @@ To install the plugin, follow these instructions.
     
         * * * * * php /path/to/craft schedules/run 1>> /dev/null 2>&1
 
-Usages
-------
+Documentation
+-------------
+Read more about it, including install instructions, in the [official documentation](https://schedule.panlatent.com/).
 
 License
 -------
