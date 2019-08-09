@@ -81,6 +81,7 @@ return [
     'End Date' => '结束时间',
     'Duration' => '耗时',
     'Output' => '输出',
+    'Enabled' => '启用',
     'Enabled Log' => '启用日志',
     'Waiting time after the execution of the plan is completed' => '在计划执行完成后的等待时间。',
     'Waiting time (minute)' => '等待时间（分钟）',

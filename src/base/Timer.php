@@ -12,12 +12,13 @@ use Craft;
 use craft\base\SavableComponent;
 use panlatent\schedule\helpers\CronHelper;
 use panlatent\schedule\Plugin;
+use yii\base\InvalidConfigException;
 
 /**
  * Class Timer
  *
  * @package panlatent\schedule\base
- * @property ScheduleInterface|null $schedule
+ * @property ScheduleInterface $schedule
  * @author Panlatent <panlatent@gmail.com>
  */
 abstract class Timer extends SavableComponent implements TimerInterface
@@ -68,27 +69,11 @@ abstract class Timer extends SavableComponent implements TimerInterface
     }
 
     /**
-     * @return ScheduleInterface|null
+     * @inheritdoc
      */
-    public function getSchedule()
+    public function isValid(): bool
     {
-        if ($this->_schedule !== null) {
-            return $this->_schedule;
-        }
-
-        if (!$this->scheduleId) {
-            return null;
-        }
-
-        return $this->_schedule = Plugin::getInstance()->getSchedules()->getScheduleById($this->scheduleId);
-    }
-
-    /**
-     * @param ScheduleInterface $schedule
-     */
-    public function setSchedule(ScheduleInterface $schedule)
-    {
-        $this->_schedule = $schedule;
+        return $this->getSchedule()->isValid() && $this->enabled;
     }
 
     /**
@@ -97,6 +82,35 @@ abstract class Timer extends SavableComponent implements TimerInterface
     public function getCronExpression(): string
     {
         return sprintf('%s %s %s %s %s *', $this->minute, $this->hour, $this->day, $this->month, $this->week);
+    }
+
+    /**
+     * @return ScheduleInterface
+     */
+    public function getSchedule(): ScheduleInterface
+    {
+        if ($this->_schedule !== null) {
+            return $this->_schedule;
+        }
+
+        if ($this->scheduleId === null) {
+            throw new InvalidConfigException('The timer missing its schedule ID');
+        }
+
+        $this->_schedule = Plugin::getInstance()->getSchedules()->getScheduleById($this->scheduleId);
+        if ($this->_schedule === null) {
+            throw new InvalidConfigException('Invalid schedule ID: ' . $this->scheduleId);
+        }
+
+        return $this->_schedule;
+    }
+
+    /**
+     * @param ScheduleInterface $schedule
+     */
+    public function setSchedule(ScheduleInterface $schedule)
+    {
+        $this->_schedule = $schedule;
     }
 
     /**

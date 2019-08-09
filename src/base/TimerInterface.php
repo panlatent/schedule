@@ -17,6 +17,13 @@ namespace panlatent\schedule\base;
 interface TimerInterface
 {
     /**
+     * @see \panlatent\schedule\services\Timers::getAllTimers()
+     *
+     * @return bool whether to run the timer.
+     */
+    public function isValid(): bool;
+
+    /**
      * Returns cron expression.
      *
      * @return string

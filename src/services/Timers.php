@@ -128,7 +128,9 @@ class Timers extends Component
      */
     public function getActiveTimers(): array
     {
-        return ArrayHelper::filterByValue($this->getAllTimers(), 'enabled', true);
+        return array_filter($this->getAllTimers(), function(TimerInterface $timer) {
+            return $timer->isValid();
+        });
     }
 
     /**

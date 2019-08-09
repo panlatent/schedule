@@ -12,8 +12,9 @@
         "crontab",
         "job"
     ],
+    "homepage": "https://github.com/panlatent/schedule",
     "support": {
-        "docs": "https://github.com/panlatent/schedule/blob/master/README.md",
+        "docs": "https://schedule.panlatent.com",
         "issues": "https://github.com/panlatent/schedule/issues"
     },
     "license": "MIT",

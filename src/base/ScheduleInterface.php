@@ -21,9 +21,14 @@ use panlatent\schedule\models\ScheduleLog;
 interface ScheduleInterface extends SavableComponentInterface
 {
     /**
-     * @return bool
+     * @return bool whether can execute run method
      */
     public static function isRunnable(): bool;
+
+    /**
+     * @return bool whether to run the schedule
+     */
+    public function isValid(): bool;
 
     /**
      * @param Builder $builder

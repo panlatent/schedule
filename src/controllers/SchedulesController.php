@@ -103,7 +103,6 @@ class SchedulesController extends Controller
     {
         $schedules = Plugin::$plugin->getSchedules();
 
-
         /** @var Schedule $schedule */
         if ($schedule === null) {
             if ($scheduleId !== null) {
@@ -178,6 +177,7 @@ class SchedulesController extends Controller
             'description' => $request->getBodyParam('description'),
             'type' => $type,
             'settings' => $request->getBodyParam('types.' . $type, []),
+            'enabled' => (bool)$request->getBodyParam('enabled'),
             'enabledLog' => $request->getBodyParam('enabledLog'),
         ]);
 

@@ -51,6 +51,7 @@
             <th scope="col">{{ "Type"|t('app') }}</th>
             <th scope="col">{{ "Timers"|t('schedule') }}</th>
             <th scope="col">{{ "Last Running Date"|t('schedule') }}</th>
+            <th scope="col">{{ 'Enabled'|t('schedule') }}</th>
             <th scope="col">{{ "Logs"|t('schedule') }}</th>
             <th></th>
             {% if sortable %}<td class="thin"></td>{% endif %}
@@ -96,6 +97,7 @@
                             {{ schedule.lastFinishedDate|datetime('short') }}
                         {% endif %}
                     </td>
+                    <td>{% if schedule.enabled %}<span data-icon="check"></span>{% endif %}</td>
                     <td><a class="go" href="{{ url('schedule/' ~ schedule.id ~ '/logs') }}"></a></td>
                     {% if sortable %}
                         <td class="thin"><a class="move icon" title="{{ 'Reorder'|t('app') }}" role="button"></a>

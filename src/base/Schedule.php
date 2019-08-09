@@ -145,6 +145,14 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
     }
 
     /**
+     * @inheritdoc
+     */
+    public function isValid(): bool
+    {
+        return $this->enabled;
+    }
+
+    /**
      * @return ScheduleGroup|null
      */
     public function getGroup()
@@ -158,14 +166,6 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
         }
 
         return $this->_group = Plugin::$plugin->getSchedules()->getGroupById($this->groupId);
-    }
-
-    /**
-     * @return TimerInterface[]
-     */
-    public function getActiveTimers(): array
-    {
-        return ArrayHelper::filterByValue($this->getTimers(), 'enabled', true);
     }
 
     /**
@@ -192,6 +192,14 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
     public function setTimers(array $timers)
     {
         $this->_timers = $timers;
+    }
+
+    /**
+     * @return TimerInterface[]
+     */
+    public function getActiveTimers(): array
+    {
+        return ArrayHelper::filterByValue($this->getTimers(), 'enabled', true);
     }
 
     /**

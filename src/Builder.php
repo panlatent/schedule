@@ -57,7 +57,7 @@ class Builder extends Schedule
             return $this;
         }
 
-        $schedules = Plugin::$plugin->getSchedules()->getAllSchedules();
+        $schedules = Plugin::$plugin->getSchedules()->getActiveSchedules();
         foreach ($schedules as $schedule) {
             $schedule->build($this);
         }

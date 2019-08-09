@@ -45,12 +45,20 @@
             errors: schedule.getErrors('handle'),
         }) }}
 
-        {{ forms.lightswitchField({
+        {{ forms.checkboxField({
             label: 'Enabled Log'|t('schedule'),
             id: 'enabledLog',
             name: 'enabledLog',
-            on: schedule.enabledLog,
+            checked: schedule.enabledLog,
             errors: schedule.getErrors('enabledLog'),
+        }) }}
+
+        {{ forms.lightswitchField({
+            label: 'Enabled'|t('schedule'),
+            id: 'enabled',
+            name: 'enabled',
+            on: schedule.enabled,
+            errors: schedule.getErrors('enabled'),
         }) }}
 
         <hr>

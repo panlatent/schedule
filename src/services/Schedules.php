@@ -332,6 +332,16 @@ class Schedules extends Component
     }
 
     /**
+     * @return ScheduleInterface[]
+     */
+    public function getActiveSchedules(): array
+    {
+        return array_filter($this->getAllSchedules(), function(ScheduleInterface $schedule) {
+            return $schedule->isValid();
+        });
+    }
+
+    /**
      * @param int|null $groupId
      * @return ScheduleInterface[]
      */
@@ -517,6 +527,7 @@ class Schedules extends Component
             $record->type = get_class($schedule);
             $record->user = $schedule->user;
             $record->settings = Json::encode($schedule->getSettings());
+            $record->enabled = (bool)$schedule->enabled;
             $record->enabledLog = (bool)$schedule->enabledLog;
 
             $record->save(false);
@@ -649,6 +660,7 @@ class Schedules extends Component
                 'schedules.type',
                 'schedules.user',
                 'schedules.settings',
+                'schedules.enabled',
                 'schedules.enabledLog',
                 'schedules.lastStartedTime',
                 'schedules.lastFinishedTime',
