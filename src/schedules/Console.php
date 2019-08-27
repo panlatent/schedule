@@ -91,7 +91,7 @@ class Console extends Schedule
     {
         $suggestions = [];
 
-        $process = new Process(['craft', 'help/list'], Craft::getAlias('@root'));
+        $process = new Process(['craft', 'help/list'], Craft::getAlias('@root'), null, null, null);
         $process->run();
 
         if ($process->isSuccessful()) {

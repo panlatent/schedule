@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Updated
 ### Fixed
 - Fix #5 ClassHelper::findClasses() not call in `composer --no-dev`
+- Fix #6 Command schedule type only exceeded timeout of 60 seconds
 
 ## [0.2.0] - 2019-08-08
 ### Added
