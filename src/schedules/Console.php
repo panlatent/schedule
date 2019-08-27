@@ -91,7 +91,7 @@ class Console extends Schedule
     {
         $suggestions = [];
 
-        $process = new Process(['craft', 'help/list'], Craft::getAlias('@root'), null, null, null);
+        $process = new Process(['craft', 'help/list'], Craft::getAlias('@root'));
         $process->run();
 
         if ($process->isSuccessful()) {
@@ -144,7 +144,7 @@ class Console extends Schedule
      */
     protected function execute(int $logId = null): bool
     {
-        $process = new Process($this->buildCommand(), dirname(Craft::$app->request->getScriptFile()));
+        $process = new Process($this->buildCommand(), dirname(Craft::$app->request->getScriptFile()), null, null, null);
 
         $process->run(function ($type, $buffer) use ($logId) {
 
