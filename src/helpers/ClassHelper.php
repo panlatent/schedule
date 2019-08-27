@@ -69,7 +69,8 @@ class ClassHelper
                         !trait_exists($class, false) &&
                         file_exists($file) &&
                         substr($class, -4) !== 'Test' &&
-                        substr($class, -8) !== 'TestCase') {
+                        substr($class, -8) !== 'TestCase' &&
+                        substr($class, 0, 11) !== 'craft\test\\' ) {
                         // See if it's in a namespace we care about
                         foreach ($namespaces as $namespace) {
                             if (strpos($class, $namespace . '\\') === 0) {
