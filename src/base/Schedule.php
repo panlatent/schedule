@@ -13,6 +13,7 @@ use craft\base\SavableComponent;
 use craft\db\mysql\Schema as MysqlSchema;
 use craft\helpers\ArrayHelper;
 use craft\validators\HandleValidator;
+use craft\validators\UniqueValidator;
 use DateTime;
 use panlatent\schedule\Builder;
 use panlatent\schedule\db\Table;
@@ -116,7 +117,7 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
             [['name', 'handle'], 'required'],
             [['groupId', 'lastStartedTime', 'lastFinishedTime'], 'integer'],
             [['name', 'handle', 'description', 'user'], 'string'],
-            [['handle'], 'unique', 'targetClass' => ScheduleRecord::class, 'targetAttribute' => 'handle'],
+            [['handle'], UniqueValidator::class, 'targetClass' => ScheduleRecord::class, 'targetAttribute' => 'handle'],
             [['handle'], HandleValidator::class],
             [['enabledLog', 'lastStatus'], 'boolean'],
         ];
