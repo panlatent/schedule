@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Added
 ### Updated
 ### Fixed
+- Fix schedule handle unique scope from group to global.
 
 ## [0.2.1] - 2019-08-27
 ### Added

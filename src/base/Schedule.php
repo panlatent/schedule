@@ -21,6 +21,7 @@ use panlatent\schedule\helpers\PrecisionDateTimeHelper;
 use panlatent\schedule\models\ScheduleGroup;
 use panlatent\schedule\models\ScheduleLog;
 use panlatent\schedule\Plugin;
+use panlatent\schedule\records\Schedule as ScheduleRecord;
 use yii\db\Query;
 
 
@@ -115,6 +116,7 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
             [['name', 'handle'], 'required'],
             [['groupId', 'lastStartedTime', 'lastFinishedTime'], 'integer'],
             [['name', 'handle', 'description', 'user'], 'string'],
+            [['handle'], 'unique', 'targetClass' => ScheduleRecord::class, 'targetAttribute' => 'handle'],
             [['handle'], HandleValidator::class],
             [['enabledLog', 'lastStatus'], 'boolean'],
         ];
@@ -199,7 +201,7 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
      */
     public function getActiveTimers(): array
     {
-        return ArrayHelper::filterByValue($this->getTimers(), 'enabled', true);
+        return ArrayHelper::where($this->getTimers(), 'enabled', true);
     }
 
     /**

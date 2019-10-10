@@ -55,10 +55,10 @@ class Install extends Migration
             'uid' => $this->uid(),
         ]);
 
-        $this->createIndex(null, '{{%schedules}}', ['groupId']);
-        $this->createIndex(null, '{{%schedules}}', ['groupId', 'handle'], true);
-        $this->createIndex(null, '{{%schedules}}', ['type']);
-        $this->createIndex(null, '{{%schedules}}', ['dateCreated']);
+        $this->createIndex(null, '{{%schedules}}', 'groupId');
+        $this->createIndex(null, '{{%schedules}}', 'handle', true);
+        $this->createIndex(null, '{{%schedules}}', 'type');
+        $this->createIndex(null, '{{%schedules}}', 'dateCreated');
         $this->createIndex(null, '{{%schedules}}', ['sortOrder', 'dateCreated']);
         $this->addForeignKey(null, '{{%schedules}}', 'groupId', '{{%schedulegroups}}', 'id', 'SET NULL');
 
