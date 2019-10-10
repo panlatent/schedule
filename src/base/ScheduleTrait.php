@@ -70,4 +70,9 @@ trait ScheduleTrait
      * @var int|null
      */
     public $sortOrder;
+
+    /**
+     * @var string|null
+     */
+    public $uid;
 }

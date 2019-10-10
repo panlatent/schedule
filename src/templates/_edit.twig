@@ -53,12 +53,12 @@
             errors: schedule.getErrors('enabledLog'),
         }) }}
 
-        {{ forms.lightswitchField({
-            label: 'Enabled'|t('schedule'),
-            id: 'enabled',
-            name: 'enabled',
-            on: schedule.enabled,
-            errors: schedule.getErrors('enabled'),
+        {{ forms.textareaField({
+            label: 'Description'|t('app'),
+            id: 'description',
+            name: 'description',
+            value: schedule.description,
+            errors: schedule.getErrors('description'),
         }) }}
 
         <hr>
@@ -85,15 +85,40 @@
             </div>
         {% endfor %}
 
-        <hr>
+    </div>
+{% endblock %}
 
-        {{ forms.textareaField({
-            label: 'Description'|t('app'),
-            id: 'description',
-            name: 'description',
-            value: schedule.description,
-            errors: schedule.getErrors('description'),
+{% block details %}
+    <div class="meta">
+        {{ forms.lightswitchField({
+            label: 'Enabled'|t('schedule'),
+            id: 'enabled',
+            name: 'enabled',
+            on: schedule.enabled,
+            errors: schedule.getErrors('enabled'),
         }) }}
-
+    </div>
+    <div class="meta read-only">
+        <div class="data">
+            <h5 class="heading">{{ "Created at"|t('app') }}</h5>
+            <div class="value">{{ schedule.dateCreated|datetime('short') }}</div>
+        </div>
+        <div class="data">
+            <h5 class="heading">{{ "Updated at"|t('app') }}</h5>
+            <div class="value">{{ schedule.dateUpdated|datetime('short') }}</div>
+        </div>
+        {% if schedule.lastFinishedDate is not empty %}
+            <div class="data">
+                <h5 class="heading">{{ "Last running at"|t('schedule') }}</h5>
+                <div class="value">
+                    {% if schedule.lastStatus %}
+                        <span class="status green"></span>
+                    {% else %}
+                        <span class="status red"></span>
+                    {% endif %}
+                    {{ schedule.lastFinishedDate|datetime('short') }}
+                </div>
+            </div>
+        {% endif %}
     </div>
 {% endblock %}

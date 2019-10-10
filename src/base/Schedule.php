@@ -115,7 +115,7 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
     {
         return [
             [['name', 'handle'], 'required'],
-            [['groupId', 'lastStartedTime', 'lastFinishedTime'], 'integer'],
+            [['id', 'groupId', 'lastStartedTime', 'lastFinishedTime'], 'integer'],
             [['name', 'handle', 'description', 'user'], 'string'],
             [['handle'], UniqueValidator::class, 'targetClass' => ScheduleRecord::class, 'targetAttribute' => 'handle'],
             [['handle'], HandleValidator::class],
@@ -131,6 +131,16 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
         $attributes = parent::attributes();
         $attributes[] = 'lastFinishedDate';
         $attributes[] = 'lastDuration';
+
+        return $attributes;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function datetimeAttributes(): array
+    {
+        $attributes = parent::datetimeAttributes();
 
         return $attributes;
     }

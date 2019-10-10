@@ -81,7 +81,7 @@ return [
     'End Date' => '结束时间',
     'Duration' => '耗时',
     'Output' => '输出',
-    'Enabled' => '启用',
+    'Enabled' => '已启用',
     'Enabled Log' => '启用日志',
     'Waiting time after the execution of the plan is completed' => '在计划执行完成后的等待时间。',
     'Waiting time (minute)' => '等待时间（分钟）',
@@ -95,4 +95,5 @@ return [
     'Schedule disabled.' => '计划已禁用。',
     'DateTime' => '固定时间',
     'At {datetime}' => '在 {datetime}',
+    'Last running at' => '最后运行于',
 ];

@@ -170,7 +170,7 @@ class SchedulesController extends Controller
 
         /** @var Schedule $schedule */
         $schedule = $schedules->createSchedule([
-            'id ' => $request->getBodyParam('scheduleId'),
+            'id' => $request->getBodyParam('scheduleId'),
             'groupId' => $request->getBodyParam('groupId'),
             'name' => $request->getBodyParam('name'),
             'handle' => $request->getBodyParam('handle'),
