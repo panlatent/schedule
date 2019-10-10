@@ -12,6 +12,7 @@ use Craft;
 use panlatent\schedule\base\Schedule;
 use panlatent\schedule\db\Table;
 use panlatent\schedule\models\ScheduleLog;
+use panlatent\schedule\Plugin;
 use Symfony\Component\Process\Process;
 use yii\db\Expression;
 
@@ -91,7 +92,7 @@ class Console extends Schedule
     {
         $suggestions = [];
 
-        $process = new Process(['craft', 'help/list'], Craft::getAlias('@root'));
+        $process = new Process([Plugin::getInstance()->getSettings()->getCliPath(), 'craft', 'help/list'], Craft::getAlias('@root'));
         $process->run();
 
         if ($process->isSuccessful()) {

@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ### Fixed
 - Fix schedule handle unique scope from group to global.
+- Fix console schedule is not use php cli path settings.
 
 ## [0.2.1] - 2019-08-27
 ### Added
