@@ -90,4 +90,5 @@ return [
     'Console Output' => '控制台输出',
     'Successful' => '成功',
     'Failed' => '失败',
+    'Confirm clear all schedule logs?' => '确定要清除所有计划日志？',
 ];

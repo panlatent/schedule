@@ -7,3 +7,26 @@
     limit: 50,
     sortOrder: 'logs.id DESC',
 } %}
+
+{% block actionButton %}
+    {% if currentUser.admin %}
+        <a id="delete-all" class="btn submit">{{ 'Delete all logs'|t('schedule') }}</a>
+    {% endif %}
+{% endblock %}
+
+{% js %}
+    $('#delete-all').click(function() {
+        if (!confirm('{{ 'Confirm clear all schedule logs?'|t('schedule') }}')) {
+            return;
+        }
+        Craft.postActionRequest('schedule/logs/delete-all-logs', {
+        }, $.proxy(function(response, textStatus) {
+            if (textStatus === 'success') {
+                window.location = '{{ url('schedule/logs') }}';
+            } else {
+                Craft.cp.displayError('{{ 'Delete failed.'|t('schedule') }}')
+            }
+        }));
+        return false;
+    });
+{% endjs %}

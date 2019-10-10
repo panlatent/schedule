@@ -118,6 +118,19 @@ class Logs extends Component
         return true;
     }
 
+    /**
+     * @return bool
+     */
+    public function deleteAllLogs(): bool
+    {
+        Craft::$app->getDb()
+            ->createCommand()
+            ->delete(Table::SCHEDULELOGS)
+            ->execute();
+
+        return true;
+    }
+
     // Private Methods
     // =========================================================================
 

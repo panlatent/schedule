@@ -21,11 +21,27 @@ use yii\web\Response;
  */
 class LogsController extends Controller
 {
-    // Properties
-    // =========================================================================
-
     // Public Methods
     // =========================================================================
+
+    /**
+     * @return Response
+     */
+    public function actionDeleteAllLogs(): Response
+    {
+        $this->requirePostRequest();
+        $this->requireAdmin();
+
+        if (!Plugin::getInstance()->getLogs()->deleteAllLogs()) {
+            return $this->asJson([
+                'success' => false
+            ]);
+        }
+
+        return $this->asJson([
+            'success' => true
+        ]);
+    }
 
     /**
      * @return Response
