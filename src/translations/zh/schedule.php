@@ -91,4 +91,6 @@ return [
     'Successful' => '成功',
     'Failed' => '失败',
     'Confirm clear all schedule logs?' => '确定要清除所有计划日志？',
+    'Schedule enabled.' => '计划已启用。',
+    'Schedule disabled.' => '计划已禁用。',
 ];

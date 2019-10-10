@@ -45,7 +45,7 @@
                         id: $(this).closest('tr').data('id'),
                         enabled: enabled ? '1' : '0'
                     };
-                    Craft.postActionRequest('schedule/schedule/save', data, function(response, textStatus, jqXHR) {
+                    Craft.postActionRequest('schedule/schedules/toggle-schedule', data, function(response, textStatus, jqXHR) {
                         if (textStatus === 'success' && response.success) {
                             Craft.cp.displayNotice(enabled ? Craft.t('schedule', 'Schedule enabled.') : Craft.t('schedule', 'Schedule disabled.'));
                         } else {

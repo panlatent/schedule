@@ -124,7 +124,7 @@ class SchedulesController extends Controller
             [
                 'label' => Craft::t('schedule', 'Ungrouped'),
                 'value' => '',
-            ]
+            ],
         ];
 
         foreach ($allGroups as $group) {
@@ -170,8 +170,8 @@ class SchedulesController extends Controller
 
         /** @var Schedule $schedule */
         $schedule = $schedules->createSchedule([
-            'id' => $request->getBodyParam('scheduleId'),
-            'groupId' =>  $request->getBodyParam('groupId'),
+            'id ' => $request->getBodyParam('scheduleId'),
+            'groupId' => $request->getBodyParam('groupId'),
             'name' => $request->getBodyParam('name'),
             'handle' => $request->getBodyParam('handle'),
             'description' => $request->getBodyParam('description'),
@@ -194,6 +194,32 @@ class SchedulesController extends Controller
         Craft::$app->getSession()->setNotice(Craft::t('schedule', 'Schedule saved.'));
 
         return $this->redirect('schedule' . ($schedule->groupId ? '/groups/' . $schedule->groupId : ''));
+    }
+
+    /**
+     * @return Response
+     */
+    public function actionToggleSchedule(): Response
+    {
+        $this->requirePostRequest();
+        $this->requireAcceptsJson();
+
+        $schedules = Plugin::$plugin->getSchedules();
+        $request = Craft::$app->getRequest();
+
+        $schedule = $schedules->getScheduleById($request->getBodyParam('id'));
+        if (!$schedule) {
+            return $this->asJson(['success' => false]);
+        }
+        /** @var Schedule $schedule */
+        $schedule->enabled = (bool)$request->getBodyParam('enabled');
+
+        if (!$schedules->saveSchedule($schedule)) {
+            var_dump($schedule->getErrors());
+            return $this->asJson(['success' => false]);
+        }
+
+        return $this->asJson(['success' => true]);
     }
 
     /**

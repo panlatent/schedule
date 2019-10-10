@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ## [Unreleased]
 ### Added
 - Add clear all logs.
+- Add enable/disable schedule on list page.
 
 ### Updated
 - Only allow admin show cp nav item and manage plugin settings.

@@ -6,6 +6,8 @@
 {% set groupId = groupId is defined ? groupId : null %}
 {% set schedules = craft.schedule.schedules.getSchedulesByGroupId(groupId) %}
 
+{% import "_includes/forms" as forms %}
+
 {% block actionButton %}
     {% set newScheduleUrl = url('schedule/new', (groupId  ? { groupId: groupId } : null)) %}
     <a href="{{ newScheduleUrl }}" class="submit btn add icon">{{ "New schedule"|t('schedule') }}</a>
@@ -97,11 +99,15 @@
                             {{ schedule.lastFinishedDate|datetime('short') }}
                         {% endif %}
                     </td>
-                    <td>{% if schedule.enabled %}<span data-icon="check"></span>{% endif %}</td>
+                    <td>
+                         {{ forms.lightswitchField({
+                             name: 'enabled',
+                             small: true,
+                             on: schedule.enabled,
+                         }) }}
+                    </td>
                     <td><a class="go" href="{{ url('schedule/' ~ schedule.id ~ '/logs') }}"></a></td>
-                    {% if sortable %}
-                        <td class="thin"><a class="move icon" title="{{ 'Reorder'|t('app') }}" role="button"></a>
-                        </td>{% endif %}
+                    {% if sortable %}<td class="thin"><a class="move icon" title="{{ 'Reorder'|t('app') }}" role="button"></a></td>{% endif %}
                     <td class="thin"><a class="delete icon" title="{{ 'Delete'|t('app') }}" role="button"></a></td>
                 </tr>
             {% endfor %}
@@ -112,15 +118,15 @@
 
 {% js %}
     var adminTable = new Craft.AdminTable({
-    tableSelector: '#schedules',
-    noItemsSelector: '#noschedules',
-    sortable: true,
-    reorderAction: 'schedule/schedules/reorder-schedules',
-    deleteAction: 'schedule/schedules/delete-schedule',
-    onDeleteItem: function() {
-    if (adminTable.totalItems == 0) {
-    $('#nav-schedule').remove();
-    }
-    }
+        tableSelector: '#schedules',
+        noItemsSelector: '#noschedules',
+        sortable: true,
+        reorderAction: 'schedule/schedules/reorder-schedules',
+        deleteAction: 'schedule/schedules/delete-schedule',
+        onDeleteItem: function() {
+            if (adminTable.totalItems == 0) {
+                $('#nav-schedule').remove();
+            }
+        }
     });
 {% endjs %}
