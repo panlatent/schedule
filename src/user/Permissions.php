@@ -21,5 +21,4 @@ abstract class Permissions
 
     const MANAGE_SCHEDULES = 'schedule-manageSchedules';
     const MANAGE_LOGS = 'schedule-manageLogs';
-    const MANAGE_SETTINGS = 'schedule-manageSettings';
 }

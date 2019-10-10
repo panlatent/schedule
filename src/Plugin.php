@@ -112,7 +112,7 @@ class Plugin extends \craft\base\Plugin
             ];
         }
 
-        if ($user->checkPermission(Permissions::MANAGE_SETTINGS)) {
+        if (Craft::$app->getConfig()->getGeneral()->allowAdminChanges && $user->getIsAdmin()) {
             $ret['subnav']['settings'] = [
                 'label' => Craft::t('schedule', 'Settings'),
                 'url' => 'schedule/settings',
@@ -156,9 +156,6 @@ class Plugin extends \craft\base\Plugin
                 ],
                 Permissions::MANAGE_LOGS => [
                     'label' => Craft::t('schedule', 'Manage Logs'),
-                ],
-                Permissions::MANAGE_SETTINGS => [
-                    'label' => Craft::t('schedule', 'Manage Settings'),
                 ],
             ];
         });

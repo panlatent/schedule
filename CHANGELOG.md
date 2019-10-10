@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ## [Unreleased]
 ### Added
 ### Updated
+- Only allow admin show cp nav item and manage plugin settings.
+
 ### Fixed
 - Fix schedule handle unique scope from group to global.
 
