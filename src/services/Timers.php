@@ -21,6 +21,7 @@ use panlatent\schedule\errors\TimerException;
 use panlatent\schedule\events\TimerEvent;
 use panlatent\schedule\records\Timer as TimerRecord;
 use panlatent\schedule\timers\Custom;
+use panlatent\schedule\timers\DateTime;
 use panlatent\schedule\timers\Every;
 use panlatent\schedule\timers\MissingTimer;
 use panlatent\schedule\timers\Relay;
@@ -87,6 +88,7 @@ class Timers extends Component
     {
         $types = [
             Custom::class,
+            DateTime::class,
             Every::class,
             Relay::class,
         ];

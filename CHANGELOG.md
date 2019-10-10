@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ## [0.2.1] - 2019-08-27
 ### Added
 - Add schedule enabled setting.
+- Add DateTime timer.
 
 ### Fixed
 - Fix #5 ClassHelper::findClasses() not call in `composer --no-dev`

@@ -1,0 +1,7 @@
+{% import "_includes/forms" as forms %}
+
+{{ forms.datetimeField({
+    name: 'datetime',
+    value: timer.datetime,
+    errors: timer.getErrors('datetime'),
+}) }}
