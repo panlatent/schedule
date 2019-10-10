@@ -6,11 +6,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## [Unreleased]
 ### Added
+### Updated
+### Fixed
+
+## [0.2.2] - 2019-10-10
+### Added
 - Add clear all logs.
 - Add enable/disable schedule on list page.
 
 ### Updated
 - Only allow admin show cp nav item and manage plugin settings.
+- Advance schedule edit page.
 
 ### Fixed
 - Fix schedule handle unique scope from group to global.
