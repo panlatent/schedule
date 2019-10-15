@@ -17,3 +17,12 @@
     value: schedule.arguments,
     errors: schedule.getErrors('arguments'),
 }) }}
+
+{{ forms.textField({
+    label: 'Timeout'|t('schedule'),
+    id: 'timeout',
+    name: 'timeout',
+    value: schedule.timeout ?: '',
+    size: 5,
+    errors: schedule.getErrors('timeout'),
+}) }}

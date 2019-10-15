@@ -61,6 +61,11 @@ class Console extends Schedule
      */
     public $arguments;
 
+    /**
+     * @var int|null
+     */
+    public $timeout;
+
     // Public Methods
     // =========================================================================
 
@@ -145,7 +150,7 @@ class Console extends Schedule
      */
     protected function execute(int $logId = null): bool
     {
-        $process = new Process($this->buildCommand(), dirname(Craft::$app->request->getScriptFile()), null, null, null);
+        $process = new Process($this->buildCommand(), dirname(Craft::$app->request->getScriptFile()), null, null, $this->timeout ?: null);
 
         $process->run(function ($type, $buffer) use ($logId) {
 

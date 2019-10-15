@@ -96,4 +96,5 @@ return [
     'DateTime' => '固定时间',
     'At {datetime}' => '在 {datetime}',
     'Last running at' => '最后运行于',
+    'Timeout' => '超时时间',
 ];
