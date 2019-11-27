@@ -35,7 +35,7 @@ class MissingSchedule extends Schedule
     /**
      * @inheritdoc
      */
-    public function execute(int $logId): bool
+    public function execute(int $logId = null): bool
     {
         throw new NotSupportedException();
     }
