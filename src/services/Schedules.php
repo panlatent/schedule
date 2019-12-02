@@ -665,6 +665,9 @@ class Schedules extends Component
                 'schedules.lastStartedTime',
                 'schedules.lastFinishedTime',
                 'schedules.lastStatus',
+                'schedules.dateCreated',
+                'schedules.dateUpdated',
+                'schedules.uid',
             ])
             ->from('{{%schedules}} schedules')
             ->orderBy('schedules.sortOrder');
