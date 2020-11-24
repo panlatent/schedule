@@ -96,7 +96,7 @@ class Console extends Schedule
         $process->run();
 
         if ($process->isSuccessful()) {
-            $lines = (array)explode("\n", mb_convert_encoding($process->getOutput(), 'UTF-8'));
+            $lines = (array)explode("\n", mb_convert_encoding($process->getOutput(), mb_internal_encoding()));
 
             $data = [];
             foreach ($lines as $index => $line) {
