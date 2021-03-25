@@ -11,6 +11,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Updated
 ### Fixed
 
+## [0.2.2.1] - 2021-03-25
+### Fixed
+- Fix MissingSchedule::execute() param type declaration
+- Fix the display problem of the captured console output (charset encoding) 
+
 ## [0.2.2] - 2019-10-10
 ### Added
 - Add clear all logs.
