@@ -493,8 +493,8 @@ class Schedules extends Component
         /** @var Schedule $schedule */
         $isNewSchedule = $schedule->getIsNew();
 
-        if ($this->hasEventHandlers(self::EVENT_AFTER_SAVE_SCHEDULE)) {
-            $this->trigger(self::EVENT_AFTER_SAVE_SCHEDULE, new ScheduleEvent([
+        if ($this->hasEventHandlers(self::EVENT_BEFORE_SAVE_SCHEDULE)) {
+            $this->trigger(self::EVENT_BEFORE_SAVE_SCHEDULE, new ScheduleEvent([
                 'schedule' => $schedule,
                 'isNew' => $isNewSchedule,
             ]));
