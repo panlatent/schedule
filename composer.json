@@ -27,7 +27,7 @@
     "require": {
         "craftcms/cms": "^3.1.0",
         "omnilight/yii2-scheduling": "^1.1",
-        "symfony/process": "^4.2",
+        "symfony/process": "^4.2||^5.0",
         "guzzlehttp/guzzle": "^6.3",
         "panlatent/cron-expression-descriptor": "^1.0.2"
     },
