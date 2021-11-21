@@ -71,12 +71,12 @@ class Timers extends Component
     /**
      * @var bool
      */
-    public $_fetchedAllTimers = false;
+    private $_fetchedAllTimers = false;
 
     /**
      * @var TimerInterface[]|null
      */
-    public $_timersById;
+    private $_timersById;
 
     // Public Methods
     // =========================================================================
