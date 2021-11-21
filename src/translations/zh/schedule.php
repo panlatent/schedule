@@ -52,6 +52,7 @@ return [
     'Schedule Settings' => '计划设置',
     'General Settings' => '常规设置',
     'Custom Name' => '自定义名称',
+    'Custom Cp Nav Name' => '自定义 CP 导航名称',
     'Also modify the plugin name' => '修改插件名称',
     'CLI Path' => 'CLI 路径',
     'Arguments' => '参数',

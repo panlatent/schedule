@@ -20,12 +20,12 @@
             errors: settings.getErrors('customName'),
         }) }}
 
-        {{ forms.checkboxField({
-            label: "Also modify the plugin name"|t('schedule'),
-            id: "modifyPluginName",
-            name: "mocheckeddifyPluginName",
-            checked: settings.modifyPluginName,
-            errors: settings.getErrors('modifyPluginName'),
+        {{ forms.textField({
+            label: "Custom Cp Nav Name"|t('schedule'),
+            id: "customCpNavName",
+            name: "customCpNavName",
+            value: settings.customCpNavName,
+            errors: settings.getErrors('customCpNavName'),
         }) }}
 
         {{ forms.autoSuggestField({

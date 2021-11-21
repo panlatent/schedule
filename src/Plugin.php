@@ -66,7 +66,10 @@ class Plugin extends \craft\base\Plugin
         parent::init();
         self::$plugin = $this;
         Craft::setAlias('@schedule', $this->getBasePath());
-        if ($this->getSettings()->customName && $this->getSettings()->modifyPluginName) {
+
+        if (strval($this->getSettings()->customName) !== "") {
+            $this->name = $this->getSettings()->customName;
+        } else {
             $this->name = Craft::t('schedule', 'Schedule');
         }
 
@@ -91,10 +94,10 @@ class Plugin extends \craft\base\Plugin
     {
         $ret = parent::getCpNavItem();
 
-        if ($this->getSettings()->customName) {
-            $ret['label'] = $this->getSettings()->customName;
+        if (strval($this->getSettings()->customCpNavName)) {
+            $ret['label'] = $this->getSettings()->customCpNavName;
         } else {
-            $ret['label'] = Craft::t('schedule', 'Schedule');
+            $ret['label'] = $this->name;
         }
 
         $user = Craft::$app->getUser();
