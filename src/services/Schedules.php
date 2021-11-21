@@ -345,7 +345,7 @@ class Schedules extends Component
      * @param int|null $groupId
      * @return ScheduleInterface[]
      */
-    public function getSchedulesByGroupId(int $groupId = null)
+    public function getSchedulesByGroupId(int $groupId = null): array
     {
         $schedules = [];
 
@@ -513,7 +513,7 @@ class Schedules extends Component
         try {
             if (!$isNewSchedule) {
                 $record = ScheduleRecord::findOne(['id' => $schedule->id]);
-                if (!$schedule) {
+                if (!$record) {
                     throw new ScheduleException("No schedule exists with the ID: “{$schedule->id}“.");
                 }
             } else {

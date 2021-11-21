@@ -6,10 +6,22 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## [Unreleased]
 ### Added
+### Updated
+### Fixed
+
+## [0.3.0] - 2021-11-21
+### Added
 - Add Console schedule timeout.
 
 ### Updated
+- Support PHP8
+- Advance plugin display name settings
+
 ### Fixed
+- Fix lost schedule record not being detected
+- Fix service class properties accessibility
+- Fix event trigger of schedule saving
+- Fix i18n
 
 ## [0.2.2.1] - 2021-03-25
 ### Fixed
