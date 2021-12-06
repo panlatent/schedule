@@ -3,6 +3,7 @@
 namespace panlatent\schedule\migrations;
 
 use craft\db\Migration;
+use craft\helpers\MigrationHelper;
 
 /**
  * m191010_060704_fix_shedules_handle_unqidx migration.
@@ -14,7 +15,7 @@ class m191010_060704_fix_shedules_handle_unqidx extends Migration
      */
     public function safeUp()
     {
-        $this->dropIndex('schedules_groupId_handle_unq_idx', '{{%schedules}}');
+        MigrationHelper::dropIndexIfExists('{{%schedules}}', ['groupId', 'handle'], true, $this);
         $this->createIndex(null, '{{%schedules}}', 'handle', true);
     }
 

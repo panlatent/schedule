@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Schedule plugin for CraftCMS 3
  *
@@ -9,6 +10,7 @@
 namespace panlatent\schedule\console;
 
 use Craft;
+use Carbon\Carbon;
 use panlatent\schedule\base\Schedule;
 use panlatent\schedule\Plugin;
 use yii\console\Controller;
@@ -22,8 +24,32 @@ use yii\helpers\Console;
  */
 class SchedulesController extends Controller
 {
+    // Properties
+    // =========================================================================
+
+    /**
+     * @var bool|null Force flush schedule repository.
+     */
+    public $force;
+
     // Public Methods
     // =========================================================================
+
+    /**
+     * @inheritdoc
+     */
+    public function options($actionID)
+    {
+        $options = parent::options($actionID);
+        switch ($actionID) {
+            case 'run': // no break
+            case 'listen':
+                $options[] = 'force';
+                break;
+        }
+
+        return $options;
+    }
 
     /**
      * List all schedules.
@@ -45,7 +71,8 @@ class SchedulesController extends Controller
         foreach ($schedules->getAllGroups() as $group) {
             $this->stdout("{$group->name}: \n", Console::FG_YELLOW);
             foreach ($group->getSchedules() as $schedule) {
-                /** @var Schedule $schedule */
+                // @var Schedule $schedule
+
                 $this->stdout(Console::renderColoredString("    > #{$i} %c{$schedule->handle}\n"));
                 ++$i;
             }
@@ -58,7 +85,7 @@ class SchedulesController extends Controller
     public function actionRun()
     {
         $events = Plugin::$plugin->getBuilder()
-            ->build()
+            ->build($this->force)
             ->dueEvents(Craft::$app);
 
         if (empty($events)) {
@@ -76,5 +103,40 @@ class SchedulesController extends Controller
         }
 
         Craft::info("Running scheduled event total: " . count($events), __METHOD__);
+    }
+
+    /**
+     * Run a permanent command to call crons run command every minute
+     *
+     * @return void
+     */
+    public function actionListen()
+    {
+        if ($this->force === null) {
+            $this->force = true;
+        }
+
+        $waitSeconds = $this->nextMinute();
+        $this->stdout("Waiting $waitSeconds seconds for next run of scheduler\n");
+        sleep($waitSeconds);
+        $this->triggerCronCall();
+    }
+
+    protected function triggerCronCall()
+    {
+        $this->stdout("Running scheduler \n");
+        $this->actionRun();
+        $this->stdout('completed, sleeping... \n');
+        sleep($this->nextMinute());
+        $this->triggerCronCall();
+    }
+
+    /**
+     * @return int
+     */
+    protected function nextMinute(): int
+    {
+        $current = Carbon::now();
+        return 60 - $current->second;
     }
 }

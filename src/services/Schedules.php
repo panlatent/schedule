@@ -94,6 +94,11 @@ class Schedules extends Component
     // =========================================================================
 
     /**
+     * @var bool Force fetch groups or schedules. (Not cache)
+     */
+    public $force = false;
+
+    /**
      * @var bool
      */
     private $_fetchedAllGroups = false;
@@ -144,7 +149,9 @@ class Schedules extends Component
             $this->_groupsByName[$group->name] = $group;
         }
 
-        $this->_fetchedAllGroups = true;
+        if (!$this->force) {
+            $this->_fetchedAllGroups = true;
+        }
 
         return array_values($this->_groupsById);
     }
@@ -326,7 +333,9 @@ class Schedules extends Component
             $this->_schedulesByHandle[$schedule->handle] = $schedule;
         }
 
-        $this->_fetchedAllSchedules = true;
+        if (!$this->force) {
+            $this->_fetchedAllSchedules = true;
+        }
 
         return array_values($this->_schedulesById);
     }
@@ -535,8 +544,6 @@ class Schedules extends Component
             if ($isNewSchedule) {
                 $schedule->id = $record->id;
             }
-
-            $schedule->afterSave($isNewSchedule);
 
             $transaction->commit();
         } catch (\Throwable $exception) {

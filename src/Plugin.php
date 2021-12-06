@@ -35,7 +35,8 @@ class Plugin extends \craft\base\Plugin
     // Traits
     // =========================================================================
 
-    use Routes, Services;
+    use Routes;
+    use Services;
 
     // Properties
     // =========================================================================
