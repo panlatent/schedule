@@ -131,7 +131,7 @@ class SchedulesController extends Controller
     {
         $this->stdout("Running scheduler \n");
         $this->actionRun();
-        $this->stdout('completed, sleeping... \n');
+        $this->stdout("completed, sleeping... \n");
         sleep($this->nextMinute());
         $this->triggerCronCall();
     }
