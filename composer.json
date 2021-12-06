@@ -29,7 +29,7 @@
         "omnilight/yii2-scheduling": "^1.1",
         "symfony/process": "^4.2",
         "guzzlehttp/guzzle": "^6.3",
-        "panlatent/cron-expression-descriptor": "^1.0.2"
+        "panlatent/cron-expression-descriptor": "^1.0.5"
     },
     "suggest": {
         "ext-intl": "Help translate cron express description"
@@ -47,7 +47,7 @@
         "changelogUrl": "https://raw.githubusercontent.com/panlatent/schedule/master/CHANGELOG.md",
         "class": "panlatent\\schedule\\Plugin",
         "branch-alias": {
-            "dev-master": "0.2.x-dev"
+            "dev-master": "0.3.x-dev"
         }
     },
     "require-dev": {
