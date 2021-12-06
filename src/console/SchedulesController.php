@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Schedule plugin for CraftCMS 3
  *
@@ -9,6 +10,7 @@
 namespace panlatent\schedule\console;
 
 use Craft;
+use Carbon\Carbon;
 use panlatent\schedule\base\Schedule;
 use panlatent\schedule\Plugin;
 use yii\console\Controller;
@@ -36,7 +38,8 @@ class SchedulesController extends Controller
         if ($ungroupedSchedules = $schedules->getSchedulesByGroupId()) {
             $this->stdout(Craft::t('schedule', 'Ungrouped') . ": \n", Console::FG_YELLOW);
             foreach ($ungroupedSchedules as $schedule) {
-                /** @var Schedule $schedule */
+                // @var Schedule $schedule
+
                 $this->stdout(Console::renderColoredString("    > #{$i} %c{$schedule->handle}\n"));
                 ++$i;
             }
@@ -45,7 +48,8 @@ class SchedulesController extends Controller
         foreach ($schedules->getAllGroups() as $group) {
             $this->stdout("{$group->name}: \n", Console::FG_YELLOW);
             foreach ($group->getSchedules() as $schedule) {
-                /** @var Schedule $schedule */
+                // @var Schedule $schedule
+
                 $this->stdout(Console::renderColoredString("    > #{$i} %c{$schedule->handle}\n"));
                 ++$i;
             }
@@ -76,5 +80,33 @@ class SchedulesController extends Controller
         }
 
         Craft::info("Running scheduled event total: " . count($events), __METHOD__);
+    }
+
+    /**
+     * run a permanent command to call crons run command every minute
+     *
+     * @return void
+     */
+    public function actionCron()
+    {
+        $this->stdout("Waiting {$this->nextMinute()} seconds for next run of scheduler\n");
+        sleep($this->nextMinute());
+        $this->triggerCronCall();
+    }
+
+    protected function triggerCronCall()
+    {
+        $this->stdout("Running scheduler \n");
+        $this->actionRun();
+        $this->stdout('completed, sleeping... \n');
+        sleep($this->nextMinute());
+        Plugin::getInstance()->getSchedules()->_fetchedAllSchedules = false;
+        $this->triggerCronCall();
+    }
+
+    protected function nextMinute()
+    {
+        $current = Carbon::now();
+        return 60 - $current->second;
     }
 }

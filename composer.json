@@ -26,6 +26,7 @@
     ],
     "require": {
         "craftcms/cms": "^3.1.0",
+        "nesbot/carbon": "^1.22 || ^2.10",
         "omnilight/yii2-scheduling": "^1.1",
         "symfony/process": "^4.2",
         "guzzlehttp/guzzle": "^6.3",
