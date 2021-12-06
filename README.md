@@ -39,7 +39,7 @@ To install the plugin, follow these instructions.
 
 Documentation
 -------------
-Read more about it, including install instructions, in the [official documentation](https://schedule.panlatent.com/).
+Read more about it, including install instructions, in the [official documentation](https://docs.panlatent.com/projects/schedule/).
 
 License
 -------
