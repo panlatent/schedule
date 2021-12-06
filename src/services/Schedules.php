@@ -96,32 +96,32 @@ class Schedules extends Component
     /**
      * @var bool
      */
-    public $_fetchedAllGroups = false;
+    private $_fetchedAllGroups = false;
 
     /**
      * @var ScheduleGroup[]|null
      */
-    public $_groupsById;
+    private $_groupsById;
 
     /**
      * @var ScheduleGroup[]|null
      */
-    public $_groupsByName;
+    private $_groupsByName;
 
     /**
      * @var bool
      */
-    public $_fetchedAllSchedules = false;
+    private $_fetchedAllSchedules = false;
 
     /**
      * @var ScheduleInterface[]|null
      */
-    public $_schedulesById;
+    private $_schedulesById;
 
     /**
      * @var ScheduleInterface[]|null
      */
-    public $_schedulesByHandle;
+    private $_schedulesByHandle;
 
     /**
      * Returns all category groups.
@@ -345,7 +345,7 @@ class Schedules extends Component
      * @param int|null $groupId
      * @return ScheduleInterface[]
      */
-    public function getSchedulesByGroupId(int $groupId = null)
+    public function getSchedulesByGroupId(int $groupId = null): array
     {
         $schedules = [];
 
@@ -513,7 +513,7 @@ class Schedules extends Component
         try {
             if (!$isNewSchedule) {
                 $record = ScheduleRecord::findOne(['id' => $schedule->id]);
-                if (!$schedule) {
+                if (!$record) {
                     throw new ScheduleException("No schedule exists with the ID: “{$schedule->id}“.");
                 }
             } else {

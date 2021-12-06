@@ -34,6 +34,12 @@ class Settings extends Model
     public $customName;
 
     /**
+     * @var string|null
+     */
+    public $customCpNavName;
+
+    /**
+     * @deprecated
      * @var bool
      */
     public $modifyPluginName = false;
@@ -47,7 +53,7 @@ class Settings extends Model
     public function rules()
     {
         return [
-            [['cliPath', 'customName'], 'string'],
+            [['cliPath', 'customName', 'customCpNavName'], 'string'],
             [['modifyPluginName'], 'boolean'],
             [['cliPath'], PhpBinaryValidator::class, 'minVersion' => '7.1', 'allowParseEnv' => true],
         ];
