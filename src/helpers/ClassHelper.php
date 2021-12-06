@@ -74,7 +74,6 @@ class ClassHelper
                         // See if it's in a namespace we care about
                         foreach ($namespaces as $namespace) {
                             if (strpos($class, $namespace . '\\') === 0) {
-                                /** @noinspection PhpIncludeInspection */
                                 require $file;
                                 break;
                             }
