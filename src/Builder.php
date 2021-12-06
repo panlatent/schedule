@@ -51,14 +51,15 @@ class Builder extends Schedule
     /**
      * Build schedules.
      */
-    public function build()
+    public function build(bool $force = false)
     {
         if (!$this->beforeBuild()) {
             return $this;
         }
 
-        $schedules = Plugin::$plugin->getSchedules()->getActiveSchedules();
-        foreach ($schedules as $schedule) {
+        $schedules = Plugin::$plugin->getSchedules();
+        $schedules->force = $force;
+        foreach ($schedules->getActiveSchedules() as $schedule) {
             $schedule->build($this);
         }
 

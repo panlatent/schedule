@@ -24,8 +24,32 @@ use yii\helpers\Console;
  */
 class SchedulesController extends Controller
 {
+    // Properties
+    // =========================================================================
+
+    /**
+     * @var bool|null Force flush schedule repository.
+     */
+    public $force;
+
     // Public Methods
     // =========================================================================
+
+    /**
+     * @inheritdoc
+     */
+    public function options($actionID)
+    {
+        $options = parent::options($actionID);
+        switch ($actionID) {
+            case 'run': // no break
+            case 'listen':
+                $options[] = 'force';
+                break;
+        }
+
+        return $options;
+    }
 
     /**
      * List all schedules.
@@ -38,8 +62,7 @@ class SchedulesController extends Controller
         if ($ungroupedSchedules = $schedules->getSchedulesByGroupId()) {
             $this->stdout(Craft::t('schedule', 'Ungrouped') . ": \n", Console::FG_YELLOW);
             foreach ($ungroupedSchedules as $schedule) {
-                // @var Schedule $schedule
-
+                /** @var Schedule $schedule */
                 $this->stdout(Console::renderColoredString("    > #{$i} %c{$schedule->handle}\n"));
                 ++$i;
             }
@@ -62,7 +85,7 @@ class SchedulesController extends Controller
     public function actionRun()
     {
         $events = Plugin::$plugin->getBuilder()
-            ->build()
+            ->build($this->force)
             ->dueEvents(Craft::$app);
 
         if (empty($events)) {
@@ -83,14 +106,19 @@ class SchedulesController extends Controller
     }
 
     /**
-     * run a permanent command to call crons run command every minute
+     * Run a permanent command to call crons run command every minute
      *
      * @return void
      */
-    public function actionCron()
+    public function actionListen()
     {
-        $this->stdout("Waiting {$this->nextMinute()} seconds for next run of scheduler\n");
-        sleep($this->nextMinute());
+        if ($this->force === null) {
+            $this->force = true;
+        }
+
+        $waitSeconds = $this->nextMinute();
+        $this->stdout("Waiting $waitSeconds seconds for next run of scheduler\n");
+        sleep($waitSeconds);
         $this->triggerCronCall();
     }
 
@@ -100,11 +128,13 @@ class SchedulesController extends Controller
         $this->actionRun();
         $this->stdout('completed, sleeping... \n');
         sleep($this->nextMinute());
-        Plugin::getInstance()->getSchedules()->_fetchedAllSchedules = false;
         $this->triggerCronCall();
     }
 
-    protected function nextMinute()
+    /**
+     * @return int
+     */
+    protected function nextMinute(): int
     {
         $current = Carbon::now();
         return 60 - $current->second;
