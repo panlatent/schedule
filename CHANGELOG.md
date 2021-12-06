@@ -9,6 +9,20 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Updated
 ### Fixed
 
+## [0.3.1] - 2021-12-07
+### Added
+- Add `schdules/listen` command, run a permanent command be used to replace cron.
+
+### Updated
+- `schdules/list` is the default command for `schedules`.
+
+### Fixed
+- Fix calling afterSave() 2 times when schedule saving.
+- Fix #9 migrate failed 0.2.1.2 to 0.2.2.
+- Fix #15 documentation url.
+- Fix codeception version.
+- Fix typo and syntax errors.
+
 ## [0.3.0] - 2021-11-21
 ### Added
 - Add Console schedule timeout.

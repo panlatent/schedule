@@ -49,7 +49,7 @@ class Plugin extends \craft\base\Plugin
     /**
      * @var string
      */
-    public $schemaVersion = '0.3.0';
+    public $schemaVersion = '0.3.1';
 
     /**
      * @var string
