@@ -121,6 +121,10 @@ class SchedulesController extends Controller
             $this->force = true;
         }
 
+        if (!$this->force) {
+            $this->stdout("(!) Notice: Force option is disable, all schedules updates will not be synchronized.\n");
+        }
+
         $waitSeconds = $this->nextMinute();
         $this->stdout("Waiting $waitSeconds seconds for next run of scheduler\n");
         sleep($waitSeconds);
