@@ -536,8 +536,6 @@ class Schedules extends Component
                 $schedule->id = $record->id;
             }
 
-            $schedule->afterSave($isNewSchedule);
-
             $transaction->commit();
         } catch (\Throwable $exception) {
             $transaction->rollBack();
