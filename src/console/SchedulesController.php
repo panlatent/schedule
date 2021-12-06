@@ -28,6 +28,11 @@ class SchedulesController extends Controller
     // =========================================================================
 
     /**
+     * @inheritdoc
+     */
+    public $defaultAction = 'list';
+
+    /**
      * @var bool|null Force flush schedule repository.
      */
     public $force;
