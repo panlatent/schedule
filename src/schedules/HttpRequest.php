@@ -75,12 +75,12 @@ class HttpRequest extends Schedule
     public function getMethods(): array
     {
         return [
-            'get' => 'Get',
-            'head' => 'Head',
-            'post' => 'Post',
-            'put' => 'Put',
-            'patch' => 'Patch',
-            'delete' => 'Delete',
+            'get' => 'GET',
+            'head' => 'HEAD',
+            'post' => 'POST',
+            'put' => 'PUT',
+            'patch' => 'PATCH',
+            'delete' => 'DELETE',
         ];
     }
 
