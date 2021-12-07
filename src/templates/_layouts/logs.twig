@@ -80,8 +80,10 @@
             {% set hasPrev = (page != 1) %}
             {% set hasNext = (page < totalPages) %}
 
-            <a class="page-link{% if not hasPrev %} disabled{% endif %}"{% if hasPrev %} href="{{ url(baseUrl, {page:  page - 1}) }}"{% endif %} data-icon="leftangle" title="Newer requests"></a>
-            <a class="page-link{% if not hasNext %} disabled{% endif %}"{% if hasNext %} href="{{ url(baseUrl, {page: page + 1}) }}"{% endif %} data-icon="rightangle" title="Older requests"></a>
+            {% if totalPages > 1 %}
+                <a class="page-link{% if not hasPrev %} disabled{% endif %}"{% if hasPrev %} href="{{ url(baseUrl, {page:  page - 1}) }}"{% endif %} data-icon="leftangle" title="Newer requests"></a>
+                <a class="page-link{% if not hasNext %} disabled{% endif %}"{% if hasNext %} href="{{ url(baseUrl, {page: page + 1}) }}"{% endif %} data-icon="rightangle" title="Older requests"></a>
+            {% endif %}
         </div>
     {% endif %}
 {% endblock %}
