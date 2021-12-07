@@ -37,6 +37,18 @@ To install the plugin, follow these instructions.
     
         * * * * * php /path/to/craft schedules/run 1>> /dev/null 2>&1
 
+   Or use built-in `schedules/listen` command:
+
+   ```shell
+   $ ./craft schedules/listen
+   ```
+
+   If you use nitro:
+
+   ```shell
+   $ nitro craft schedules/listen
+   ```
+
 Documentation
 -------------
 Read more about it, including install instructions, in the [official documentation](https://docs.panlatent.com/projects/schedule/).
