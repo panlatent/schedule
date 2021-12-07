@@ -69,7 +69,7 @@
 
         <div class="flex pagination">
             <div class="page-info">
-                {{ '{start}-{end} of {total}'|t('dingtalk', {
+                {{ '{start}-{end} of {total}'|t('schedule', {
                     start: criteria.offset + 1,
                     end: criteria.offset + logs|length,
                     total: totalLogs

@@ -99,4 +99,5 @@ return [
     'At {datetime}' => '在 {datetime}',
     'Last running at' => '最后运行于',
     'Timeout' => '超时时间',
+    '{start}-{end} of {total}' => '第 {start} - {end} 个，共 {total} 条记录',
 ];
