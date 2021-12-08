@@ -1,5 +1,8 @@
 {% import "_includes/forms" as forms %}
 
+{% set scheduleType = className(schedule) %}
+{% namespace 'types[' ~ scheduleType ~']' %}
+
 {{ forms.autosuggestField({
     label: "Queue Component ID"|t('schedule'),
     required: true,
@@ -19,3 +22,5 @@
     errors: schedule.getErrors('jobClass'),
     suggestions: jobClassSuggestions,
 }) }}
+
+{% endnamespace %}

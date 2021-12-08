@@ -298,9 +298,9 @@ class Schedules extends Component
     public function getAllScheduleTypes(): array
     {
         $types = [
+            HttpRequest::class,
             Console::class,
             Event::class,
-            HttpRequest::class,
             Queue::class,
         ];
 

@@ -1,5 +1,8 @@
 {% import "_includes/forms" as forms %}
 
+{% set scheduleType = className(schedule) %}
+{% namespace 'types[' ~ scheduleType ~']' %}
+
 {{ forms.selectField({
     label: "HTTP Method"|t('schedule'),
     required: true,
@@ -55,6 +58,8 @@
     }) }}
 
 </div>
+
+{% endnamespace %}
 
 {% js %}
     $('#types-panlatent-schedule-schedules-HttpRequest-method').change(function() {

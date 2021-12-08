@@ -2,6 +2,7 @@
 
 {% do view.registerAssetBundle('panlatent\\schedule\\web\\assets\\schedules\\SchedulesAsset') %}
 {% set title = "Schedules"|t("schedule") %}
+{% set selectedSubnavItem = "schedules" %}
 {% set groups = craft.schedule.schedules.getAllGroups() %}
 {% set groupId = groupId is defined ? groupId : null %}
 {% set schedules = craft.schedule.schedules.getSchedulesByGroupId(groupId) %}

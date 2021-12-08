@@ -2,6 +2,7 @@
 
 {% set groupId = groupId is defined ? groupId : craft.app.request.getQueryParam('groupId') %}
 {% set title = isNewSchedule ? 'New a schedule'|t('schedule') : 'Edit: {name}'|t('schedule', {name: schedule.name}) %}
+{% set selectedSubnavItem = "schedules" %}
 {% set fullPageForm = true %}
 {% set crumbs = [{
     label: 'Schedule'|t('schedule'),
@@ -73,15 +74,15 @@
 
         {% for scheduleType in scheduleTypes %}
             {% set isCurrent = (scheduleType == className(schedule)) %}
-
+            {% set scheduleTypeIds = scheduleTypeIds|merge([scheduleType|id]) %}
             <div id="{{ scheduleType|id }}"{% if not isCurrent %} class="hidden"{% endif %}>
-                {% namespace 'types[' ~ scheduleType ~']' %}
-                    {% if isCurrent %}
-                        {{ schedule.getSettingsHtml()|raw }}
-                    {% else %}
-                        {{ scheduleInstances[scheduleType].settingsHtml|raw }}
-                    {% endif %}
-                {% endnamespace %}
+                {% if isCurrent %}
+                    {{ schedule.getSettingsHtml()|raw }}
+                {% else %}
+                    <div class="settings-loading">
+                        <div class="spinner"></div>
+                    </div>
+                {% endif %}
             </div>
         {% endfor %}
 
@@ -122,3 +123,45 @@
         {% endif %}
     </div>
 {% endblock %}
+
+{% set scheduleTypeIds = [] %}
+{% for scheduleType in scheduleTypes %}
+    {% if scheduleType != className(schedule) %}
+        {% set scheduleTypeIds = scheduleTypeIds|merge({(scheduleType): scheduleType|id}) %}
+    {% endif %}
+{% endfor %}
+
+{% js %}
+    var scheduleTypes = {{ scheduleTypeIds|json_encode|raw }};
+    $('select[name=type]').on('change', function(value) {
+        var selectedType = $(this).val();
+        if (selectedType in scheduleTypes) {
+            var id = '#' + scheduleTypes[selectedType];
+            $.get("{{ actionUrl("schedule/schedules/get-schedule-settings-html") }}", {
+                scheduleType: selectedType,
+            }, function(ret) {
+                $(id).html(ret.html + ret.js);
+            });
+            delete scheduleTypes[selectedType]
+        }
+    });
+{% endjs %}
+
+{% css %}
+    .settings-loading {
+    display: block;
+    height: 100px;
+    margin: 0px 0px;
+    padding: 0;
+    border: 1px solid #fff;
+    border-radius: 4px;
+    }
+    .spinner {
+    margin: 25px auto;
+    display: block;
+    width: 50px;
+    height: 40px;
+    text-align: center;
+    font-size: 10px;
+    }
+{% endcss %}

@@ -1,5 +1,8 @@
 {% import "_includes/forms" as forms %}
 
+{% set scheduleType = className(schedule) %}
+{% namespace 'types[' ~ scheduleType ~']' %}
+
 {{ forms.autosuggestField({
     label: 'Command'|t('schedule'),
     required: true,
@@ -26,3 +29,5 @@
     size: 5,
     errors: schedule.getErrors('timeout'),
 }) }}
+
+{% endnamespace %}

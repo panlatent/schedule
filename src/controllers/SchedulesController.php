@@ -15,7 +15,7 @@ use panlatent\schedule\base\Schedule;
 use panlatent\schedule\base\ScheduleInterface;
 use panlatent\schedule\models\ScheduleGroup;
 use panlatent\schedule\Plugin;
-use panlatent\schedule\schedules\Console;
+use panlatent\schedule\schedules\HttpRequest;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
@@ -111,7 +111,7 @@ class SchedulesController extends Controller
                     throw new NotFoundHttpException();
                 }
             } else {
-                $schedule = $schedules->createSchedule(Console::class);
+                $schedule = $schedules->createSchedule(HttpRequest::class);
             }
         }
 
@@ -156,11 +156,38 @@ class SchedulesController extends Controller
     }
 
     /**
+     * @param string $scheduleType
+     * @return Response
+     */
+    public function actionGetScheduleSettingsHtml(string $scheduleType): Response
+    {
+        if (!class_exists($scheduleType)) {
+            return $this->asErrorJson("schedule class $scheduleType not found");
+        }
+
+        /** @var Schedule $schedule */
+        $schedule = new $scheduleType;
+
+        $view = Craft::$app->getView();
+        $view->startJsBuffer();
+        $view->startCssBuffer();
+        $html =$schedule->getSettingsHtml();
+        $js = $view->clearJsBuffer();
+        $css = $view->clearCssBuffer();
+
+        return $this->asJson([
+            'html' => $html,
+            'js' => $js,
+            'css' => $css,
+        ]);
+    }
+
+    /**
      * Save a schedule.
      *
      * @return Response|null
      */
-    public function actionSaveSchedule()
+    public function actionSaveSchedule(): ?Response
     {
         $this->requirePostRequest();
 
