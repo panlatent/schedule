@@ -9,6 +9,19 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Updated
 ### Fixed
 
+## [0.3.2] - 2021-12-09
+### Added
+- Add **headers** and **url parameters** settings to **Http Request** schedule.
+
+### Updated
+- Advance cp edit schedule page loading speed.
+- Update hidden paging when only one page.
+
+### Fixed
+- Fix schedules/run not execute.
+- Fix multiple build schedule total events error.
+- Fix translations.
+
 ## [0.3.1] - 2021-12-07
 ### Added
 - Add `schdules/listen` command, run a permanent command be used to replace cron.
