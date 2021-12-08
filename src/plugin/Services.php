@@ -25,10 +25,22 @@ use panlatent\schedule\services\Timers;
 trait Services
 {
     /**
+     * @since 0.3.2
+     * @return Builder
+     */
+    public function createBuilder(): Builder
+    {
+        return new Builder();
+    }
+
+    /**
+     * @deprecated
+     * @see createBuilder()
      * @return Builder|object|null
      */
     public function getBuilder()
     {
+        \Craft::$app->getDeprecator()->log('schedule.getBuilder()', 'This method has been deprecated, singleton objects will have bad problems in persistent mode.');
         return $this->get('builder');
     }
 

@@ -11,6 +11,7 @@ namespace panlatent\schedule\console;
 
 use Craft;
 use Carbon\Carbon;
+use omnilight\scheduling\Event;
 use panlatent\schedule\base\Schedule;
 use panlatent\schedule\Plugin;
 use yii\console\Controller;
@@ -86,12 +87,16 @@ class SchedulesController extends Controller
 
     /**
      * Run all schedules.
+     *
+     * @param Event[]|null $events
      */
-    public function actionRun()
+    public function actionRun(array $events = null)
     {
-        $events = Plugin::$plugin->getBuilder()
-            ->build($this->force ?? false)
-            ->dueEvents(Craft::$app);
+        if ($events === null) {
+            $events = Plugin::$plugin->createBuilder()
+                ->build($this->force ?? false)
+                ->dueEvents(Craft::$app);
+        }
 
         if (empty($events)) {
             $this->stdout("No scheduled commands are ready to run.\n");
@@ -131,13 +136,24 @@ class SchedulesController extends Controller
         $this->triggerCronCall();
     }
 
-    protected function triggerCronCall()
+    protected function triggerCronCall(array $events = null)
     {
         $this->stdout("Running scheduler \n");
-        $this->actionRun();
+        $this->actionRun($events);
         $this->stdout("completed, sleeping... \n");
-        sleep($this->nextMinute());
-        $this->triggerCronCall();
+
+        $sec = $this->nextMinute();
+        if ($sec >= 5) {
+            // Use free time to get events.
+            $events = Plugin::$plugin->createBuilder()
+                ->build($this->force ?? false)
+                ->dueEvents(Craft::$app);
+        } else {
+            $events = null;
+        }
+
+        sleep($sec < 5 ? $sec : $this->nextMinute());
+        $this->triggerCronCall($events);
     }
 
     /**
