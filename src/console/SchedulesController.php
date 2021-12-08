@@ -90,7 +90,7 @@ class SchedulesController extends Controller
     public function actionRun()
     {
         $events = Plugin::$plugin->getBuilder()
-            ->build($this->force)
+            ->build($this->force ?? false)
             ->dueEvents(Craft::$app);
 
         if (empty($events)) {
