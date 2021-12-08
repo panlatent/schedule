@@ -14,6 +14,7 @@ use craft\events\RegisterComponentTypesEvent;
 use craft\helpers\Component as ComponentHelper;
 use craft\helpers\Db;
 use craft\helpers\Json;
+use craft\web\Request;
 use panlatent\schedule\base\Schedule;
 use panlatent\schedule\base\ScheduleInterface;
 use panlatent\schedule\db\Table;
@@ -474,6 +475,31 @@ class Schedules extends Component
         $this->_applyConditions($query, $criteria);
 
         return $query->count('[[schedules.id]]');
+    }
+
+    /**
+     * @param Request|null $request
+     * @return ScheduleInterface
+     */
+    public function createScheduleFromRequest(Request $request = null): ScheduleInterface
+    {
+        if ($request === null) {
+            $request = Craft::$app->getRequest();
+        }
+
+        $type = $request->getBodyParam('type');
+
+        return $this->createSchedule([
+            'id' => $request->getBodyParam('scheduleId'),
+            'groupId' => $request->getBodyParam('groupId'),
+            'name' => $request->getBodyParam('name'),
+            'handle' => $request->getBodyParam('handle'),
+            'description' => $request->getBodyParam('description'),
+            'type' => $type,
+            'settings' => $request->getBodyParam('types.' . $type, []),
+            'enabled' => (bool)$request->getBodyParam('enabled'),
+            'enabledLog' => $request->getBodyParam('enabledLog'),
+        ]);
     }
 
     /**

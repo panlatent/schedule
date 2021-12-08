@@ -15,6 +15,7 @@ use panlatent\schedule\base\Schedule;
 use panlatent\schedule\db\Table;
 use panlatent\schedule\models\ScheduleLog;
 use Psr\Http\Message\ResponseInterface;
+use yii\base\Model;
 
 /**
  * Class HttpRequest
@@ -52,9 +53,19 @@ class HttpRequest extends Schedule
     public $method = 'get';
 
     /**
-     * @var string
+     * @var string Request URL default is echo api.
      */
-    public $url;
+    public $url = 'https://postman-echo.com/get';
+
+    /**
+     * @var
+     */
+    public $headers;
+
+    /**
+     * @var
+     */
+    public $urlParams;
 
     /**
      * @var string
@@ -68,6 +79,37 @@ class HttpRequest extends Schedule
 
     // Public Methods
     // =========================================================================
+
+    /**
+     * @inheritdoc
+     */
+    public function rules()
+    {
+        return array_merge(parent::rules(), [
+            [['method', 'url'], 'required'],
+            [['method', 'url'], 'string'],
+            [['headers', 'urlParams'], function($property) {
+                if (empty($this->$property)) {
+                    return;
+                }
+                $hasErrors = false;
+                foreach ($this->$property as $key => $row) {
+                    if ($row['enabled'] && empty($row['name'])) {
+                        $this->$property[$key]['name'] = [
+                            'hasErrors' => true,
+                            'value' => $row['name'],
+                        ];
+                        if (!$hasErrors) {
+                            $this->addError($property, Craft::t('schedule', '{label} can not blank', [
+                                'label' => $this->getAttributeLabel($property),
+                            ]));
+                            $hasErrors = true;
+                        }
+                    }
+                }
+            }]
+        ]);
+    }
 
     /**
      * @return array
@@ -143,6 +185,22 @@ class HttpRequest extends Schedule
                 default:
                     $options['headers'] = ['content-type' => $this->contentType];
                     $options['body'] = $this->body;
+            }
+        }
+
+        if (!empty($this->headers)) {
+            foreach ($this->headers as ['name' => $name, 'value' => $value, 'enabled' => $enabled]) {
+                if ($enabled) {
+                    $options['headers'][$name] = $value;
+                }
+            }
+        }
+
+        if (!empty($this->urlParams)) {
+            foreach ($this->urlParams as ['name' => $name, 'value' => $value, 'enabled' => $enabled]) {
+                if ($enabled) {
+                    $options['query'][$name] = $value;
+                }
             }
         }
 

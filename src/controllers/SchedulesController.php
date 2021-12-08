@@ -192,21 +192,9 @@ class SchedulesController extends Controller
         $this->requirePostRequest();
 
         $schedules = Plugin::$plugin->getSchedules();
-        $request = Craft::$app->getRequest();
-        $type = $request->getBodyParam('type');
 
         /** @var Schedule $schedule */
-        $schedule = $schedules->createSchedule([
-            'id' => $request->getBodyParam('scheduleId'),
-            'groupId' => $request->getBodyParam('groupId'),
-            'name' => $request->getBodyParam('name'),
-            'handle' => $request->getBodyParam('handle'),
-            'description' => $request->getBodyParam('description'),
-            'type' => $type,
-            'settings' => $request->getBodyParam('types.' . $type, []),
-            'enabled' => (bool)$request->getBodyParam('enabled'),
-            'enabledLog' => $request->getBodyParam('enabledLog'),
-        ]);
+        $schedule = $schedules->createScheduleFromRequest();
 
         if (!$schedules->saveSchedule($schedule)) {
             Craft::$app->getSession()->setError(Craft::t('schedule', 'Couldn’t save schedule.'));

@@ -23,6 +23,67 @@
     suggestEnvVars: true,
 }) }}
 
+{{ forms.editableTableField({
+    label: "Headers"|t("schedule"),
+    id: "headers",
+    name: "headers",
+    addRowLabel: "Add a header"|t("schedule"),
+    cols: {
+        enabled: {
+            type: 'checkbox',
+            thin: true,
+            checked: true,
+        },
+        name: {
+            type: 'singleline',
+            heading: "Header Name"|t("schedule"),
+            placeholder: "Add Header Name"|t("schedule"),
+            code: true,
+        },
+        value: {
+            type: 'singleline',
+            heading: "Header Value"|t("schedule"),
+            placeholder: "Add Header Value"|t("schedule"),
+            code: true,
+        }
+    },
+    rows: schedule.headers,
+    defaultValues: {
+        enabled: true,
+    },
+    errors: schedule.getErrors("headers"),
+}) }}
+
+{{ forms.editableTableField({
+    label: "URL Params"|t("schedule"),
+    id: "urlParams",
+    name: "urlParams",
+    addRowLabel: "Add a parameter"|t("schedule"),
+    cols: {
+        enabled: {
+            type: 'checkbox',
+            thin: true,
+        },
+        name: {
+            type: 'singleline',
+            heading: "Parameter"|t("schedule"),
+            placeholder: "Add URL Parameter"|t("schedule"),
+            code: true,
+        },
+        value: {
+            type: 'singleline',
+            heading: "Value"|t("schedule"),
+            placeholder: "Add Value"|t("schedule"),
+            code: true,
+        },
+    },
+    rows: schedule.urlParams,
+    defaultValues: {
+        enabled: true,
+    },
+    errors: schedule.getErrors("urlParams"),
+}) }}
+
 {% set contentTypeSuggestions = [] %}
 {% for contentType in schedule.contentTypes %}
     {% set contentTypeSuggestions = contentTypeSuggestions|merge([
