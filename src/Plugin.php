@@ -9,6 +9,7 @@
 namespace panlatent\schedule;
 
 use Craft;
+use craft\base\Model;
 use craft\events\RegisterUserPermissionsEvent;
 use craft\helpers\UrlHelper;
 use craft\services\UserPermissions;
@@ -49,12 +50,12 @@ class Plugin extends \craft\base\Plugin
     /**
      * @var string
      */
-    public $schemaVersion = '0.3.2';
+    public string $schemaVersion = '0.3.2';
 
     /**
      * @var string
      */
-    public $t9nCategory = 'schedule';
+    public ?string $t9nCategory = 'schedule';
 
     // Public Methods
     // =========================================================================
@@ -91,7 +92,7 @@ class Plugin extends \craft\base\Plugin
     /**
      * @inheritdoc
      */
-    public function getCpNavItem()
+    public function getCpNavItem(): ?array
     {
         $ret = parent::getCpNavItem();
 
@@ -129,7 +130,7 @@ class Plugin extends \craft\base\Plugin
     /**
      * @inheritdoc
      */
-    public function getSettingsResponse()
+    public function getSettingsResponse(): mixed
     {
         return Craft::$app->getResponse()->redirect(UrlHelper::cpUrl('schedule/settings'));
     }
@@ -140,7 +141,7 @@ class Plugin extends \craft\base\Plugin
     /**
      * @return Settings
      */
-    protected function createSettingsModel(): Settings
+    protected function createSettingsModel(): ?Model
     {
         return new Settings();
     }
