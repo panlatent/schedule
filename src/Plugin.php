@@ -155,13 +155,16 @@ class Plugin extends \craft\base\Plugin
     private function _registerUserPermissions()
     {
         Event::on(UserPermissions::class, UserPermissions::EVENT_REGISTER_PERMISSIONS, function(RegisterUserPermissionsEvent $event) {
-            $event->permissions[Craft::t('schedule', 'Schedules')] = [
-                Permissions::MANAGE_SCHEDULES => [
-                    'label' => Craft::t('schedule', 'Manage Schedules'),
-                ],
-                Permissions::MANAGE_LOGS => [
-                    'label' => Craft::t('schedule', 'Manage Logs'),
-                ],
+            $event->permissions[] = [
+                'heading' => Craft::t('schedule', 'Schedules'),
+                'permissions' => [
+                    Permissions::MANAGE_SCHEDULES => [
+                        'label' => Craft::t('schedule', 'Manage Schedules'),
+                    ],
+                    Permissions::MANAGE_LOGS => [
+                        'label' => Craft::t('schedule', 'Manage Logs'),
+                    ],
+                ]
             ];
         });
     }
