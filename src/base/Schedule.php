@@ -111,7 +111,7 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
     /**
      * @inheritdoc
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['name', 'handle'], 'required'],

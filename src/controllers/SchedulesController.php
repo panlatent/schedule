@@ -57,7 +57,7 @@ class SchedulesController extends Controller
             ]);
         }
 
-        Craft::$app->getSession()->setName(Craft::t('schedule', 'Group saved.'));
+        Craft::$app->getSession()->setNotice(Craft::t('schedule', 'Group saved.'));
 
         return $this->asJson([
             'success' => true,

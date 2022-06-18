@@ -93,7 +93,7 @@ class Console extends Schedule
     /**
      * @inheritdoc
      */
-    public function getSettingsHtml()
+    public function getSettingsHtml(): ?string
     {
         $suggestions = [];
 
