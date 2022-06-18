@@ -63,7 +63,7 @@ class Queue extends Schedule
     /**
      * @inheritdoc
      */
-    public function getSettingsHtml()
+    public function getSettingsHtml(): ?string
     {
         $componentSuggestions = [
             [

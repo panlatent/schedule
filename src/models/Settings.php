@@ -9,8 +9,8 @@
 namespace panlatent\schedule\models;
 
 use Craft;
+use craft\base\Model;
 use panlatent\schedule\validators\PhpBinaryValidator;
-use yii\base\Model;
 
 /**
  * Class Settings
@@ -50,7 +50,7 @@ class Settings extends Model
     /**
      * @inheritdoc
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['cliPath', 'customName', 'customCpNavName'], 'string'],

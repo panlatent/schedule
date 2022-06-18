@@ -52,7 +52,7 @@ abstract class Timer extends SavableComponent implements TimerInterface
     /**
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         $rules = parent::rules();
         $rules[] = [['scheduleId', 'enabled'], 'required'];

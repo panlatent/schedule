@@ -83,7 +83,7 @@ class HttpRequest extends Schedule
     /**
      * @inheritdoc
      */
-    public function rules()
+    public function rules(): array
     {
         return array_merge(parent::rules(), [
             [['method', 'url'], 'required'],
@@ -144,7 +144,7 @@ class HttpRequest extends Schedule
     /**
      * @inheritdoc
      */
-    public function getSettingsHtml()
+    public function getSettingsHtml(): ?string
     {
         return Craft::$app->getView()->renderTemplate('schedule/_components/schedules/HttpRequest/settings', [
             'schedule' => $this,

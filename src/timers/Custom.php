@@ -36,7 +36,7 @@ class Custom extends Timer
     /**
      * @inheritdoc
      */
-    public function getSettingsHtml()
+    public function getSettingsHtml(): ?string
     {
         return Craft::$app->getView()->renderTemplate('schedule/_components/timers/Custom', [
             'minute' => $this->minute,
