@@ -50,12 +50,22 @@ class Plugin extends \craft\base\Plugin
     /**
      * @var string
      */
-    public string $schemaVersion = '0.3.2';
+    public string $schemaVersion = '0.4.0';
 
     /**
      * @var string
      */
     public ?string $t9nCategory = 'schedule';
+
+    /**
+     * @var bool
+     */
+    public bool $hasCpSettings = true;
+
+    /**
+     * @var bool
+     */
+    public bool $hasCpSection = true;
 
     // Public Methods
     // =========================================================================
