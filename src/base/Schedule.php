@@ -119,8 +119,25 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
             [['name', 'handle', 'description', 'user'], 'string'],
             [['handle'], UniqueValidator::class, 'targetClass' => ScheduleRecord::class, 'targetAttribute' => 'handle'],
             [['handle'], HandleValidator::class],
-            [['enabledLog', 'lastStatus'], 'boolean'],
+            [['enabledLog', 'lastStatus', 'emailOnError', 'emailOnSuccess'], 'boolean'],
+            ['email', 'validateEmail', 'skipOnEmpty' => false]
         ];
+    }
+
+    /**
+     * Validate the email attribute which can be an env variable
+     */
+    public function validateEmail()
+    {
+        if (!$this->emailOnSuccess and !$this->emailOnError) {
+            return;
+        }
+        $email = $this->getParsedEmail();
+        if (!$email) {
+            $this->addError('email', \Craft::t('schedule', 'Email is required'));
+        } else if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $this->addError('email', \Craft::t('schedule', '{email} is not a valid email address', ['email' => $email]));
+        }
     }
 
     /**
@@ -241,6 +258,14 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
     }
 
     /**
+     * @return string
+     */
+    public function getParsedEmail(): string
+    {
+        return \Craft::parseEnv($this->email);
+    }
+
+    /**
      * @return DateTime|null
      */
     public function getLastFinishedDate()
@@ -319,6 +344,14 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
 
         if ($this->enabledLog) {
             $this->endLog($id, $successful ? self::STATUS_SUCCESSFUL : self::STATUS_FAILED, $reason ?? null);
+        }
+
+        if ($successful and $this->emailOnSuccess) {
+            $this->sendEmail('success', $id);
+        }
+
+        if (!$successful and $this->emailOnError) {
+            $this->sendEmail('error', $id);
         }
 
         $this->afterRun($successful);
@@ -436,5 +469,38 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
                 'id' => $id,
             ])
             ->execute();
+    }
+
+    /**
+     * Send a success or error email
+     * 
+     * @param  string $type
+     * @param  ?int $logId
+     */
+    protected function sendEmail(string $type, ?int $logId)
+    {
+        $subject = 'Schedule "' . $this->name . '"';
+        $subject .= ($type == 'success' ? ' has run successfully' : ' failed');
+        $output = '';
+        if ($logId) {
+            $query = (new Query())
+                ->select(['output'])
+                ->from(Table::SCHEDULELOGS)
+                ->where([
+                    'id' => $logId,
+                ])
+                ->one();
+            $output = $query['output'];
+        }
+        $content = \Craft::$app->view->renderTemplate('schedule/emails/' . $type, [
+            'schedule' => $this,
+            'output' => $output
+        ]);
+        \Craft::$app->mailer
+            ->compose()
+            ->setHtmlBody($content)
+            ->setSubject($subject)
+            ->setTo($this->getParsedEmail())
+            ->send();
     }
 }

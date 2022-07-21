@@ -499,6 +499,9 @@ class Schedules extends Component
             'settings' => $request->getBodyParam('types.' . $type, []),
             'enabled' => (bool)$request->getBodyParam('enabled'),
             'enabledLog' => $request->getBodyParam('enabledLog'),
+            'emailOnSuccess' => $request->getBodyParam('emailOnSuccess'),
+            'emailOnError' => $request->getBodyParam('emailOnError'),
+            'email' => $request->getBodyParam('email'),
         ]);
     }
 
@@ -564,6 +567,9 @@ class Schedules extends Component
             $record->settings = Json::encode($schedule->getSettings());
             $record->enabled = (bool)$schedule->enabled;
             $record->enabledLog = (bool)$schedule->enabledLog;
+            $record->emailOnSuccess = (bool)$schedule->emailOnSuccess;
+            $record->emailOnError = (bool)$schedule->emailOnError;
+            $record->email = $schedule->email;
 
             $record->save(false);
 
@@ -694,6 +700,10 @@ class Schedules extends Component
                 'schedules.user',
                 'schedules.settings',
                 'schedules.enabled',
+                'schedules.enabledLog',
+                'schedules.emailOnSuccess',
+                'schedules.emailOnError',
+                'schedules.email',
                 'schedules.enabledLog',
                 'schedules.lastStartedTime',
                 'schedules.lastFinishedTime',
