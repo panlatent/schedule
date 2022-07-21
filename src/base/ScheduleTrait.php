@@ -52,21 +52,6 @@ trait ScheduleTrait
     public $enabledLog;
 
     /**
-     * @var bool|null
-     */
-    public $emailOnError;
-
-    /**
-     * @var bool|null
-     */
-    public $emailOnSuccess;
-
-    /**
-     * @var string|null
-     */
-    public $email;
-
-    /**
      * @var int|null
      */
     public $lastStartedTime;

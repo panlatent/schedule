@@ -157,7 +157,7 @@ class Console extends Schedule
             if (Process::ERR === $type) {
                 $output = $buffer . "\n";
             } else {
-                $output = $buffer . "\n";
+                $output = $buffer . "\n";;
             }
 
             Craft::$app->getDb()->createCommand()

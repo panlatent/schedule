@@ -1,6 +1,0 @@
-{% if schedule.enabledLog %}
-    <p>{{ 'The output was :'|t('schedule') }}</p>
-    <pre>{{ output }}</pre>
-{% else %}
-    <p>{{ "There was no output as the schedule doesn't have logs enabled."|t('schedule') }}</p>
-{% endif %}

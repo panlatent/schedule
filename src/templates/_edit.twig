@@ -54,32 +54,6 @@
             errors: schedule.getErrors('enabledLog'),
         }) }}
 
-        {{ forms.checkboxField({
-            label: 'Send an email on error'|t('schedule'),
-            id: 'emailOnError',
-            name: 'emailOnError',
-            checked: schedule.emailOnError,
-            errors: schedule.getErrors('emailOnError'),
-        }) }}
-
-        {{ forms.checkboxField({
-            label: 'Send an email on success'|t('schedule'),
-            id: 'emailOnSuccess',
-            name: 'emailOnSuccess',
-            checked: schedule.emailOnSuccess,
-            errors: schedule.getErrors('emailOnSuccess'),
-        }) }}
-
-        {{ forms.autosuggestField({
-            label: 'Email address'|t('schedule'),
-            id: 'email',
-            name: 'email',
-            value: schedule.email,
-            errors: schedule.getErrors('email'),
-            suggestEnvVars: true
-            }) 
-        }}
-
         {{ forms.textareaField({
             label: 'Description'|t('app'),
             id: 'description',
