@@ -102,10 +102,14 @@ class Slack extends Notification
      */
     protected function sendErrorMessage(?array $log, array $settings): bool
     {
-        $message = \Craft::t('schedule', 'Schedule {name} failed, no output was given', ['name' => $this->schedule->name]);
+        $message = \Craft::t('schedule', '{systemName} : Schedule {name} failed, no output was given', [
+            'name' => $this->schedule->name,
+            'systemName' => \Craft::$app->getSystemName()
+        ]);
         if ($log['output'] ?? false) {
-            $message = \Craft::t('schedule', "Schedule {name} failed, output was :\n```{output}```", [
+            $message = \Craft::t('schedule', "{systemName} : Schedule {name} failed, output was :\n```{output}```", [
                 'name' => $this->schedule->name,
+                'systemName' => \Craft::$app->getSystemName(),
                 'output' => $log['output']
             ]);
         }
@@ -121,15 +125,14 @@ class Slack extends Notification
      */
     protected function sendSuccessMessage(?array $log, array $settings): bool
     {
-        $primarySite = \Craft::$app->sites->primarySite->name;
-        $message = \Craft::t('schedule', '{site} : Schedule {name} ran successfully', [
-            'site' => $primarySite,
+        $message = \Craft::t('schedule', '{systemName} : Schedule {name} ran successfully, no output was given', [
+            'systemName' => \Craft::$app->getSystemName(),
             'name' => $this->schedule->name
         ]);
         if ($log['output'] ?? false) {
-            $message = \Craft::t('schedule', "{site} : Schedule {name} ran successfully, output was :\n```{output}```", [
+            $message = \Craft::t('schedule', "{systemName} : Schedule {name} ran successfully, output was :\n```{output}```", [
                 'name' => $this->schedule->name,
-                'site' => $primarySite,
+                'systemName' => \Craft::$app->getSystemName(),
                 'output' => $log['output']
             ]);
         }

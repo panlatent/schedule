@@ -97,10 +97,9 @@ class Email extends Notification
      */
     protected function sendErrorEmail(?array $log): bool
     {
-        $primarySite = \Craft::$app->sites->primarySite->name;
-        $subject = \Craft::t('schedule', '{site} : Schedule {name} failed', [
+        $subject = \Craft::t('schedule', '{systemName} : Schedule {name} failed', [
             'name' => $this->schedule->name,
-            'site' => $primarySite
+            'systemName' => \Craft::$app->getSystemName()
         ]);
         return $this->sendEmail($subject, $log);
     }
@@ -113,10 +112,9 @@ class Email extends Notification
      */
     protected function sendSuccessEmail(?array $log): bool
     {
-        $primarySite = \Craft::$app->sites->primarySite->name;
-        $subject = \Craft::t('schedule', '{site} : Schedule {name} ran successfully', [
+        $subject = \Craft::t('schedule', '{systemName} : Schedule {name} ran successfully', [
             'name' => $this->schedule->name,
-            'site' => $primarySite
+            'systemName' => \Craft::$app->getSystemName()
         ]);
         return $this->sendEmail($subject, $log);
     }
