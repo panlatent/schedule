@@ -44,6 +44,16 @@ class Settings extends Model
      */
     public $modifyPluginName = false;
 
+    /**
+     * @var boolean
+     */
+    public $disableNotifications = false;
+
+    /**
+     * @var string
+     */
+    public $slackApiToken;
+
     // Public Methods
     // =========================================================================
 
@@ -53,8 +63,8 @@ class Settings extends Model
     public function rules()
     {
         return [
-            [['cliPath', 'customName', 'customCpNavName'], 'string'],
-            [['modifyPluginName'], 'boolean'],
+            [['cliPath', 'customName', 'customCpNavName', 'slackApiToken'], 'string'],
+            [['modifyPluginName', 'disableNotifications'], 'boolean'],
             [['cliPath'], PhpBinaryValidator::class, 'minVersion' => '7.1', 'allowParseEnv' => true],
         ];
     }

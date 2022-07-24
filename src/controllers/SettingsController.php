@@ -52,4 +52,26 @@ class SettingsController extends Controller
 
         return $this->redirectToPostedUrl();
     }
+
+    /**
+     * @return Response|null
+     */
+    public function actionSaveSlack()
+    {
+        $this->requirePostRequest();
+
+        $request = Craft::$app->getRequest();
+        $settings = Plugin::$plugin->getSettings();
+        $settings->load($request->getBodyParams(), '');
+
+        if (!Craft::$app->getPlugins()->savePluginSettings(Plugin::$plugin, $settings->toArray())) {
+            Craft::$app->getSession()->setError(Craft::t('schedule', 'Couldn’t save settings.'));
+
+            return null;
+        }
+
+        Craft::$app->getSession()->setNotice(Craft::t('schedule', 'Settings saved.'));
+
+        return $this->redirectToPostedUrl();
+    }
 }

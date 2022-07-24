@@ -10,6 +10,7 @@ namespace panlatent\schedule\plugin;
 
 use panlatent\schedule\Builder;
 use panlatent\schedule\services\Logs;
+use panlatent\schedule\services\Notifications;
 use panlatent\schedule\services\Schedules;
 use panlatent\schedule\services\Timers;
 
@@ -69,6 +70,14 @@ trait Services
     }
 
     /**
+     * @return Notifications
+     */
+    public function getNotifications(): Notifications
+    {
+        return $this->get('notifications');
+    }
+
+    /**
      * Set service components.
      */
     private function _setComponents()
@@ -78,6 +87,7 @@ trait Services
             'schedules' => Schedules::class,
             'timers' => Timers::class,
             'logs' => Logs::class,
+            'notifications' => Notifications::class,
         ]);
     }
 }

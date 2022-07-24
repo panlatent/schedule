@@ -1,0 +1,60 @@
+{% import "_includes/forms" as forms %}
+
+{{
+    forms.lightswitchField({
+        name: 'onSuccess',
+        on: settings.onSuccess,
+        label: 'Notify on success'|t('schedule'),
+    })
+}}
+
+{{
+    forms.lightswitchField({
+        name: 'onError',
+        on: settings.onError,
+        label: 'Notify on error'|t('schedule')
+    })
+}}
+
+{{ 
+    forms.textField({
+        label: "Channel"|t('schedule'),
+        id: "channel",
+        name: "channel",
+        required: true,
+        value: settings.channel,
+        errors: settings.getErrors('channel'),
+    }) 
+}}
+
+{{
+    forms.lightswitchField({
+        name: 'useGlobalToken',
+        label: 'Use global slack api token'|t('schedule'),
+        on: settings.useGlobalToken,
+        id: 'useGlobalToken'
+    })
+}}
+
+{{ 
+    forms.autoSuggestField({
+        label: "API Token"|t('schedule'),
+        id: "apiToken",
+        name: "apiToken",
+        value: settings.apiToken,
+        errors: settings.getErrors('apiToken'),
+        instructions: 'A Bot token with the scope `chat:write` enabled'|t('schedule'),
+        suggestEnvVars: true,
+        fieldClass: settings.useGlobalToken ? 'hidden' : ''
+    }) 
+}}
+
+{% js %}
+    $('#settings-useGlobalToken').on('change', function () {
+        if ($('#settings-useGlobalToken').hasClass('on')) {
+            $('#settings-apiToken-field').addClass('hidden');
+        } else {
+            $('#settings-apiToken-field').removeClass('hidden');
+        }
+    });
+{% endjs %}
