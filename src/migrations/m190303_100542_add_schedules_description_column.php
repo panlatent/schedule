@@ -1,4 +1,9 @@
 <?php
+/*
+ * Schedule plugin for CraftCMS
+ *
+ * https://github.com/panlatent/schedule
+ */
 
 namespace panlatent\schedule\migrations;
 
