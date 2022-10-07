@@ -1,0 +1,69 @@
+{% extends "_layouts/cp" %}
+
+{% set schedule = schedule is defined ? schedule : craft.schedule.schedules.getScheduleById(scheduleId) %}
+{% set notifications = notifications is defined ? notifications : schedule.notifications %}
+{% set title = "Notifications"|t('schedule') %}
+{% set crumbs = [
+    {label: "Schedule"|t('schedule'), url: url('schedule')},
+] %}
+
+{% if schedule.group %}
+    {% set crumbs = crumbs|merge([
+        {label: schedule.group, url: url('schedule/groups/' ~ schedule.groupId)}
+    ]) %}
+{% endif %}
+
+{% set crumbs = crumbs|merge([
+    {label: schedule, url: url('schedule/' ~ schedule.id)},
+]) %}
+
+{% block actionButton %}
+    <a href="{{ url('schedule/' ~ schedule.id ~ '/notifications/new') }}" class="btn submit icon add">{{ "New notification"|t('schedule') }}</a>
+{% endblock %}
+
+{% block content %}
+    <div id="nonotifications"{% if notifications %} class="hidden"{% endif %}>
+        <p>{{ "No notifications exist yet."|t('schedule') }}</p>
+    </div>
+
+    {% if notifications|length %}
+        {% set sortable  = (notifications|length > 1) %}
+        <table id="notifications-table" class="data fullwidth collapsible">
+            <thead>
+                <th scope="col">{{ "No."|t('schedules') }}</th>
+                <th scope="col">{{ "Type"|t('schedules') }}</th>
+                <th scope="col">{{ "Description"|t('app') }}</th>
+                <th scope="col">{{ "Enabled"|t('app') }}</th>
+                {% if sortable %}<td class="thin"></td>{% endif %}
+                <td class="thin"></td>
+            </thead>
+            <tbody>
+            {% for index, notification in notifications %}
+                <tr data-id="{{ notification.id }}" data-name="{{ notification.name }}">
+                    <th scope="row" data-title="{{ 'No.'|t('schedule') }}"><a href="{{ url('schedule/' ~ notification.scheduleId ~ '/notifications/' ~ notification.id) }}">{{ notification }}</a></th>
+                    <th scope="row" data-title="{{ 'Type'|t('schedule') }}">{{ notification.name }}</th>
+                    <th scope="row" data-title="{{ 'Description'|t('schedule') }}">{{ notification.description }}</th>
+                    <td>{% if notification.enabled %}<span data-icon="check"></span>{% endif %}</td>
+                    {% if sortable %}<td class="thin"><a class="move icon" title="{{ 'Reorder'|t('app') }}" role="button"></a></td>{% endif %}
+                    <td class="thin"><a class="delete icon" title="{{ 'Delete'|t('app') }}" role="button"></a></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+{% endblock %}
+
+{% js %}
+    var adminTable = new Craft.AdminTable({
+        tableSelector: '#notifications-table',
+        noItemsSelector: '#nonotifications',
+        sortable: true,
+        reorderAction: 'schedule/notifications/reorder-notifications',
+        deleteAction: 'schedule/notifications/delete-notification',
+        onDeleteItem: function() {
+            if (adminTable.totalItems == 0) {
+                $('#nav-entries').remove();
+            }
+        }
+    });
+{% endjs %}

@@ -1,0 +1,11 @@
+{% import "_includes/forms" as forms %}
+
+{{ forms.lightswitchField({
+    label: "Enabled"|t('schedule'),
+    on: notification.enabled ?? true,
+    name: 'enabled'
+}) }}
+
+{% namespace 'settings' %}
+    {% include template %}
+{% endnamespace %}
