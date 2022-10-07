@@ -28,7 +28,7 @@
         "craftcms/cms": "^4.0",
         "nesbot/carbon": "^1.22 || ^2.10",
         "omnilight/yii2-scheduling": "^1.1",
-        "symfony/process": "^4.2",
+        "symfony/process": "^4.2 || ^5.0 || ^6.0",
         "guzzlehttp/guzzle": "^7.2",
         "panlatent/cron-expression-descriptor": "^1.1"
     },
