@@ -1,6 +1,6 @@
 {% extends "schedule/_layouts/settings" %}
 
-{% set fullPageForm = true %}
+{% set fullPageFomr = true %}
 {% set settings = craft.schedule.settings %}
 
 {% import "_includes/forms" as forms %}
@@ -35,13 +35,6 @@
             value: settings.cliPath,
             errors: settings.getErrors('cliPath'),
             suggestEnvVars: true,
-        }) }}
-
-        {{ forms.lightswitchField({
-            label: "Disable all notifications"|t('schedule'),
-            id: "disableNotifications",
-            name: "disableNotifications",
-            on: settings.disableNotifications,
         }) }}
 
         <button class="btn submit">{{ "Save"|t('app') }}</button>

@@ -19,5 +19,4 @@ abstract class Table
     const SCHEDULEGROUPS = '{{%schedulegroups}}';
     const SCHEDULELOGS = '{{%schedulelogs}}';
     const SCHEDULETIMERS = '{{%scheduletimers}}';
-    const SCHEDULENOTIFICATIONS = '{{%schedulenotifications}}';
 }

@@ -34,9 +34,6 @@ trait Routes
                 'schedule/<scheduleId:\d+>/timers/<timerId:\d+>' => 'schedule/timers/edit-timer',
                 'schedule/<scheduleId:\d+>/logs' => ['template' => 'schedule/_logs'],
                 'schedule/<scheduleId:\d+>/logs/<logId:\d+>' => ['template' => 'schedule/logs/_view'],
-                'schedule/<scheduleId:\d+>/notifications' => ['template' => 'schedule/notifications'],
-                'schedule/<scheduleId:\d+>/notifications/new' => 'schedule/notifications/edit-notification',
-                'schedule/<scheduleId:\d+>/notifications/<notificationId:\d+>' => 'schedule/notifications/edit-notification',
             ]);
         });
     }

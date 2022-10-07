@@ -8,20 +8,19 @@
 namespace panlatent\schedule\base;
 
 use Craft;
-use DateTime;
 use craft\base\SavableComponent;
 use craft\db\mysql\Schema as MysqlSchema;
 use craft\helpers\ArrayHelper;
 use craft\validators\HandleValidator;
 use craft\validators\UniqueValidator;
+use DateTime;
 use panlatent\schedule\Builder;
-use panlatent\schedule\Plugin;
 use panlatent\schedule\db\Table;
 use panlatent\schedule\events\ScheduleEvent;
-use panlatent\schedule\events\SheduleNotificationEvent;
 use panlatent\schedule\helpers\PrecisionDateTimeHelper;
 use panlatent\schedule\models\ScheduleGroup;
 use panlatent\schedule\models\ScheduleLog;
+use panlatent\schedule\Plugin;
 use panlatent\schedule\records\Schedule as ScheduleRecord;
 use yii\db\Query;
 
@@ -32,8 +31,6 @@ use yii\db\Query;
  * @package panlatent\schedule\base
  * @property ScheduleGroup $group
  * @property TimerInterface[] $timers
- * @property NotificationInterface[] $notifications
- * @property NotificationInterface[] $activeNotifications
  * @property-read ScheduleLog[] $logs
  * @property-read int $totalLogs
  * @property-read string $cronExpression
@@ -61,16 +58,6 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
      * @event ScheduleEvent
      */
     const EVENT_AFTER_RUN = 'afterRun';
-
-    /**
-     * @event SheduleNotificationEvent
-     */
-    const EVENT_BEFORE_NOTIFICATIONS = 'beforeNotifications';
-
-    /**
-     * @event SheduleNotificationEvent
-     */
-    const EVENT_AFTER_NOTIFICATIONS = 'afterNotifications';
 
     // Statuses
     // =========================================================================
@@ -103,11 +90,6 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
      * @var TimerInterface[]|null
      */
     private $_timers;
-
-    /**
-     * @var NotificationInterface[]|null
-     */
-    private $_notifications;
 
     /**
      * @var DateTime|null
@@ -214,29 +196,6 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
         $this->_timers = Plugin::getInstance()->getTimers()->getTimersByScheduleId($this->id);
 
         return $this->_timers;
-    }
-
-    /**
-     * @return NotificationChannelInterface[]
-     */
-    public function getNotifications(): array
-    {
-        if ($this->_notifications === null) {
-            $this->_notifications = Plugin::getInstance()->getNotifications()->getNotificationsByScheduleId($this->id);
-        }
-        return $this->_notifications;
-    }
-
-    /**
-     * Get all active notifications
-     * 
-     * @return array
-     */
-    public function getActiveNotifications(): array
-    {
-        return array_filter($this->notifications, function ($notif) {
-            return $notif->enabled;
-        });
     }
 
     /**
@@ -361,8 +320,6 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
             $this->endLog($id, $successful ? self::STATUS_SUCCESSFUL : self::STATUS_FAILED, $reason ?? null);
         }
 
-        $this->runNotifications($successful, $id);
-
         $this->afterRun($successful);
 
         return true;
@@ -409,42 +366,6 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
                 'id' => $this->id,
             ])
             ->execute();
-    }
-
-    protected function runNotifications(bool $successful, ?int $logId)
-    {
-        $disabled = Plugin::getInstance()->settings->disableNotifications;
-        if ($disabled) {
-            \Craft::debug('Notifications for schedule ' . $this->id . ' not sent, disabled globally in the settings', __METHOD__);
-            return;
-        }
-        if ($this->hasEventHandlers(self::EVENT_BEFORE_NOTIFICATIONS)) {
-            $event = new SheduleNotificationEvent([
-                'schedule' => $this,
-            ]);
-            $this->trigger(self::EVENT_BEFORE_NOTIFICATIONS, $event);
-            if (!$event->isValid) {
-                \Craft::debug('Notifications for schedule ' . $this->id . ' not sent, disabled by the EVENT_BEFORE_NOTIFICATIONS', __METHOD__);
-                return;
-            }
-        }
-        $log = null;
-        if ($logId) {
-            $log = (new Query())
-                ->from(Table::SCHEDULELOGS)
-                ->where([
-                    'id' => $logId,
-                ])
-                ->one();
-        }
-        foreach ($this->getActiveNotifications() as $notification) {
-            $notification->notify($successful, $log);
-        }
-        if ($this->hasEventHandlers(self::EVENT_AFTER_NOTIFICATIONS)) {
-            $this->trigger(self::EVENT_AFTER_NOTIFICATIONS, new SheduleNotificationEvent([
-                'schedule' => $this,
-            ]));
-        }
     }
 
     // Protected Methods

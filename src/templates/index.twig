@@ -53,7 +53,6 @@
             <th scope="col">{{ "Handle"|t('app') }}</th>
             <th scope="col">{{ "Type"|t('app') }}</th>
             <th scope="col">{{ "Timers"|t('schedule') }}</th>
-            <th scope="col">{{ "Notifications"|t('schedule') }}</th>
             <th scope="col">{{ "Last Running Date"|t('schedule') }}</th>
             <th scope="col">{{ 'Enabled'|t('schedule') }}</th>
             <th scope="col">{{ "Logs"|t('schedule') }}</th>
@@ -85,23 +84,6 @@
                                     {% for timer in schedule.timers %}
                                         <li>
                                             <a href="{{ url('schedule/' ~ schedule.id ~ '/timers/' ~ timer.id) }}">{{ timer ~ ' ' ~ timer.cronDescription }}</a>
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                        {% endif %}
-                    </td>
-                    <td data-title="{{ 'Notifications'|t('schedule') }}">
-                        {% if schedule.notifications|length == 0 %}
-                            <a href="{{ url('schedule/' ~ schedule.id ~ '/notifications') }}">{{ "Edit Notifications"|t('schedule') }}</a>
-                        {% else %}
-                            <a href="{{ url('schedule/' ~ schedule.id ~ '/notifications') }}">{{ "Edit Notifications ({count})"|t('schedule', { count: schedule.notifications|length }) }}</a>
-                            <a class="menubtn" title="{{ 'Timers'|t('schedule') }}"></a>
-                            <div class="menu">
-                                <ul>
-                                    {% for notification in schedule.notifications %}
-                                        <li>
-                                            <a href="{{ url('schedule/' ~ schedule.id ~ '/notifications/' ~ notification.id) }}">{{ notification.name }}</a>
                                         </li>
                                     {% endfor %}
                                 </ul>
