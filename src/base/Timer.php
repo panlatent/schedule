@@ -1,9 +1,8 @@
 <?php
-/**
- * Schedule plugin for CraftCMS 3
+/*
+ * Schedule plugin for CraftCMS
  *
- * @link      https://panlatent.com/
- * @copyright Copyright (c) 2018 panlatent@gmail.com
+ * https://github.com/panlatent/schedule
  */
 
 namespace panlatent\schedule\base;
@@ -52,7 +51,7 @@ abstract class Timer extends SavableComponent implements TimerInterface
     /**
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         $rules = parent::rules();
         $rules[] = [['scheduleId', 'enabled'], 'required'];

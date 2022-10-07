@@ -1,14 +1,14 @@
 <?php
-/**
- * Schedule plugin for CraftCMS 3
+/*
+ * Schedule plugin for CraftCMS
  *
- * @link      https://panlatent.com/
- * @copyright Copyright (c) 2018 panlatent@gmail.com
+ * https://github.com/panlatent/schedule
  */
 
 namespace panlatent\schedule;
 
 use Craft;
+use craft\base\Model;
 use craft\events\RegisterUserPermissionsEvent;
 use craft\helpers\UrlHelper;
 use craft\services\UserPermissions;
@@ -49,12 +49,22 @@ class Plugin extends \craft\base\Plugin
     /**
      * @var string
      */
-    public $schemaVersion = '0.3.3';
+    public string $schemaVersion = '0.4.0';
 
     /**
      * @var string
      */
-    public $t9nCategory = 'schedule';
+    public ?string $t9nCategory = 'schedule';
+
+    /**
+     * @var bool
+     */
+    public bool $hasCpSettings = true;
+
+    /**
+     * @var bool
+     */
+    public bool $hasCpSection = true;
 
     // Public Methods
     // =========================================================================
@@ -91,7 +101,7 @@ class Plugin extends \craft\base\Plugin
     /**
      * @inheritdoc
      */
-    public function getCpNavItem()
+    public function getCpNavItem(): ?array
     {
         $ret = parent::getCpNavItem();
 
@@ -129,7 +139,7 @@ class Plugin extends \craft\base\Plugin
     /**
      * @inheritdoc
      */
-    public function getSettingsResponse()
+    public function getSettingsResponse(): mixed
     {
         return Craft::$app->getResponse()->redirect(UrlHelper::cpUrl('schedule/settings'));
     }
@@ -140,7 +150,7 @@ class Plugin extends \craft\base\Plugin
     /**
      * @return Settings
      */
-    protected function createSettingsModel(): Settings
+    protected function createSettingsModel(): ?Model
     {
         return new Settings();
     }
@@ -154,13 +164,16 @@ class Plugin extends \craft\base\Plugin
     private function _registerUserPermissions()
     {
         Event::on(UserPermissions::class, UserPermissions::EVENT_REGISTER_PERMISSIONS, function(RegisterUserPermissionsEvent $event) {
-            $event->permissions[Craft::t('schedule', 'Schedules')] = [
-                Permissions::MANAGE_SCHEDULES => [
-                    'label' => Craft::t('schedule', 'Manage Schedules'),
-                ],
-                Permissions::MANAGE_LOGS => [
-                    'label' => Craft::t('schedule', 'Manage Logs'),
-                ],
+            $event->permissions[] = [
+                'heading' => Craft::t('schedule', 'Schedules'),
+                'permissions' => [
+                    Permissions::MANAGE_SCHEDULES => [
+                        'label' => Craft::t('schedule', 'Manage Schedules'),
+                    ],
+                    Permissions::MANAGE_LOGS => [
+                        'label' => Craft::t('schedule', 'Manage Logs'),
+                    ],
+                ]
             ];
         });
     }

@@ -1,9 +1,8 @@
 <?php
-/**
- * Schedule plugin for CraftCMS 3
+/*
+ * Schedule plugin for CraftCMS
  *
- * @link      https://panlatent.com/
- * @copyright Copyright (c) 2018 panlatent@gmail.com
+ * https://github.com/panlatent/schedule
  */
 
 namespace panlatent\schedule\timers;
@@ -36,7 +35,7 @@ class Custom extends Timer
     /**
      * @inheritdoc
      */
-    public function getSettingsHtml()
+    public function getSettingsHtml(): ?string
     {
         return Craft::$app->getView()->renderTemplate('schedule/_components/timers/Custom', [
             'minute' => $this->minute,

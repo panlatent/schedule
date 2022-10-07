@@ -1,9 +1,8 @@
 <?php
-/**
- * Schedule plugin for CraftCMS 3
+/*
+ * Schedule plugin for CraftCMS
  *
- * @link      https://panlatent.com/
- * @copyright Copyright (c) 2018 panlatent@gmail.com
+ * https://github.com/panlatent/schedule
  */
 
 namespace panlatent\schedule\controllers;
@@ -57,7 +56,7 @@ class SchedulesController extends Controller
             ]);
         }
 
-        Craft::$app->getSession()->setName(Craft::t('schedule', 'Group saved.'));
+        Craft::$app->getSession()->setNotice(Craft::t('schedule', 'Group saved.'));
 
         return $this->asJson([
             'success' => true,

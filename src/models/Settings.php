@@ -1,16 +1,15 @@
 <?php
-/**
- * Schedule plugin for CraftCMS 3
+/*
+ * Schedule plugin for CraftCMS
  *
- * @link      https://panlatent.com/
- * @copyright Copyright (c) 2018 panlatent@gmail.com
+ * https://github.com/panlatent/schedule
  */
 
 namespace panlatent\schedule\models;
 
 use Craft;
+use craft\base\Model;
 use panlatent\schedule\validators\PhpBinaryValidator;
-use yii\base\Model;
 
 /**
  * Class Settings
@@ -60,7 +59,7 @@ class Settings extends Model
     /**
      * @inheritdoc
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['cliPath', 'customName', 'customCpNavName', 'slackApiToken'], 'string'],

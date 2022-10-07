@@ -31,6 +31,10 @@ To install the plugin, follow these instructions.
 
         composer require panlatent/schedule
 
+   The plugin supports CraftCMS 4 since version 0.4, CraftCMS 3 requires version 0.3.x:
+
+        composer require "panlatent/schedule:^0.3.2"
+
 3. In the Control Panel, go to Settings → Plugins and click the “Install” button for Schedule.
 
 4. Add a record to system crontab:

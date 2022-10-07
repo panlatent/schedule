@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Updated
 ### Fixed
 
+## [0.4.0] - 2022-06-20
+### Updated
+- Craft 4 Support.
+
 ## [0.3.2] - 2021-12-09
 ### Added
 - Add **headers** and **url parameters** settings to **Http Request** schedule.
