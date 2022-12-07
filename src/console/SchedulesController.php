@@ -7,6 +7,8 @@
 
 namespace panlatent\schedule\console;
 
+use Carbon\CarbonInterval;
+use Carbon\Exceptions\InvalidArgumentException;
 use Craft;
 use Carbon\Carbon;
 use omnilight\scheduling\Event;
@@ -36,6 +38,11 @@ class SchedulesController extends Controller
      */
     public $force;
 
+    /**
+     * @var string|null Time offset for log clearing.
+     */
+    public $offset;
+
     // Public Methods
     // =========================================================================
 
@@ -49,6 +56,9 @@ class SchedulesController extends Controller
             case 'run': // no break
             case 'listen':
                 $options[] = 'force';
+                break;
+            case 'clear-logs':
+                $options[] = 'offset';
                 break;
         }
 
@@ -134,6 +144,35 @@ class SchedulesController extends Controller
         $this->triggerCronCall();
     }
 
+    /**
+     * Clear schedules logs with an optional time offset.
+     *
+     * @return int
+     */
+    public function actionClearLogs()
+    {
+        if($this->hasOffset()) {
+            if(! $this->validOffset()) {
+                $this->stderr("'{$this->offset}' is not a valid offset.\n", Console::FG_RED);
+
+                return 0;
+            }
+
+            Plugin::$plugin->getLogs()->deleteLogsByDateCreated(
+                Carbon::now()->subtract($this->offset)
+            );
+
+            $interval = CarbonInterval::fromString($this->offset);
+            $this->stdout("Deleted all logs older than {$interval->forHumans()} \n", Console::FG_GREEN);
+        } else {
+            Plugin::$plugin->getLogs()->deleteAllLogs();
+
+            $this->stdout("Deleted all logs \n", Console::FG_GREEN);
+        }
+
+        return 0;
+    }
+
     protected function triggerCronCall(array $events = null)
     {
         $this->stdout("Running scheduler \n");
@@ -161,5 +200,27 @@ class SchedulesController extends Controller
     {
         $current = Carbon::now();
         return 60 - $current->second;
+    }
+
+    /**
+     * @return bool
+     */
+    protected function hasOffset(): bool
+    {
+        return ! is_null($this->offset);
+    }
+
+    /**
+     * @return bool
+     */
+    protected function validOffset(): bool
+    {
+        try {
+            Carbon::now()->subtract($this->offset);
+
+            return true;
+        } catch(InvalidArgumentException $e) {
+            return false;
+        }
     }
 }
