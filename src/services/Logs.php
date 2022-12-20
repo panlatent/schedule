@@ -7,6 +7,7 @@
 
 namespace panlatent\schedule\services;
 
+use Carbon\Carbon;
 use Craft;
 use craft\db\Query;
 use craft\helpers\Db;
@@ -111,6 +112,22 @@ class Logs extends Component
             ->createCommand()
             ->delete(Table::SCHEDULELOGS, [
                 'scheduleId' => $scheduleId,
+            ])
+            ->execute();
+
+        return true;
+    }
+
+    /**
+     * @param Carbon $datetime
+     * @return bool
+     */
+    public function deleteLogsByDateCreated($datetime): bool
+    {
+        Craft::$app->getDb()
+            ->createCommand()
+            ->delete(Table::SCHEDULELOGS, [
+                '<=', 'dateCreated', $datetime,
             ])
             ->execute();
 

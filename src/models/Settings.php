@@ -9,6 +9,7 @@ namespace panlatent\schedule\models;
 
 use Craft;
 use craft\base\Model;
+use panlatent\schedule\validators\CarbonStringIntervalValidator;
 use panlatent\schedule\validators\PhpBinaryValidator;
 
 /**
@@ -38,6 +39,11 @@ class Settings extends Model
     public $customCpNavName;
 
     /**
+     * @var string|null
+     */
+    public $logExpireAfter;
+
+    /**
      * @deprecated
      * @var bool
      */
@@ -52,9 +58,10 @@ class Settings extends Model
     public function rules(): array
     {
         return [
-            [['cliPath', 'customName', 'customCpNavName'], 'string'],
+            [['cliPath', 'customName', 'customCpNavName', 'logExpireAfter'], 'string'],
             [['modifyPluginName'], 'boolean'],
             [['cliPath'], PhpBinaryValidator::class, 'minVersion' => '7.1', 'allowParseEnv' => true],
+            [['logExpireAfter'], CarbonStringIntervalValidator::class],
         ];
     }
 

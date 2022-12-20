@@ -7,13 +7,16 @@
 
 namespace panlatent\schedule\console;
 
+use Carbon\CarbonInterval;
 use Craft;
 use Carbon\Carbon;
 use omnilight\scheduling\Event;
 use panlatent\schedule\base\Schedule;
 use panlatent\schedule\Plugin;
+use panlatent\schedule\validators\CarbonStringIntervalValidator;
 use yii\console\Controller;
 use yii\helpers\Console;
+use yii\validators\Validator;
 
 /**
  * Class ScheduleController
@@ -36,6 +39,16 @@ class SchedulesController extends Controller
      */
     public $force;
 
+    /**
+     * @var bool|null Clear all logs.
+     */
+    public $all;
+
+    /**
+     * @var string|null Expiry offset for log clearing.
+     */
+    public $expire;
+
     // Public Methods
     // =========================================================================
 
@@ -49,6 +62,10 @@ class SchedulesController extends Controller
             case 'run': // no break
             case 'listen':
                 $options[] = 'force';
+                break;
+            case 'clear-logs':
+                $options[] = 'all';
+                $options[] = 'expire';
                 break;
         }
 
@@ -132,6 +149,43 @@ class SchedulesController extends Controller
         $this->stdout("Waiting $waitSeconds seconds for next run of scheduler\n");
         sleep($waitSeconds);
         $this->triggerCronCall();
+    }
+
+    /**
+     * Clear schedules logs with an optional time offset.
+     *
+     * @return void
+     */
+    public function actionClearLogs()
+    {
+        if($this->all) {
+            Plugin::$plugin->getLogs()->deleteAllLogs();
+            $this->stdout("Deleted all logs \n", Console::FG_GREEN);
+
+            return;
+        }
+
+        if(Plugin::getInstance()->getSettings()->logExpireAfter || $this->expire) {
+            $expire = $this->expire ?: Plugin::getInstance()->getSettings()->logExpireAfter;
+            $validator = new CarbonStringIntervalValidator;
+
+            if($validator->validate($expire, $error)) {
+                Plugin::$plugin->getLogs()->deleteLogsByDateCreated(
+                    Carbon::now()->subtract($expire)
+                );
+
+                $interval = CarbonInterval::make($expire);
+                $this->stdout("Deleted all logs older than {$interval->forHumans()} \n", Console::FG_GREEN);
+
+                return;
+            }
+
+            $this->stderr($error .  ".\n", Console::FG_RED);
+
+            return;
+        }
+
+        $this->stdout("Provide the expire or all option to use this command. \n", Console::FG_YELLOW);
     }
 
     protected function triggerCronCall(array $events = null)
