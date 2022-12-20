@@ -181,7 +181,11 @@ class SchedulesController extends Controller
             }
 
             $this->stderr($error .  ".\n", Console::FG_RED);
+
+            return;
         }
+
+        $this->stdout("Provide the expire or all option to use this command. \n", Console::FG_YELLOW);
     }
 
     protected function triggerCronCall(array $events = null)
