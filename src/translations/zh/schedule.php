@@ -111,4 +111,6 @@ return [
     'Add Header Value' => '添加首部值',
     'Add URL Parameter' => '添加 URL 参数',
     'Add Value' => '添加值',
+    'Expiry threshold' => '????',
+    'Default expiry time used when calling the `schedules/clear-logs` command.' => '???? `schedules/clear-logs`',
 ];

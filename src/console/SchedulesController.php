@@ -8,14 +8,15 @@
 namespace panlatent\schedule\console;
 
 use Carbon\CarbonInterval;
-use Carbon\Exceptions\InvalidArgumentException;
 use Craft;
 use Carbon\Carbon;
 use omnilight\scheduling\Event;
 use panlatent\schedule\base\Schedule;
 use panlatent\schedule\Plugin;
+use panlatent\schedule\validators\CarbonStringIntervalValidator;
 use yii\console\Controller;
 use yii\helpers\Console;
+use yii\validators\Validator;
 
 /**
  * Class ScheduleController
@@ -39,9 +40,14 @@ class SchedulesController extends Controller
     public $force;
 
     /**
-     * @var string|null Time offset for log clearing.
+     * @var bool|null Clear all logs.
      */
-    public $offset;
+    public $all;
+
+    /**
+     * @var string|null Expiry offset for log clearing.
+     */
+    public $expire;
 
     // Public Methods
     // =========================================================================
@@ -58,7 +64,8 @@ class SchedulesController extends Controller
                 $options[] = 'force';
                 break;
             case 'clear-logs':
-                $options[] = 'offset';
+                $options[] = 'all';
+                $options[] = 'expire';
                 break;
         }
 
@@ -147,30 +154,34 @@ class SchedulesController extends Controller
     /**
      * Clear schedules logs with an optional time offset.
      *
-     * @return int
+     * @return void
      */
     public function actionClearLogs()
     {
-        if($this->hasOffset()) {
-            if(! $this->validOffset()) {
-                $this->stderr("'{$this->offset}' is not a valid offset.\n", Console::FG_RED);
-
-                return 0;
-            }
-
-            Plugin::$plugin->getLogs()->deleteLogsByDateCreated(
-                Carbon::now()->subtract($this->offset)
-            );
-
-            $interval = CarbonInterval::fromString($this->offset);
-            $this->stdout("Deleted all logs older than {$interval->forHumans()} \n", Console::FG_GREEN);
-        } else {
+        if($this->all) {
             Plugin::$plugin->getLogs()->deleteAllLogs();
-
             $this->stdout("Deleted all logs \n", Console::FG_GREEN);
+
+            return;
         }
 
-        return 0;
+        if(Plugin::getInstance()->getSettings()->logExpireAfter || $this->expire) {
+            $expire = $this->expire ?: Plugin::getInstance()->getSettings()->logExpireAfter;
+            $validator = new CarbonStringIntervalValidator;
+
+            if($validator->validate($expire, $error)) {
+                Plugin::$plugin->getLogs()->deleteLogsByDateCreated(
+                    Carbon::now()->subtract($expire)
+                );
+
+                $interval = CarbonInterval::make($expire);
+                $this->stdout("Deleted all logs older than {$interval->forHumans()} \n", Console::FG_GREEN);
+
+                return;
+            }
+
+            $this->stderr($error .  ".\n", Console::FG_RED);
+        }
     }
 
     protected function triggerCronCall(array $events = null)
@@ -200,27 +211,5 @@ class SchedulesController extends Controller
     {
         $current = Carbon::now();
         return 60 - $current->second;
-    }
-
-    /**
-     * @return bool
-     */
-    protected function hasOffset(): bool
-    {
-        return ! is_null($this->offset);
-    }
-
-    /**
-     * @return bool
-     */
-    protected function validOffset(): bool
-    {
-        try {
-            Carbon::now()->subtract($this->offset);
-
-            return true;
-        } catch(InvalidArgumentException $e) {
-            return false;
-        }
     }
 }
