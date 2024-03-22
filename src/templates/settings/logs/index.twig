@@ -1,0 +1,26 @@
+{% extends "schedule/_layouts/settings" %}
+
+{% set fullPageFomr = true %}
+{% set settings = craft.schedule.settings %}
+
+{% import "_includes/forms" as forms %}
+
+{% block content %}
+    <h2>{{ "Log Settings"|t('schedule') }}</h2>
+
+    <form method="post" accept-charset="UTF-8">
+        <input type="hidden" name="action" value="schedule/settings/save-general">
+        {{ csrfInput() }}
+
+        {{ forms.textField({
+            label: "Expiry threshold"|t('schedule'),
+            instructions: 'Default expiry time used when calling the `schedules/clear-logs` command.'|t('schedule'),
+            id: "logExpireAfter",
+            name: "logExpireAfter",
+            value: settings.logExpireAfter,
+            errors: settings.getErrors('logExpireAfter'),
+        }) }}
+
+        <button class="btn submit">{{ "Save"|t('app') }}</button>
+    </form>
+{% endblock %}
