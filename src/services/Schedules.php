@@ -276,7 +276,7 @@ class Schedules extends Component
             ]));
         }
 
-        Craft::$app->getDb()->createCommand()->delete('{{%schedulegroups}}', [
+        Craft::$app->getDb()->createCommand()->delete(Table::SCHEDULEGROUPS, [
             'id' => $group->id,
         ])->execute();
 
@@ -605,7 +605,7 @@ class Schedules extends Component
         $transaction = $db->beginTransaction();
         try {
             foreach ($scheduleIds as $scheduleOrder => $scheduleId) {
-                $db->createCommand()->update('{{%schedules}}', [
+                $db->createCommand()->update(Table::SCHEDULES, [
                     'sortOrder' => $scheduleOrder,
                 ], [
                     'id' => $scheduleId,
@@ -642,7 +642,7 @@ class Schedules extends Component
 
         $transaction = $db->beginTransaction();
         try {
-            $db->createCommand()->delete('{{%schedules}}', [
+            $db->createCommand()->delete(Table::SCHEDULES, [
                 'id' => $schedule->id,
             ])->execute();
 
@@ -674,7 +674,7 @@ class Schedules extends Component
     {
         return (new Query())
             ->select(['id', 'name'])
-            ->from('{{%schedulegroups}}');
+            ->from(Table::SCHEDULEGROUPS);
     }
 
     /**
@@ -701,7 +701,7 @@ class Schedules extends Component
                 'schedules.dateUpdated',
                 'schedules.uid',
             ])
-            ->from('{{%schedules}} schedules')
+            ->from(['schedules' => Table::SCHEDULES])
             ->orderBy('schedules.sortOrder');
     }
 
