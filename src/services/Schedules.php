@@ -10,6 +10,7 @@ namespace panlatent\schedule\services;
 use Craft;
 use craft\errors\MissingComponentException;
 use craft\events\RegisterComponentTypesEvent;
+use craft\helpers\ArrayHelper;
 use craft\helpers\Component as ComponentHelper;
 use craft\helpers\Db;
 use craft\helpers\Json;
@@ -30,6 +31,7 @@ use panlatent\schedule\schedules\Event;
 use panlatent\schedule\schedules\HttpRequest;
 use panlatent\schedule\schedules\MissingSchedule;
 use panlatent\schedule\schedules\Queue;
+use Throwable;
 use yii\base\Component;
 use yii\db\Expression;
 use yii\db\Query;
@@ -96,37 +98,17 @@ class Schedules extends Component
     /**
      * @var bool Force fetch groups or schedules. (Not cache)
      */
-    public $force = false;
-
-    /**
-     * @var bool
-     */
-    private $_fetchedAllGroups = false;
+    public bool $force = false;
 
     /**
      * @var ScheduleGroup[]|null
      */
-    private $_groupsById;
-
-    /**
-     * @var ScheduleGroup[]|null
-     */
-    private $_groupsByName;
-
-    /**
-     * @var bool
-     */
-    private $_fetchedAllSchedules = false;
+    private ?array $_groups = null;
 
     /**
      * @var ScheduleInterface[]|null
      */
-    private $_schedulesById;
-
-    /**
-     * @var ScheduleInterface[]|null
-     */
-    private $_schedulesByHandle;
+    private ?array $_schedules = null;
 
     /**
      * Returns all category groups.
@@ -135,25 +117,16 @@ class Schedules extends Component
      */
     public function getAllGroups(): array
     {
-        if ($this->_fetchedAllGroups) {
-            return array_values($this->_groupsById);
+        if ($this->_groups === null) {
+            $this->_groups = [];
+            $results = $this->_createGroupQuery()->all();
+            foreach ($results as $result) {
+                $group = $this->createGroup($result);
+                $this->_groups[] = $group;
+            }
         }
 
-        $this->_groupsById = [];
-
-        $results = $this->_createGroupQuery()->all();
-
-        foreach ($results as $result) {
-            $group = $this->createGroup($result);
-            $this->_groupsById[$group->id] = $group;
-            $this->_groupsByName[$group->name] = $group;
-        }
-
-        if (!$this->force) {
-            $this->_fetchedAllGroups = true;
-        }
-
-        return array_values($this->_groupsById);
+        return$this->_groups;
     }
 
     /**
@@ -162,21 +135,9 @@ class Schedules extends Component
      * @param int $groupId
      * @return ScheduleGroup|null
      */
-    public function getGroupById(int $groupId)
+    public function getGroupById(int $groupId): ?ScheduleGroup
     {
-        if ($this->_groupsById && array_key_exists($groupId, $this->_groupsById)) {
-            return $this->_groupsById[$groupId];
-        }
-
-        if ($this->_fetchedAllGroups) {
-            return null;
-        }
-
-        $result = $this->_createGroupQuery()
-            ->where(['id' => $groupId])
-            ->one();
-
-        return $this->_groupsById[$groupId] = $result ? $this->createGroup($result) : null;
+        return ArrayHelper::firstWhere($this->getAllGroups(), 'id', $groupId);
     }
 
     /**
@@ -185,21 +146,9 @@ class Schedules extends Component
      * @param string $name
      * @return ScheduleGroup|null
      */
-    public function getGroupByHandle(string $name)
+    public function getGroupByHandle(string $name): ?ScheduleGroup
     {
-        if ($this->_groupsByName && array_key_exists($name, $this->_groupsByName)) {
-            return $this->_groupsByName[$name];
-        }
-
-        if ($this->_fetchedAllGroups) {
-            return null;
-        }
-
-        $result = $this->_createGroupQuery()
-            ->where(['handle' => $name])
-            ->one();
-
-        return $this->_groupsByName[$name] = $result ? $this->createGroup($result) : null;
+        return ArrayHelper::firstWhere($this->getAllGroups(), 'handle', $name);
     }
 
     /**
@@ -208,7 +157,7 @@ class Schedules extends Component
      * @param mixed $config
      * @return ScheduleGroup
      */
-    public function createGroup($config): ScheduleGroup
+    public function createGroup(mixed $config): ScheduleGroup
     {
         return new ScheduleGroup($config);
     }
@@ -250,6 +199,7 @@ class Schedules extends Component
 
         if ($isNewGroup) {
             $group->id = $groupRecord->id;
+            $this->_groups[] = $group;
         }
 
         if ($this->hasEventHandlers(self::EVENT_AFTER_SAVE_GROUP)) {
@@ -318,26 +268,16 @@ class Schedules extends Component
      */
     public function getAllSchedules(): array
     {
-        if ($this->_fetchedAllSchedules) {
-            return array_values($this->_schedulesById);
+        if ($this->_schedules === null) {
+            $this->_schedules = [];
+            $results = $this->_createScheduleQuery()->all();
+            foreach ($results as $result) {
+                $schedule = $this->createSchedule($result);
+                $this->_schedules[] = $schedule;
+            }
         }
 
-        $this->_schedulesById = [];
-        $this->_schedulesByHandle = [];
-
-        $results = $this->_createScheduleQuery()->all();
-        foreach ($results as $result) {
-            /** @var Schedule $schedule */
-            $schedule = $this->createSchedule($result);
-            $this->_schedulesById[$schedule->id] = $schedule;
-            $this->_schedulesByHandle[$schedule->handle] = $schedule;
-        }
-
-        if (!$this->force) {
-            $this->_fetchedAllSchedules = true;
-        }
-
-        return array_values($this->_schedulesById);
+        return $this->_schedules;
     }
 
     /**
@@ -356,70 +296,32 @@ class Schedules extends Component
      */
     public function getSchedulesByGroupId(int $groupId = null): array
     {
-        $schedules = [];
-
-        $results = $this->_createScheduleQuery()
-            ->where(['groupId' => $groupId])
-            ->all();
-
-        foreach ($results as $result) {
-            /** @var Schedule $schedule */
-            $schedule = $this->createSchedule($result);
-            $this->_schedulesById[$schedule->id] = $schedule;
-            $this->_schedulesByHandle[$schedule->handle] = $schedule;
-            $schedules[] = $schedule;
-        }
-
-        return $schedules;
+        return ArrayHelper::where($this->getAllSchedules(), 'groupId', $groupId);
     }
 
     /**
      * @param int $scheduleId
      * @return ScheduleInterface|null
      */
-    public function getScheduleById(int $scheduleId)
+    public function getScheduleById(int $scheduleId): ?ScheduleInterface
     {
-        if ($this->_schedulesById && array_key_exists($scheduleId, $this->_schedulesById)) {
-            return $this->_schedulesById[$scheduleId];
-        }
-
-        if ($this->_fetchedAllSchedules) {
-            return null;
-        }
-
-        $result = $this->_createScheduleQuery()
-            ->where(['id' => $scheduleId])
-            ->one();
-
-        return $this->_schedulesById[$scheduleId] = $result ? $this->createSchedule($result) : null;
+        return ArrayHelper::firstWhere($this->getAllSchedules(), 'id', $scheduleId);
     }
 
     /**
      * @param string $handle
      * @return ScheduleInterface|null
      */
-    public function getScheduleByHandle(string $handle)
+    public function getScheduleByHandle(string $handle): ?ScheduleInterface
     {
-        if ($this->_schedulesByHandle && array_key_exists($handle, $this->_schedulesByHandle)) {
-            return $this->_schedulesByHandle[$handle];
-        }
-
-        if ($this->_fetchedAllSchedules) {
-            return null;
-        }
-
-        $result = $this->_createScheduleQuery()
-            ->where(['handle' => $handle])
-            ->one();
-
-        return $this->_schedulesByHandle[$handle] = $result ? $this->createSchedule($result) : null;
+        return ArrayHelper::firstWhere($this->getAllSchedules(), 'handle', $handle);
     }
 
     /**
-     * @param ScheduleCriteria|array $criteria
+     * @param array|ScheduleCriteria $criteria
      * @return ScheduleInterface[]
      */
-    public function findSchedules($criteria): array
+    public function findSchedules(array|ScheduleCriteria $criteria): array
     {
         if (!$criteria instanceof ScheduleCriteria) {
             $criteria = new ScheduleCriteria($criteria);
@@ -442,10 +344,10 @@ class Schedules extends Component
     }
 
     /**
-     * @param ScheduleCriteria|array $criteria
+     * @param array|ScheduleCriteria $criteria
      * @return ScheduleInterface|null
      */
-    public function findSchedule($criteria)
+    public function findSchedule(array|ScheduleCriteria $criteria): ?ScheduleInterface
     {
         if (!$criteria instanceof ScheduleCriteria) {
             $criteria = new ScheduleCriteria($criteria);
@@ -462,10 +364,10 @@ class Schedules extends Component
     }
 
     /**
-     * @param ScheduleCriteria|array $criteria
+     * @param array|ScheduleCriteria $criteria
      * @return int
      */
-    public function getTotalSchedules($criteria = []): int
+    public function getTotalSchedules(array|ScheduleCriteria $criteria = []): int
     {
         if (!$criteria instanceof ScheduleCriteria) {
             $criteria = new ScheduleCriteria($criteria);
@@ -505,11 +407,11 @@ class Schedules extends Component
      * @param mixed $config
      * @return ScheduleInterface
      */
-    public function createSchedule($config): ScheduleInterface
+    public function createSchedule(mixed $config): ScheduleInterface
     {
         try {
             $schedule = ComponentHelper::createComponent($config, ScheduleInterface::class);
-        } catch (MissingComponentException $exception) {
+        } catch (MissingComponentException) {
             unset($config['type']);
             $schedule = new MissingSchedule($config);
         }
@@ -563,22 +465,19 @@ class Schedules extends Component
             $record->settings = Json::encode($schedule->getSettings());
             $record->enabled = (bool)$schedule->enabled;
             $record->enabledLog = (bool)$schedule->enabledLog;
-
             $record->save(false);
 
-            if ($isNewSchedule) {
-                $schedule->id = $record->id;
-            }
-
             $transaction->commit();
-        } catch (\Throwable $exception) {
+        } catch (Throwable $exception) {
             $transaction->rollBack();
 
             throw $exception;
         }
 
-        $this->_schedulesById[$schedule->id] = $schedule;
-        $this->_schedulesByHandle[$schedule->handle] = $schedule;
+        if ($isNewSchedule) {
+            $schedule->id = $record->id;
+            $this->_schedules[] = $schedule;
+        }
 
         $schedule->afterSave($isNewSchedule);
 
@@ -612,7 +511,7 @@ class Schedules extends Component
                 ])->execute();
             }
             $transaction->commit();
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $transaction->rollBack();
 
             throw $e;
@@ -649,7 +548,7 @@ class Schedules extends Component
             $transaction->commit();
 
             $schedule->afterDelete();
-        } catch (\Throwable $exception) {
+        } catch (Throwable $exception) {
             $transaction->rollBack();
 
             throw $exception;
@@ -709,7 +608,7 @@ class Schedules extends Component
      * @param Query $query
      * @param ScheduleCriteria $criteria
      */
-    private function _applyConditions(Query $query, ScheduleCriteria $criteria)
+    private function _applyConditions(Query $query, ScheduleCriteria $criteria): void
     {
         if ($criteria->enabledLog !== null) {
             $query->andWhere(Db::parseParam('schedules.enabledLog', $criteria->enabledLog));

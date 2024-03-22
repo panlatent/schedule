@@ -20,7 +20,7 @@ class Install extends Migration
     /**
      * @inheritdoc
      */
-    public function safeUp()
+    public function safeUp(): void
     {
         // Schedule Groups
         $this->createTable('{{%schedulegroups}}', [
@@ -110,7 +110,7 @@ class Install extends Migration
     /**
      * @inheritdoc
      */
-    public function safeDown()
+    public function safeDown(): void
     {
         $this->dropTableIfExists('{{%schedulelogs}}');
         $this->dropTableIfExists('{{%scheduletimers}}');

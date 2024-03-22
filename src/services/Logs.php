@@ -28,10 +28,10 @@ class Logs extends Component
     // =========================================================================
 
     /**
-     * @param LogCriteria|array|null $criteria
+     * @param array|LogCriteria|null $criteria
      * @return ScheduleLog[]
      */
-    public function findLogs($criteria): array
+    public function findLogs(array|LogCriteria|null $criteria): array
     {
         if (!$criteria instanceof LogCriteria) {
             $criteria = new LogCriteria($criteria);
@@ -54,10 +54,10 @@ class Logs extends Component
     }
 
     /**
-     * @param LogCriteria|array|null $criteria
+     * @param array|LogCriteria|null $criteria
      * @return ScheduleLog|null
      */
-    public function findLog($criteria)
+    public function findLog(array|LogCriteria|null $criteria): ?ScheduleLog
     {
         if (!$criteria instanceof LogCriteria) {
             $criteria = new LogCriteria($criteria);
@@ -74,10 +74,10 @@ class Logs extends Component
     }
 
     /**
-     * @param LogCriteria|array|null $criteria
+     * @param array|LogCriteria|null $criteria
      * @return int
      */
-    public function getTotalLogs($criteria): int
+    public function getTotalLogs(array|LogCriteria|null $criteria): int
     {
         if (!$criteria instanceof LogCriteria) {
             $criteria = new LogCriteria($criteria);
@@ -92,7 +92,7 @@ class Logs extends Component
      * @param int $logId
      * @return ScheduleLog|null
      */
-    public function getLogById(int $logId)
+    public function getLogById(int $logId): ?ScheduleLog
     {
         $result = $this->_createQuery()
             ->where(['id' => $logId])
@@ -156,7 +156,7 @@ class Logs extends Component
      * @param Query $query
      * @param LogCriteria $criteria
      */
-    private function _applyConditions(Query $query, LogCriteria $criteria)
+    private function _applyConditions(Query $query, LogCriteria $criteria): void
     {
         if ($criteria->scheduleId) {
             $query->andWhere(Db::parseParam('logs.scheduleId', $criteria->scheduleId));

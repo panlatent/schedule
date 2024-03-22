@@ -21,15 +21,15 @@ class ScheduleBuildEvent extends Event
     /**
      * @var Builder|null
      */
-    public $builder;
+    public ?Builder $builder = null;
 
     /**
      * @var array[]|null
      */
-    public $events;
+    public ?array $events = null;
 
     /**
      * @var bool
      */
-    public $isValid = true;
+    public bool $isValid = true;
 }

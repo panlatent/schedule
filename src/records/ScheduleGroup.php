@@ -8,6 +8,7 @@
 namespace panlatent\schedule\records;
 
 use craft\db\ActiveRecord;
+use panlatent\schedule\db\Table;
 
 /**
  * Class ScheduleGroup
@@ -22,8 +23,8 @@ class ScheduleGroup extends ActiveRecord
     /**
      * @inheritdoc
      */
-    public static function tableName()
+    public static function tableName(): string
     {
-        return '{{%schedulegroups}}';
+        return Table::SCHEDULEGROUPS;
     }
 }

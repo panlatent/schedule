@@ -31,14 +31,14 @@ class PrecisionDateTimeHelper
     }
 
     /**
-     * @param string|int $value
+     * @param int|string $value
      * @param bool $setToSystemTimeZone
      * @return DateTime
      */
-    public static function toDateTime($value, bool $setToSystemTimeZone = true): DateTime
+    public static function toDateTime(int|string $value, bool $setToSystemTimeZone = true): DateTime
     {
         $timestamp = substr($value, 0, -3);
-        $datetime = new DateTime("@{$timestamp}");
+        $datetime = new DateTime("@$timestamp");
 
         if ($setToSystemTimeZone) {
             $datetime->setTimezone(new DateTimeZone(Craft::$app->getTimeZone()));
@@ -53,12 +53,12 @@ class PrecisionDateTimeHelper
      * @param bool $setToSystemTimeZone
      * @return string
      */
-    public static function format(string $format, $value, bool $setToSystemTimeZone = true): string
+    public static function format(string $format, mixed $value, bool $setToSystemTimeZone = true): string
     {
         $timestamp = substr($value, 0, -3);
         $microsecond = substr($value, -3);
 
-        $datetime = new DateTime("@{$timestamp}");
+        $datetime = new DateTime("@$timestamp");
         if ($setToSystemTimeZone) {
             $datetime->setTimezone(new DateTimeZone(Craft::$app->getTimeZone()));
         }

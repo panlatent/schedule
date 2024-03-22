@@ -22,7 +22,7 @@ trait Routes
     /**
      * Register Cp URL rule.
      */
-    public function _registerCpRoutes()
+    public function _registerCpRoutes(): void
     {
         Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function (RegisterUrlRulesEvent $event) {
             $event->rules = array_merge($event->rules, [

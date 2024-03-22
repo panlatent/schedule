@@ -17,7 +17,7 @@ class m190423_161829_schedulelogs extends Migration
     /**
      * @inheritdoc
      */
-    public function safeUp()
+    public function safeUp(): void
     {
         $this->createTable('{{%schedulelogs}}', [
             'id' => $this->primaryKey(),
@@ -43,7 +43,7 @@ class m190423_161829_schedulelogs extends Migration
     /**
      * @inheritdoc
      */
-    public function safeDown()
+    public function safeDown(): void
     {
         $this->dropTable('{{%schedulelogs}}');
     }

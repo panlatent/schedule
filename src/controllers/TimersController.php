@@ -63,10 +63,6 @@ class TimersController extends Controller
             $schedule = $timer->getSchedule();
         }
 
-        if (!$schedule) {
-            throw new NotFoundHttpException();
-        }
-
         $allTimerTypes = $timers->getAllTimerTypes();
 
         $timerInstances = [];

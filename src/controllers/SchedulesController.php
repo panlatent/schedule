@@ -83,7 +83,7 @@ class SchedulesController extends Controller
         }
 
         if (!$schedules->deleteGroup($group)) {
-            return $this->asErrorJson(Craft::t('app', 'Couldn’t delete group.', ['name' => $group->name]));
+            return $this->asFailure(Craft::t('app', 'Couldn’t delete group.', ['name' => $group->name]));
         }
 
         return $this->asJson([
@@ -161,7 +161,7 @@ class SchedulesController extends Controller
     public function actionGetScheduleSettingsHtml(string $scheduleType): Response
     {
         if (!class_exists($scheduleType)) {
-            return $this->asErrorJson("schedule class $scheduleType not found");
+            return $this->asFailure("schedule class $scheduleType not found");
         }
 
         /** @var Schedule $schedule */

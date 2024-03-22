@@ -49,32 +49,32 @@ class HttpRequest extends Schedule
     /**
      * @var string
      */
-    public $method = 'get';
+    public string $method = 'get';
 
     /**
      * @var string Request URL default is echo api.
      */
-    public $url = 'https://postman-echo.com/get';
+    public string $url = 'https://postman-echo.com/get';
 
     /**
-     * @var
+     * @var array
      */
-    public $headers;
+    public array $headers = [];
 
     /**
-     * @var
+     * @var array
      */
-    public $urlParams;
-
-    /**
-     * @var string
-     */
-    public $contentType;
+    public array $urlParams = [];
 
     /**
      * @var string
      */
-    public $body;
+    public string $contentType = '';
+
+    /**
+     * @var string
+     */
+    public string $body = '';
 
     // Public Methods
     // =========================================================================

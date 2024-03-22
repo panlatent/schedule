@@ -26,7 +26,7 @@ class MissingSchedule extends Schedule
     /**
      * @inheritdoc
      */
-    public function build(Builder $builder)
+    public function build(Builder $builder): void
     {
         Craft::warning('Missing build a schedule', __METHOD__);
     }

@@ -20,30 +20,30 @@ class ScheduleCriteria extends Model
     /**
      * @var string|null
      */
-    public $search;
+    public ?string $search = null;
 
     /**
      * @var bool|null
      */
-    public $hasLogs;
+    public ?bool $hasLogs = null;
 
     /**
      * @var bool|null
      */
-    public $enabledLog;
+    public ?bool $enabledLog = null;
 
     /**
      * @var string|null
      */
-    public $sortOrder;
+    public ?string $sortOrder = null;
 
     /**
      * @var int|null
      */
-    public $offset;
+    public ?int $offset = null;
 
     /**
      * @var int|null
      */
-    public $limit;
+    public ?int $limit = null;
 }

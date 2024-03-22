@@ -17,7 +17,7 @@ class m190430_082749_advance_schedulelogs_output_type extends Migration
     /**
      * @inheritdoc
      */
-    public function safeUp()
+    public function safeUp(): void
     {
         $this->alterColumn('{{%schedulelogs}}', 'output', $this->mediumText());
     }
@@ -25,7 +25,7 @@ class m190430_082749_advance_schedulelogs_output_type extends Migration
     /**
      * @inheritdoc
      */
-    public function safeDown()
+    public function safeDown(): void
     {
         $this->alterColumn('{{%schedulelogs}}', 'output', $this->text());
     }

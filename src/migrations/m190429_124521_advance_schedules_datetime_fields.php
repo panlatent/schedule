@@ -19,7 +19,7 @@ class m190429_124521_advance_schedules_datetime_fields extends Migration
     /**
      * @inheritdoc
      */
-    public function safeUp()
+    public function safeUp(): void
     {
         $this->addColumn('{{%schedules}}', 'lastStartedTime', $this->bigInteger()->after('settings'));
         $this->addColumn('{{%schedules}}', 'lastFinishedTime', $this->bigInteger()->after('lastStartedTime'));

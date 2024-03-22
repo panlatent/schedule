@@ -8,6 +8,7 @@
 namespace panlatent\schedule\validators;
 
 use Craft;
+use craft\helpers\App;
 use Symfony\Component\Process\Process;
 use yii\validators\Validator;
 
@@ -25,17 +26,17 @@ class PhpBinaryValidator extends Validator
     /**
      * @var string|null php max version
      */
-    public $maxVersion;
+    public ?string $maxVersion = null;
 
     /**
      * @var string|null php min version
      */
-    public $minVersion;
+    public ?string $minVersion = null;
 
     /**
      * @var bool Use Craft::parseEnv
      */
-    public $allowParseEnv = false;
+    public bool $allowParseEnv = false;
 
     // Public Methods
     // =========================================================================
@@ -43,10 +44,10 @@ class PhpBinaryValidator extends Validator
     /**
      * @inheritdoc
      */
-    public function validateValue($value)
+    public function validateValue($value): ?array
     {
         if ($this->allowParseEnv) {
-            $value = Craft::parseEnv($value);
+            $value = App::parseEnv($value);
         }
 
         $process = new Process([$value, '-v']);
@@ -61,7 +62,7 @@ class PhpBinaryValidator extends Validator
         }
 
         $output = $process->getOutput();
-        if (!preg_match('#^PHP\s+(\d+(?:\.[\S])+)#', $output, $match)) {
+        if (!preg_match('#^PHP\s+(\d+(?:\.\S)+)#', $output, $match)) {
             return ['Unknown PHP version'];
         }
 

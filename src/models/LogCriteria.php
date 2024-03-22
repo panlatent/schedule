@@ -24,25 +24,25 @@ class LogCriteria extends Model
     /**
      * @var int[]|int|null
      */
-    public $scheduleId;
+    public array|int|null $scheduleId = null;
 
     /**
      * @var Schedule|string|null
      */
-    public $schedule;
+    public Schedule|string|null $schedule = null;
 
     /**
      * @var string|null
      */
-    public $sortOrder;
+    public ?string $sortOrder = null;
 
     /**
      * @var int|null
      */
-    public $offset;
+    public ?int $offset = null;
 
     /**
      * @var int|null
      */
-    public $limit;
+    public ?int $limit = null;
 }

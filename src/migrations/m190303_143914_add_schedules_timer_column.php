@@ -17,7 +17,7 @@ class m190303_143914_add_schedules_timer_column extends Migration
     /**
      * @inheritdoc
      */
-    public function safeUp()
+    public function safeUp(): void
     {
         $this->addColumn('{{%schedules}}', 'timer', $this->string()->notNull()->after('user'));
     }
@@ -25,7 +25,7 @@ class m190303_143914_add_schedules_timer_column extends Migration
     /**
      * @inheritdoc
      */
-    public function safeDown()
+    public function safeDown(): void
     {
         $this->dropColumn('{{%schedules}}', 'timer');
     }

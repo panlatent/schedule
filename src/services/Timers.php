@@ -70,12 +70,12 @@ class Timers extends Component
     /**
      * @var bool
      */
-    private $_fetchedAllTimers = false;
+    private bool $_fetchedAllTimers = false;
 
     /**
      * @var TimerInterface[]|null
      */
-    private $_timersById;
+    private ?array $_timersById = null;
 
     // Public Methods
     // =========================================================================
@@ -138,10 +138,10 @@ class Timers extends Component
      * @param int $scheduleId
      * @return TimerInterface[]
      */
-    public function getTimersByScheduleId(int $scheduleId)
+    public function getTimersByScheduleId(int $scheduleId): array
     {
         if ($this->_fetchedAllTimers) {
-            return ArrayHelper::filterByValue($this->getAllTimers(), 'scheduleId', $scheduleId);
+            return ArrayHelper::firstWhere($this->getAllTimers(), 'scheduleId', $scheduleId);
         }
 
         $ret = [];
@@ -151,7 +151,6 @@ class Timers extends Component
             ->all();
 
         foreach ($results as $result) {
-            /** @var Timer $timer */
             $timer = $this->createTimer($result);
             $ret[] = $this->_timersById[$timer->id] = $timer;
         }
@@ -163,7 +162,7 @@ class Timers extends Component
      * @param int $id
      * @return TimerInterface|null
      */
-    public function getTimerById(int $id)
+    public function getTimerById(int $id): ?TimerInterface
     {
         if ($this->_timersById && array_key_exists($id, $this->_timersById)) {
             return $this->_timersById[$id];
@@ -184,11 +183,11 @@ class Timers extends Component
      * @param mixed $config
      * @return TimerInterface
      */
-    public function createTimer($config): TimerInterface
+    public function createTimer(mixed $config): TimerInterface
     {
         try {
             $timer = ComponentHelper::createComponent($config, TimerInterface::class);
-        } catch (MissingComponentException $exception) {
+        } catch (MissingComponentException) {
             unset($config['type']);
             $timer = new MissingTimer($config);
         }
@@ -390,7 +389,7 @@ class Timers extends Component
      * @param mixed $express
      * @return string
      */
-    private function _normalizeCronExpress($express): string
+    private function _normalizeCronExpress(mixed $express): string
     {
         return ($express !== '' && $express !== null) ? $express : '*';
     }

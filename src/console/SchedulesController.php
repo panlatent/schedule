@@ -34,7 +34,7 @@ class SchedulesController extends Controller
     /**
      * @var bool|null Force flush schedule repository.
      */
-    public $force;
+    public ?bool $force = null;
 
     // Public Methods
     // =========================================================================
@@ -42,7 +42,7 @@ class SchedulesController extends Controller
     /**
      * @inheritdoc
      */
-    public function options($actionID)
+    public function options($actionID): array
     {
         $options = parent::options($actionID);
         switch ($actionID) {
@@ -58,7 +58,7 @@ class SchedulesController extends Controller
     /**
      * List all schedules.
      */
-    public function actionList()
+    public function actionList(): void
     {
         $schedules = Plugin::$plugin->getSchedules();
 
@@ -67,7 +67,7 @@ class SchedulesController extends Controller
             $this->stdout(Craft::t('schedule', 'Ungrouped') . ": \n", Console::FG_YELLOW);
             foreach ($ungroupedSchedules as $schedule) {
                 /** @var Schedule $schedule */
-                $this->stdout(Console::renderColoredString("    > #{$i} %c{$schedule->handle}\n"));
+                $this->stdout(Console::renderColoredString("    > #$i %c{$schedule->handle}\n"));
                 ++$i;
             }
         }
@@ -77,7 +77,7 @@ class SchedulesController extends Controller
             foreach ($group->getSchedules() as $schedule) {
                 // @var Schedule $schedule
 
-                $this->stdout(Console::renderColoredString("    > #{$i} %c{$schedule->handle}\n"));
+                $this->stdout(Console::renderColoredString("    > #$i %c{$schedule->handle}\n"));
                 ++$i;
             }
         }
@@ -88,7 +88,7 @@ class SchedulesController extends Controller
      *
      * @param Event[]|null $events
      */
-    public function actionRun(array $events = null)
+    public function actionRun(array $events = null): void
     {
         if ($events === null) {
             $events = Plugin::$plugin->createBuilder()
@@ -118,7 +118,7 @@ class SchedulesController extends Controller
      *
      * @return void
      */
-    public function actionListen()
+    public function actionListen(): void
     {
         if ($this->force === null) {
             $this->force = true;
@@ -134,7 +134,7 @@ class SchedulesController extends Controller
         $this->triggerCronCall();
     }
 
-    protected function triggerCronCall(array $events = null)
+    protected function triggerCronCall(array $events = null): void
     {
         $this->stdout("Running scheduler \n");
         $this->actionRun($events);

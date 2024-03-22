@@ -7,8 +7,8 @@
 
 namespace panlatent\schedule\models;
 
-use Craft;
 use craft\base\Model;
+use craft\helpers\App;
 use panlatent\schedule\validators\PhpBinaryValidator;
 
 /**
@@ -25,23 +25,23 @@ class Settings extends Model
     /**
      * @var string PHP binary path.
      */
-    public $cliPath = 'php';
+    public string $cliPath = 'php';
 
     /**
      * @var string|null
      */
-    public $customName;
+    public ?string $customName = null;
 
     /**
      * @var string|null
      */
-    public $customCpNavName;
+    public ?string $customCpNavName = null;
 
     /**
      * @deprecated
      * @var bool
      */
-    public $modifyPluginName = false;
+    public bool $modifyPluginName = false;
 
     // Public Methods
     // =========================================================================
@@ -63,6 +63,6 @@ class Settings extends Model
      */
     public function getCliPath(): string
     {
-        return Craft::parseEnv($this->cliPath) ?: 'php';
+        return App::parseEnv($this->cliPath) ?: 'php';
     }
 }

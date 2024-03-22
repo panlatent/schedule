@@ -12,6 +12,7 @@ use craft\base\Model;
 use craft\events\RegisterUserPermissionsEvent;
 use craft\helpers\UrlHelper;
 use craft\services\UserPermissions;
+use craft\web\Response;
 use craft\web\twig\variables\CraftVariable;
 use panlatent\schedule\console\SchedulesController;
 use panlatent\schedule\models\Settings;
@@ -44,15 +45,15 @@ class Plugin extends \craft\base\Plugin
     /**
      * @var Plugin
      */
-    public static $plugin;
+    public static Plugin $plugin;
 
     /**
      * @var string
      */
-    public string $schemaVersion = '0.4.0';
+    public string $schemaVersion = '0.5.0';
 
     /**
-     * @var string
+     * @var string|null
      */
     public ?string $t9nCategory = 'schedule';
 
@@ -72,7 +73,7 @@ class Plugin extends \craft\base\Plugin
     /**
      * Init.
      */
-    public function init()
+    public function init(): void
     {
         parent::init();
         self::$plugin = $this;
@@ -139,7 +140,7 @@ class Plugin extends \craft\base\Plugin
     /**
      * @inheritdoc
      */
-    public function getSettingsResponse(): mixed
+    public function getSettingsResponse(): Response
     {
         return Craft::$app->getResponse()->redirect(UrlHelper::cpUrl('schedule/settings'));
     }
@@ -148,7 +149,7 @@ class Plugin extends \craft\base\Plugin
     // =========================================================================
 
     /**
-     * @return Settings
+     * @return Model|null
      */
     protected function createSettingsModel(): ?Model
     {
@@ -161,7 +162,7 @@ class Plugin extends \craft\base\Plugin
     /**
      * Register user permissions.
      */
-    private function _registerUserPermissions()
+    private function _registerUserPermissions(): void
     {
         Event::on(UserPermissions::class, UserPermissions::EVENT_REGISTER_PERMISSIONS, function(RegisterUserPermissionsEvent $event) {
             $event->permissions[] = [
@@ -181,7 +182,7 @@ class Plugin extends \craft\base\Plugin
     /**
      * Register the plugin template variable.
      */
-    private function _registerVariables()
+    private function _registerVariables(): void
     {
         Event::on(CraftVariable::class, CraftVariable::EVENT_INIT, function(Event $event) {
             /** @var CraftVariable $variable */

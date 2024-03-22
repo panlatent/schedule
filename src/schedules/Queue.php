@@ -49,12 +49,12 @@ class Queue extends Schedule
     /**
      * @var string
      */
-    public $componentId = 'queue';
+    public string $componentId = 'queue';
 
     /**
      * @var string|null
      */
-    public $jobClass;
+    public ?string $jobClass;
 
     // Public Methods
     // =========================================================================
@@ -95,10 +95,11 @@ class Queue extends Schedule
     {
         $queue = Craft::$app->get($this->componentId, false);
         if ($queue === null) {
-            throw new ScheduleException("No queue component exists with the ID: {$this->componentId}");
+            throw new ScheduleException("No queue component exists with the ID: $this->componentId");
         }
 
-        if (!$queue instanceof \yii\queue\Queue && !$queue instanceof QueueInterface) {
+        /** @noinspection PhpConditionCheckedByNextConditionInspection */
+        if (!$queue instanceof QueueInterface && !$queue instanceof \yii\queue\Queue) {
             throw new ScheduleException('Invalid queue component');
         }
 
@@ -106,7 +107,7 @@ class Queue extends Schedule
         $job = new $this->jobClass();
         $queue->push($job);
 
-        Craft::info("Queue Schedule push a job: {$this->jobClass} to {$this->componentId} component.", __METHOD__);
+        Craft::info("Queue Schedule push a job: $this->jobClass to $this->componentId component.", __METHOD__);
 
         return true;
     }

@@ -33,7 +33,7 @@ class SettingsController extends Controller
     /**
      * @return Response|null
      */
-    public function actionSaveGeneral()
+    public function actionSaveGeneral(): ?Response
     {
         $this->requirePostRequest();
 

@@ -17,7 +17,7 @@ class m190303_100542_add_schedules_description_column extends Migration
     /**
      * @inheritdoc
      */
-    public function safeUp()
+    public function safeUp(): void
     {
         $this->addColumn('{{%schedules}}', 'description', $this->string()->after('handle'));
     }
@@ -25,7 +25,7 @@ class m190303_100542_add_schedules_description_column extends Migration
     /**
      * @inheritdoc
      */
-    public function safeDown()
+    public function safeDown(): void
     {
         $this->dropColumn('{{%schedules}}', 'description');
     }

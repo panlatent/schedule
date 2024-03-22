@@ -22,7 +22,7 @@ class CronHelper
      * @param mixed $value
      * @return string|null
      */
-    public static function toCronExpression($value)
+    public static function toCronExpression(mixed $value): ?string
     {
         if (is_string($value)) {
             $value = preg_split('#\s+#', trim($value));
@@ -52,7 +52,7 @@ class CronHelper
      * @param array|string $expression
      * @return string
      */
-    public static function toDescription($expression): string
+    public static function toDescription(array|string $expression): string
     {
         $expression = self::toCronExpression($expression);
 

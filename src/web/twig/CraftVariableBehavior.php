@@ -21,12 +21,12 @@ class CraftVariableBehavior extends Behavior
     /**
      * @var Plugin
      */
-    public $schedule;
+    public Plugin $schedule;
 
     /**
      * @inheritdoc
      */
-    public function init()
+    public function init(): void
     {
         parent::init();
 

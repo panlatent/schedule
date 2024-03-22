@@ -18,60 +18,60 @@ trait ScheduleTrait
     /**
      * @var int|null
      */
-    public $groupId;
+    public ?int $groupId = null;
 
     /**
      * @var string|null
      */
-    public $name;
+    public ?string $name = null;
 
     /**
      * @var string|null
      */
-    public $handle;
+    public ?string $handle = null;
 
     /**
      * @var string|null
      */
-    public $description;
+    public ?string $description = null;
 
     /**
      * @var string|null
      */
-    public $user;
+    public ?string $user = null;
 
     /**
      * @var bool
      */
-    public $enabled = true;
+    public bool $enabled = true;
 
     /**
      * @var bool|null
      */
-    public $enabledLog;
+    public ?bool $enabledLog = null;
 
     /**
      * @var int|null
      */
-    public $lastStartedTime;
+    public ?int $lastStartedTime = null;
 
     /**
      * @var int|null
      */
-    public $lastFinishedTime;
+    public ?int $lastFinishedTime = null;
 
     /**
      * @var string|null
      */
-    public $lastStatus;
+    public ?string $lastStatus = null;
 
     /**
      * @var int|null
      */
-    public $sortOrder;
+    public ?int $sortOrder = null;
 
     /**
      * @var string|null
      */
-    public $uid;
+    public ?string $uid = null;
 }

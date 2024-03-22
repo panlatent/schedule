@@ -35,7 +35,7 @@ class Every extends Timer
     /**
      * @var string
      */
-    private $_value = 'everyMinute';
+    private string $_value = 'everyMinute';
 
     // Public Methods
     // =========================================================================
@@ -72,7 +72,7 @@ class Every extends Timer
     /**
      * @param string $value
      */
-    public function setValue(string $value)
+    public function setValue(string $value): void
     {
         switch ($value) {
             case 'everyMinute':

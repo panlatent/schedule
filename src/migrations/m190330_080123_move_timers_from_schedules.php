@@ -18,7 +18,7 @@ class m190330_080123_move_timers_from_schedules extends Migration
     /**
      * @inheritdoc
      */
-    public function safeUp()
+    public function safeUp(): void
     {
         $schedules = (new Query())
             ->select(['id', 'timer', 'minute', 'hour', 'day', 'month', 'week'])
@@ -41,7 +41,7 @@ class m190330_080123_move_timers_from_schedules extends Migration
     /**
      * @inheritdoc
      */
-    public function safeDown()
+    public function safeDown(): void
     {
         $this->delete('{{%scheduletimers}}');
     }

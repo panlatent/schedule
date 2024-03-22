@@ -21,10 +21,10 @@ class ScheduleGroupEvent extends Event
     /**
      * @var ScheduleGroup|null
      */
-    public $group;
+    public ?ScheduleGroup $group = null;
 
     /**
      * @var bool
      */
-    public $isNew = false;
+    public bool $isNew = false;
 }

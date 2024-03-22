@@ -11,6 +11,7 @@ use Composer\Autoload\ClassLoader;
 use Composer\Factory;
 use Composer\IO\NullIO;
 use Craft;
+use Throwable;
 
 /**
  * Class ClassHelper
@@ -31,7 +32,7 @@ class ClassHelper
         // h/t https://stackoverflow.com/a/46435124/1688568
         $autoloadClass = null;
         foreach (get_declared_classes() as $class) {
-            if (strpos($class, 'ComposerAutoloaderInit') === 0) {
+            if (str_starts_with($class, 'ComposerAutoloaderInit')) {
                 $autoloadClass = $class;
                 break;
             }
@@ -67,19 +68,19 @@ class ClassHelper
                         !interface_exists($class, false) &&
                         !trait_exists($class, false) &&
                         file_exists($file) &&
-                        substr($class, -4) !== 'Test' &&
-                        substr($class, -8) !== 'TestCase' &&
-                        substr($class, 0, 11) !== 'craft\test\\' ) {
+                        !str_ends_with($class, 'Test') &&
+                        !str_ends_with($class, 'TestCase') &&
+                        !str_starts_with($class, 'craft\test\\')) {
                         // See if it's in a namespace we care about
                         foreach ($namespaces as $namespace) {
-                            if (strpos($class, $namespace . '\\') === 0) {
+                            if (str_starts_with($class, $namespace . '\\')) {
                                 require $file;
                                 break;
                             }
                         }
                     }
                 }
-            } catch (\Throwable $e) {
+            } catch (Throwable) {
             }
 
         }
@@ -94,11 +95,11 @@ class ClassHelper
      * @param string $doc
      * @return string|null
      */
-    public static function getPhpDocSummary(string $doc)
+    public static function getPhpDocSummary(string $doc): ?string
     {
         foreach (preg_split("/\r\n|\n|\r/", $doc) as $line) {
-            $line = preg_replace('#^[/*\s]*(?:@event\s+[^\s]+\s+)?#', '', $line);
-            if (strpos($line, '@') === 0) {
+            $line = preg_replace('#^[/*\s]*(?:@event\s+\S+\s+)?#', '', $line);
+            if (str_starts_with($line, '@')) {
                 return null;
             }
             if ($line) {

@@ -7,6 +7,8 @@
 
 namespace panlatent\schedule\plugin;
 
+use Craft;
+use craft\errors\DeprecationException;
 use panlatent\schedule\Builder;
 use panlatent\schedule\services\Logs;
 use panlatent\schedule\services\Schedules;
@@ -33,14 +35,13 @@ trait Services
     }
 
     /**
-     * @deprecated
+     * @deprecated Since Craft 4 throws an exception
      * @see createBuilder()
-     * @return Builder|object|null
      */
     public function getBuilder()
     {
-        \Craft::$app->getDeprecator()->log('schedule.getBuilder()', 'This method has been deprecated, singleton objects will have bad problems in persistent mode.');
-        return $this->get('builder');
+        Craft::$app->getDeprecator()->log('schedule.getBuilder()', 'This method has been deprecated, singleton objects will have bad problems in persistent mode.');
+        throw new DeprecationException();
     }
 
     /**
@@ -70,7 +71,7 @@ trait Services
     /**
      * Set service components.
      */
-    private function _setComponents()
+    private function _setComponents(): void
     {
         $this->setComponents([
             'builder' => Builder::class,

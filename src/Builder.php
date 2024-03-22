@@ -42,7 +42,7 @@ class Builder extends Schedule
     /**
      * @param ScheduleInterface $schedule
      */
-    public function schedule(ScheduleInterface $schedule)
+    public function schedule(ScheduleInterface $schedule): void
     {
         $schedule->build($this);
     }
@@ -50,7 +50,7 @@ class Builder extends Schedule
     /**
      * Build schedules.
      */
-    public function build(bool $force = false)
+    public function build(bool $force = false): static
     {
         if (!$this->beforeBuild()) {
             return $this;
@@ -92,7 +92,7 @@ class Builder extends Schedule
     /**
      * After build
      */
-    public function afterBuild()
+    public function afterBuild(): void
     {
         $event = new ScheduleBuildEvent([
             'builder' => $this,

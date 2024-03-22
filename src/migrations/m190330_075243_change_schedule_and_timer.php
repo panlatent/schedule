@@ -17,7 +17,7 @@ class m190330_075243_change_schedule_and_timer extends Migration
     /**
      * @inheritdoc
      */
-    public function safeUp()
+    public function safeUp(): void
     {
         $this->createTable('{{%scheduletimers}}', [
             'id' => $this->primaryKey(),
@@ -47,7 +47,7 @@ class m190330_075243_change_schedule_and_timer extends Migration
     /**
      * @inheritdoc
      */
-    public function safeDown()
+    public function safeDown(): void
     {
         $this->dropTableIfExists('{{%scheduletimers}}');
     }

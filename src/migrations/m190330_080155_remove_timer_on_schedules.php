@@ -17,7 +17,7 @@ class m190330_080155_remove_timer_on_schedules extends Migration
     /**
      * @inheritdoc
      */
-    public function safeUp()
+    public function safeUp(): void
     {
         $this->dropColumn('{{%schedules}}', 'timer');
         $this->dropColumn('{{%schedules}}', 'minute');
@@ -30,7 +30,7 @@ class m190330_080155_remove_timer_on_schedules extends Migration
     /**
      * @inheritdoc
      */
-    public function safeDown()
+    public function safeDown(): void
     {
         $this->addColumn('{{%schedules}}', 'timer', $this->string()->notNull()->after('user'));
         $this->addColumn('{{%schedules}}', 'week', $this->string()->notNull()->defaultValue('*')->after('type'));

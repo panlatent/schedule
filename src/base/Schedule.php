@@ -22,6 +22,7 @@ use panlatent\schedule\models\ScheduleGroup;
 use panlatent\schedule\models\ScheduleLog;
 use panlatent\schedule\Plugin;
 use panlatent\schedule\records\Schedule as ScheduleRecord;
+use Throwable;
 use yii\db\Query;
 
 
@@ -84,17 +85,17 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
     /**
      * @var ScheduleGroup|null
      */
-    private $_group;
+    private ?ScheduleGroup $_group = null;
 
     /**
      * @var TimerInterface[]|null
      */
-    private $_timers;
+    private ?array $_timers = null;
 
     /**
      * @var DateTime|null
      */
-    private $_lastFinishedDate;
+    private ?DateTime $_lastFinishedDate = null;
 
     // Public Methods
     // =========================================================================
@@ -125,7 +126,7 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
     /**
      * @inheritdoc
      */
-    public function attributes()
+    public function attributes(): array
     {
         $attributes = parent::attributes();
         $attributes[] = 'lastFinishedDate';
@@ -137,17 +138,7 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
     /**
      * @inheritdoc
      */
-    public function datetimeAttributes(): array
-    {
-        $attributes = parent::datetimeAttributes();
-
-        return $attributes;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'name' => Craft::t('app', 'Name'),
@@ -167,7 +158,7 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
     /**
      * @return ScheduleGroup|null
      */
-    public function getGroup()
+    public function getGroup(): ?ScheduleGroup
     {
         if ($this->_group !== null) {
             return $this->_group;
@@ -201,7 +192,7 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
     /**
      * @param TimerInterface[]|null $timers
      */
-    public function setTimers(array $timers)
+    public function setTimers(array $timers): void
     {
         $this->_timers = $timers;
     }
@@ -211,7 +202,7 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
      */
     public function getActiveTimers(): array
     {
-        return ArrayHelper::where($this->getTimers(), 'enabled', true);
+        return ArrayHelper::where($this->getTimers(), 'enabled');
     }
 
     /**
@@ -242,7 +233,7 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
     /**
      * @return DateTime|null
      */
-    public function getLastFinishedDate()
+    public function getLastFinishedDate(): ?DateTime
     {
         if ($this->_lastFinishedDate !== null) {
             return $this->_lastFinishedDate;
@@ -272,16 +263,13 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
     /**
      * @inheritdoc
      */
-    public function build(Builder $builder)
+    public function build(Builder $builder): void
     {
         if (static::isRunnable()) {
-            /** @noinspection PhpParamsInspection */
             foreach ($this->getActiveTimers() as $timer) {
                 $builder->call([$this, 'run'])
                     ->cron($timer->getCronExpression());
             }
-
-            return;
         }
     }
 
@@ -309,7 +297,7 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
 
         try {
             $successful = $this->execute($id);
-        } catch (\Throwable $exception) {
+        } catch (Throwable $exception) {
             $reason = $exception->getMessage();
             Craft::error($reason, __METHOD__);
 
@@ -326,7 +314,7 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
     }
 
     /**
-     * @inheritdoc
+     * @return bool
      */
     public function beforeRun(): bool
     {
@@ -348,9 +336,10 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
     }
 
     /**
-     * @inheritdoc
+     * @param bool $successful
+     * @return void
      */
-    public function afterRun(bool $successful)
+    public function afterRun(bool $successful): void
     {
         if ($this->hasEventHandlers(self::EVENT_AFTER_RUN)) {
             $this->trigger(self::EVENT_AFTER_RUN, new ScheduleEvent([
@@ -424,7 +413,7 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
      * @param string $status
      * @param string|null $reason
      */
-    protected function endLog(int $id, string $status, string $reason = null)
+    protected function endLog(int $id, string $status, string $reason = null): void
     {
         Craft::$app->getDb()->createCommand()
             ->update(Table::SCHEDULELOGS, [

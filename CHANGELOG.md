@@ -6,8 +6,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## [Unreleased]
 ### Added
+- Property/Method/Parameter type declarations
+
 ### Updated
+- Minimal support for craft 4 and PHP 8.0.2
+- Advance schedule service repository store mode
+
 ### Fixed
+
+### Removed
+- Deprecated classes and methods
+
 
 ## [0.4.0] - 2022-06-20
 ### Updated

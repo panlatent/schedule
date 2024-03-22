@@ -47,12 +47,12 @@ class Event extends Schedule
     /**
      * @var string|null
      */
-    public $className;
+    public ?string $className = null;
 
     /**
      * @var string|null
      */
-    public $eventName;
+    public ?string $eventName = null;
 
     // Public Methods
     // =========================================================================
@@ -83,7 +83,7 @@ class Event extends Schedule
      */
     protected function execute(int $logId = null): bool
     {
-        Craft::info("Event Schedule trigger event: {$this->className}::{$this->eventName}", __METHOD__);
+        Craft::info("Event Schedule trigger event: $this->className::$this->eventName", __METHOD__);
 
         BaseEvent::trigger($this->className, $this->eventName);
 

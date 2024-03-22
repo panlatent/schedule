@@ -38,7 +38,7 @@ class Relay extends Timer
     /**
      * @var int Wait time (minute)
      */
-    public $wait = 1;
+    public int $wait = 1;
 
     // Public Methods
     // =========================================================================
@@ -57,7 +57,7 @@ class Relay extends Timer
     /**
      * @inheritdoc
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         $attributeLabels = parent::attributeLabels();
         $attributeLabels['wait'] = Craft::t('schedule', 'Wait Time');

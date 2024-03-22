@@ -33,7 +33,7 @@ abstract class Timer extends SavableComponent implements TimerInterface
     /**
      * @var ScheduleInterface|null
      */
-    private $_schedule;
+    private ?ScheduleInterface $_schedule = null;
 
     // Public Methods
     // =========================================================================
@@ -107,7 +107,7 @@ abstract class Timer extends SavableComponent implements TimerInterface
     /**
      * @param ScheduleInterface $schedule
      */
-    public function setSchedule(ScheduleInterface $schedule)
+    public function setSchedule(ScheduleInterface $schedule): void
     {
         $this->_schedule = $schedule;
     }
@@ -123,8 +123,8 @@ abstract class Timer extends SavableComponent implements TimerInterface
     /**
      * @param string $cron
      */
-    public function setCronExpression(string $cron)
+    public function setCronExpression(string $cron): void
     {
-        list($this->minute, $this->hour, $this->day, $this->month, $this->week, ) = explode(' ', $cron);
+        [$this->minute, $this->hour, $this->day, $this->month, $this->week, ] = explode(' ', $cron);
     }
 }

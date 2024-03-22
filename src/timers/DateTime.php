@@ -37,12 +37,12 @@ class DateTime extends Timer
     /**
      * @var int|null
      */
-    public $year;
+    public ?int $year = null;
 
     /**
      * @var string|null
      */
-    public $timezone;
+    public ?string $timezone = null;
 
     // Public Methods
     // =========================================================================
@@ -66,7 +66,7 @@ class DateTime extends Timer
     /**
      * @inheritdoc
      */
-    public function attributes()
+    public function attributes(): array
     {
         $attributes = parent::attributes();
         $attributes[] = 'datetime';
@@ -85,7 +85,7 @@ class DateTime extends Timer
     /**
      * @return \DateTime|null
      */
-    public function getDatetime()
+    public function getDatetime(): ?\DateTime
     {
         if (empty($this->year) || empty($this->timezone)) {
             return null;
@@ -98,7 +98,7 @@ class DateTime extends Timer
     /**
      * @param mixed $datetime
      */
-    public function setDateTime($datetime)
+    public function setDateTime(mixed $datetime): void
     {
         $datetime = DateTimeHelper::toDateTime($datetime);
         $this->timezone = $datetime->getTimezone()->getName();

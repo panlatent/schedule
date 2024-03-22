@@ -19,12 +19,12 @@ use yii\base\Event;
 class ScheduleEvent extends Event
 {
     /**
-     * @var ScheduleInterface
+     * @var ScheduleInterface|null
      */
-    public $schedule;
+    public ?ScheduleInterface $schedule = null;
 
     /**
      * @var bool
      */
-    public $isNew = false;
+    public bool $isNew = false;
 }

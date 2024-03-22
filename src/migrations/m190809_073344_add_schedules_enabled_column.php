@@ -17,7 +17,7 @@ class m190809_073344_add_schedules_enabled_column extends Migration
     /**
      * @inheritdoc
      */
-    public function safeUp()
+    public function safeUp(): void
     {
         $this->addColumn('{{%schedules}}', 'enabled', $this->boolean()->notNull()->defaultValue(true)->after('settings'));
     }
@@ -25,7 +25,7 @@ class m190809_073344_add_schedules_enabled_column extends Migration
     /**
      * @inheritdoc
      */
-    public function safeDown()
+    public function safeDown(): void
     {
         $this->dropColumn('{{%schedules}}', 'enabled');
     }

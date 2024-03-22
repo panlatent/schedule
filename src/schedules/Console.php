@@ -53,17 +53,17 @@ class Console extends Schedule
     /**
      * @var string|null
      */
-    public $command;
+    public ?string $command = null;
 
     /**
      * @var string|null
      */
-    public $arguments;
+    public ?string $arguments = null;
 
     /**
      * @var int|null
      */
-    public $timeout;
+    public ?int $timeout = null;
 
     // Public Methods
     // =========================================================================
@@ -100,10 +100,10 @@ class Console extends Schedule
         $process->run();
 
         if ($process->isSuccessful()) {
-            $lines = (array)explode("\n", mb_convert_encoding($process->getOutput(), mb_internal_encoding()));
+            $lines = explode("\n", mb_convert_encoding($process->getOutput(), mb_internal_encoding()));
 
             $data = [];
-            foreach ($lines as $index => $line) {
+            foreach ($lines as $line) {
                 if (($pos = strpos($line, '/')) === false) {
                     $data[$line] = [];
                     continue;
@@ -152,13 +152,7 @@ class Console extends Schedule
         $process = new Process($this->buildCommand(), dirname(Craft::$app->request->getScriptFile()), null, null, $this->timeout ?: null);
 
         $process->run(function ($type, $buffer) use ($logId) {
-
-            if (Process::ERR === $type) {
-                $output = $buffer . "\n";
-            } else {
-                $output = $buffer . "\n";;
-            }
-
+            $output = $buffer . "\n";
             Craft::$app->getDb()->createCommand()
                 ->update(Table::SCHEDULELOGS, [
                     'status' => self::STATUS_PROCESSING,

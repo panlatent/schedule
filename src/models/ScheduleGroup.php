@@ -27,17 +27,17 @@ class ScheduleGroup extends Model
     /**
      * @var int|null
      */
-    public $id;
+    public ?int $id = null;
 
     /**
      * @var string|null
      */
-    public $name;
+    public ?string $name = null;
 
     /**
      * @var ScheduleInterface[]|null
      */
-    private $_schedules;
+    private ?array $_schedules = null;
 
     // Public Methods
     // =========================================================================
@@ -65,7 +65,7 @@ class ScheduleGroup extends Model
     /**
      * @inheritdoc
      */
-    public function attributeLabels()
+    public function attributeLabels(): array
     {
         return [
             'id' => Craft::t('app', 'ID'),

@@ -31,47 +31,47 @@ class ScheduleLog extends Model
     /**
      * @var int|null
      */
-    public $id;
+    public ?int $id = null;
 
     /**
      * @var int|null
      */
-    public $scheduleId;
+    public ?int $scheduleId = null;
 
     /**
      * @var string|null
      */
-    public $status;
+    public ?string $status = null;
 
     /**
      * @var string|null
      */
-    public $reason;
+    public ?string $reason = null;
 
     /**
      * @var int|null
      */
-    public $startTime;
+    public ?int $startTime = null;
 
     /**
      * @var int|null
      */
-    public $endTime;
+    public ?int $endTime = null;
 
     /**
      * @var string|null
      */
-    public $output;
+    public ?string $output = null;
 
     /**
      * @var int|null
      */
-    public $sortOrder;
+    public ?int $sortOrder = null;
 
     /**
      * @var ScheduleInterface|null
      */
-    private $_schedule;
+    private ?ScheduleInterface $_schedule = null;
 
     // Public Methods
     // =========================================================================
@@ -87,7 +87,7 @@ class ScheduleLog extends Model
     /**
      * @inheritdoc
      */
-    public function attributes()
+    public function attributes(): array
     {
         $attributes = parent::attributes();
         $attributes[] = 'schedule';
@@ -133,7 +133,7 @@ class ScheduleLog extends Model
     /**
      * @return DateTime|null
      */
-    public function getStartDate()
+    public function getStartDate(): ?DateTime
     {
         if ($this->startTime === null) {
             return null;
