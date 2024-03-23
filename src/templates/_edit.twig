@@ -84,24 +84,25 @@
 {% endblock %}
 
 {% block details %}
-    <div class="meta">
-        {% if craft.app.config.general.allowAdminChanges or not isNewSchedule %}
-            {{ forms.lightswitchField({
-                label: 'Static'|t('schedule'),
-                id: 'static',
-                name: 'static',
-                disabled: not allowChange,
-                on: schedule.static,
-                errors: schedule.getErrors('static'),
-                reverseToggle: 'group',
-            }) }}
-        {% endif %}
-    </div>
+    {% if craft.app.config.general.allowAdminChanges or not isNewSchedule %}
+        <div class="meta">
+        {{ forms.lightswitchField({
+            label: 'Static'|t('schedule'),
+            id: 'static',
+            name: 'static',
+            disabled: not allowChange,
+            on: schedule.static,
+            errors: schedule.getErrors('static'),
+            reverseToggle: 'group',
+        }) }}
+        </div>
+    {% endif %}
+
     <fieldset>
-        <legend class="h6">Status</legend>
+        <legend class="h6">{{ "Status"|t('app') }}</legend>
         <div class="meta">
             {{ forms.lightswitchField({
-                label: 'Enabled'|t('schedule'),
+                label: 'Enabled'|t('app'),
                 id: 'enabled',
                 name: 'enabled',
                 on: schedule.enabled,
