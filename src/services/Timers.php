@@ -354,11 +354,6 @@ class Timers extends Component
         return true;
     }
 
-    public function deleteTimersByScheduleId(int $scheduleId)
-    {
-
-    }
-
     // Private Methods
     // =========================================================================
 
