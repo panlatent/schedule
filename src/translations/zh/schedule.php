@@ -115,6 +115,8 @@ return [
     'Add Header Value' => '添加首部值',
     'Add URL Parameter' => '添加 URL 参数',
     'Add Value' => '添加值',
-    'Expiry threshold' => '????',
-    'Default expiry time used when calling the `schedules/clear-logs` command.' => '???? `schedules/clear-logs`',
+    'This is a time setting in Crontab format. For example:' => '时间设置为 Crontab 格式。例如：',
+    'Wait a few minutes after the schedule is completed and then execute it.' => '在计划完成后等待若干分钟后执行',
+    'Expiry threshold' => '有效期阈值',
+    'Default expiry time used when calling the `schedules/clear-logs` command.' => '调用 schedules/clear-logs 命令时使用的默认到期时间。',
 ];
