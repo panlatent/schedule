@@ -9,6 +9,7 @@ return [
     'Schedule' => '计划',
     'Schedules' => '计划',
     'General' => '常规',
+    'Log Settings' => '日志设置',
     'All schedules' => '所有计划',
     'Static' => '静态',
     'Ungrouped' => '未分组',
