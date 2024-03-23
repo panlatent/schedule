@@ -9,11 +9,13 @@ namespace panlatent\schedule\services;
 
 use Craft;
 use craft\errors\MissingComponentException;
+use craft\events\ConfigEvent;
 use craft\events\RegisterComponentTypesEvent;
 use craft\helpers\ArrayHelper;
 use craft\helpers\Component as ComponentHelper;
 use craft\helpers\Db;
 use craft\helpers\Json;
+use craft\helpers\StringHelper;
 use craft\web\Request;
 use panlatent\schedule\base\Schedule;
 use panlatent\schedule\base\ScheduleInterface;
@@ -73,6 +75,11 @@ class Schedules extends Component
     const EVENT_AFTER_DELETE_GROUP = 'afterDeleteGroup';
 
     /**
+     * @event ScheduleGroupEvent The event that is triggered before a tag group is applied.
+     */
+    const EVENT_BEFORE_APPLY_DELETE_GROUP = 'beforeApplyDeleteGroup';
+
+    /**
      * @event ScheduleEvent
      */
     const EVENT_BEFORE_SAVE_SCHEDULE = 'beforeSaveSchedule';
@@ -91,6 +98,11 @@ class Schedules extends Component
      * @event ScheduleEvent
      */
     const EVENT_AFTER_DELETE_SCHEDULE = 'afterDeleteSchedule';
+
+    /**
+     * @event ScheduleEvent
+     */
+    const EVENT_BEFORE_APPLY_DELETE_SCHEDULE = 'beforeApplyDeleteSchedule';
 
     // Properties
     // =========================================================================
@@ -149,6 +161,17 @@ class Schedules extends Component
     public function getGroupByHandle(string $name): ?ScheduleGroup
     {
         return ArrayHelper::firstWhere($this->getAllGroups(), 'handle', $name);
+    }
+
+    /**
+     * Returns a group by its UID.
+     *
+     * @param string $uid
+     * @return ScheduleGroup|null
+     */
+    public function getGroupByUid(string $uid): ?ScheduleGroup
+    {
+        return ArrayHelper::firstWhere($this->getAllGroups(), 'uid', $uid);
     }
 
     /**
@@ -268,7 +291,7 @@ class Schedules extends Component
      */
     public function getAllSchedules(): array
     {
-        if ($this->_schedules === null) {
+        if ($this->force || $this->_schedules === null) {
             $this->_schedules = [];
             $results = $this->_createScheduleQuery()->all();
             foreach ($results as $result) {
@@ -288,6 +311,22 @@ class Schedules extends Component
         return array_filter($this->getAllSchedules(), function(ScheduleInterface $schedule) {
             return $schedule->isValid();
         });
+    }
+
+    /**
+     * @return ScheduleInterface[]
+     */
+    public function getStaticSchedules(): array
+    {
+        return ArrayHelper::where($this->getAllSchedules(), 'static');
+    }
+
+    /**
+     * @return int
+     */
+    public function getTotalStaticSchedules(): int
+    {
+        return $this->_createScheduleQuery()->where(['schedules.static' => true])->count('[[schedules.id]]');
     }
 
     /**
@@ -315,6 +354,15 @@ class Schedules extends Component
     public function getScheduleByHandle(string $handle): ?ScheduleInterface
     {
         return ArrayHelper::firstWhere($this->getAllSchedules(), 'handle', $handle);
+    }
+
+    /**
+     * @param string $uid
+     * @return ScheduleInterface|null
+     */
+    public function getScheduleByUid(string $uid): ?ScheduleInterface
+    {
+        return ArrayHelper::firstWhere($this->getAllSchedules(), 'uid', $uid);
     }
 
     /**
@@ -398,6 +446,7 @@ class Schedules extends Component
             'description' => $request->getBodyParam('description'),
             'type' => $type,
             'settings' => $request->getBodyParam('types.' . $type, []),
+            'static' => (bool)$request->getBodyParam('static'),
             'enabled' => (bool)$request->getBodyParam('enabled'),
             'enabledLog' => $request->getBodyParam('enabledLog'),
         ]);
@@ -440,42 +489,70 @@ class Schedules extends Component
             return false;
         }
 
+        if ($isNewSchedule) {
+            $schedule->uid = StringHelper::UUID();
+        } elseif ($schedule->uid === null) {
+            $schedule->uid = Db::uidById(Table::SCHEDULES, $schedule->id);
+        }
+
         if ($runValidation && !$schedule->validate()) {
             Craft::info("Schedule not saved due to validation error.", __METHOD__);
             return false;
         }
 
-        $transaction = Craft::$app->getDb()->beginTransaction();
-        try {
-            if (!$isNewSchedule) {
-                $record = ScheduleRecord::findOne(['id' => $schedule->id]);
-                if (!$record) {
-                    throw new ScheduleException("No schedule exists with the ID: “{$schedule->id}“.");
+        if ($schedule->static) {
+            $path = "schedule.schedules.$schedule->uid";
+            Craft::$app->getProjectConfig()->set($path, $this->getScheduleConfig($schedule));
+            if ($isNewSchedule) {
+                $schedule->id = Db::idByUid(Table::SCHEDULES, $schedule->uid);
+            }
+        } else {
+            $transaction = Craft::$app->getDb()->beginTransaction();
+            try {
+                $deleteConfig = false;
+                if (!$isNewSchedule) {
+                    $record = ScheduleRecord::findOne(['id' => $schedule->id]);
+                    if (!$record) {
+                        throw new ScheduleException("No schedule exists with the ID: “{$schedule->id}“.");
+                    }
+                    if ($record->static) {
+                        $deleteConfig = true;
+                    }
+                } else {
+                    $record = new ScheduleRecord();
                 }
-            } else {
-                $record = new ScheduleRecord();
+
+                $record->groupId = $schedule->groupId;
+                $record->name = $schedule->name;
+                $record->handle = $schedule->handle;
+                $record->description = $schedule->description;
+                $record->type = get_class($schedule);
+                $record->user = $schedule->user;
+                $record->settings = Json::encode($schedule->getSettings());
+                $record->static = false;
+                $record->enabled = (bool)$schedule->enabled;
+                $record->enabledLog = (bool)$schedule->enabledLog;
+                $record->save(false);
+
+                $transaction->commit();
+
+                if ($deleteConfig) {
+                    $path = "schedule.schedules.$record->uid";
+                    Craft::$app->getProjectConfig()->remove($path);
+                }
+            } catch (Throwable $exception) {
+                $transaction->rollBack();
+
+                throw $exception;
             }
 
-            $record->groupId = $schedule->groupId;
-            $record->name = $schedule->name;
-            $record->handle = $schedule->handle;
-            $record->description = $schedule->description;
-            $record->type = get_class($schedule);
-            $record->user = $schedule->user;
-            $record->settings = Json::encode($schedule->getSettings());
-            $record->enabled = (bool)$schedule->enabled;
-            $record->enabledLog = (bool)$schedule->enabledLog;
-            $record->save(false);
 
-            $transaction->commit();
-        } catch (Throwable $exception) {
-            $transaction->rollBack();
-
-            throw $exception;
+            if ($isNewSchedule) {
+                $schedule->id = $record->id;
+            }
         }
 
         if ($isNewSchedule) {
-            $schedule->id = $record->id;
             $this->_schedules[] = $schedule;
         }
 
@@ -537,30 +614,112 @@ class Schedules extends Component
 
         $schedule->beforeDelete();
 
-        $db = Craft::$app->getDb();
+        if ($schedule->static) {
+            $path = "schedule.schedules.$schedule->uid";
+            Craft::$app->getProjectConfig()->remove($path);
+        } else {
+            $db = Craft::$app->getDb();
+            $transaction = $db->beginTransaction();
+            try {
+                $db->createCommand()->delete(Table::SCHEDULES, [
+                    'id' => $schedule->id,
+                ])->execute();
 
-        $transaction = $db->beginTransaction();
-        try {
-            $db->createCommand()->delete(Table::SCHEDULES, [
-                'id' => $schedule->id,
-            ])->execute();
+                $transaction->commit();
 
-            $transaction->commit();
+                $schedule->afterDelete();
+            } catch (Throwable $exception) {
+                $transaction->rollBack();
 
-            $schedule->afterDelete();
-        } catch (Throwable $exception) {
-            $transaction->rollBack();
+                throw $exception;
+            }
 
-            throw $exception;
+            if ($this->hasEventHandlers(self::EVENT_AFTER_DELETE_SCHEDULE)) {
+                $this->trigger(self::EVENT_AFTER_DELETE_SCHEDULE, new ScheduleEvent([
+                    'schedule' => $schedule,
+                ]));
+            }
         }
+
+        return true;
+    }
+
+    public function handleChangeSchedule(ConfigEvent $event): void
+    {
+        $uid = $event->tokenMatches[0];
+
+        $id = Db::idByUid(Table::SCHEDULES, $uid);
+        $isNew = empty($id);
+
+        $config = [
+            'groupId' => null,
+            'name' => $event->newValue['name'],
+            'handle' => $event->newValue['handle'],
+            'description' => $event->newValue['description'],
+            'type' => $event->newValue['type'],
+            'user' => $event->newValue['user'],
+            'settings' => Json::encode($event->newValue['settings']),
+            'static' => true,
+            'enabled' => (bool)$event->newValue['enabled'],
+            'enabledLog' => (bool)$event->newValue['enabledLog'],
+        ];
+
+        if ($isNew) {
+            $config['uid'] = $uid;
+            Db::insert(Table::SCHEDULES, $config);
+        } else {
+            Db::update(Table::SCHEDULES, $config, ['id' => $id]);
+        }
+
+        if ($this->hasEventHandlers(self::EVENT_AFTER_SAVE_SCHEDULE)) {
+            $this->trigger(self::EVENT_AFTER_SAVE_SCHEDULE, new ScheduleEvent([
+                'schedule' => $this->getScheduleByUid($uid),
+                'isNew' => $isNew,
+            ]));
+        }
+    }
+
+    public function handleDeleteSchedule(ConfigEvent $event): void
+    {
+        $uid = $event->tokenMatches[0];
+
+        $schedule = $this->getScheduleByUid($uid);
+        // non-static schedules cannot be deleted
+        if (!$schedule || !$schedule->static) {
+            return;
+        }
+
+        if ($this->hasEventHandlers(self::EVENT_BEFORE_APPLY_DELETE_SCHEDULE)) {
+            $this->trigger(self::EVENT_BEFORE_APPLY_DELETE_SCHEDULE, new ScheduleEvent([
+                'schedule' => $schedule,
+            ]));
+        }
+
+        Db::delete(Table::SCHEDULES, ['id' => $schedule->id]);
 
         if ($this->hasEventHandlers(self::EVENT_AFTER_DELETE_SCHEDULE)) {
             $this->trigger(self::EVENT_AFTER_DELETE_SCHEDULE, new ScheduleEvent([
                 'schedule' => $schedule,
             ]));
         }
+    }
 
-        return true;
+    /**
+     * @param ScheduleInterface $schedule
+     * @return array
+     */
+    public function getScheduleConfig(ScheduleInterface $schedule): array
+    {
+        return [
+            'name' => $schedule->name,
+            'handle' => $schedule->handle,
+            'description' => $schedule->description,
+            'type' => get_class($schedule),
+            'user' => $schedule->user,
+            'settings' => $schedule->getSettings(),
+            'enabled' => (bool)$schedule->enabled,
+            'enabledLog' => (bool)$schedule->enabledLog,
+        ];
     }
 
     // Private Methods
@@ -572,7 +731,7 @@ class Schedules extends Component
     private function _createGroupQuery(): Query
     {
         return (new Query())
-            ->select(['id', 'name'])
+            ->select(['id', 'name', 'uid'])
             ->from(Table::SCHEDULEGROUPS);
     }
 
@@ -591,6 +750,7 @@ class Schedules extends Component
                 'schedules.type',
                 'schedules.user',
                 'schedules.settings',
+                'schedules.static',
                 'schedules.enabled',
                 'schedules.enabledLog',
                 'schedules.lastStartedTime',
@@ -622,7 +782,7 @@ class Schedules extends Component
                     ->select('logs.scheduleId')
                     ->from(Table::SCHEDULELOGS . ' logs')
                     ->where([
-                        'logs.scheduleId' => new Expression('schedules.id')
+                        'logs.scheduleId' => new Expression('schedules.id'),
                     ])
                     ->limit(1),
             ]);

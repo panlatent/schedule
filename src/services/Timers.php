@@ -9,14 +9,18 @@ namespace panlatent\schedule\services;
 
 use Craft;
 use craft\errors\MissingComponentException;
+use craft\events\ConfigEvent;
 use craft\events\RegisterComponentTypesEvent;
 use craft\helpers\ArrayHelper;
 use craft\helpers\Component as ComponentHelper;
+use craft\helpers\Db;
 use craft\helpers\Json;
+use craft\helpers\StringHelper;
 use panlatent\schedule\base\Timer;
 use panlatent\schedule\base\TimerInterface;
 use panlatent\schedule\db\Table;
 use panlatent\schedule\errors\TimerException;
+use panlatent\schedule\events\ScheduleEvent;
 use panlatent\schedule\events\TimerEvent;
 use panlatent\schedule\records\Timer as TimerRecord;
 use panlatent\schedule\timers\Custom;
@@ -64,18 +68,18 @@ class Timers extends Component
      */
     const EVENT_AFTER_DELETE_TIMER = 'afterDeleteTimer';
 
+    /**
+     * @event TimerEvent The event that is triggered before a timer is applied.
+     */
+    const EVENT_BEFORE_APPLY_DELETE_TIMER = 'beforeApplyDeleteTimer';
+
     // Properties
     // =========================================================================
 
     /**
-     * @var bool
-     */
-    private bool $_fetchedAllTimers = false;
-
-    /**
      * @var TimerInterface[]|null
      */
-    private ?array $_timersById = null;
+    private ?array $_timers = null;
 
     // Public Methods
     // =========================================================================
@@ -106,22 +110,16 @@ class Timers extends Component
      */
     public function getAllTimers(): array
     {
-        if ($this->_fetchedAllTimers) {
-            return array_values($this->_timersById);
+        if ($this->_timers === null) {
+            $this->_timers = [];
+            $results = $this->_createQuery()->all();
+            foreach ($results as $result) {
+                $timer = $this->createTimer($result);
+                $this->_timers[$timer->id] = $timer;
+            }
         }
 
-        $this->_timersById = [];
-
-        $results = $this->_createQuery()->all();
-        foreach ($results as $result) {
-            /** @var Timer $timer */
-            $timer = $this->createTimer($result);
-            $this->_timersById[$timer->id] = $timer;
-        }
-
-        $this->_fetchedAllTimers = true;
-
-        return array_values($this->_timersById);
+        return array_values($this->_timers);
     }
 
     /**
@@ -140,22 +138,19 @@ class Timers extends Component
      */
     public function getTimersByScheduleId(int $scheduleId): array
     {
-        if ($this->_fetchedAllTimers) {
-            return ArrayHelper::firstWhere($this->getAllTimers(), 'scheduleId', $scheduleId);
+        if ($this->_timers !== null) {
+            return ArrayHelper::firstWhere($this->_timers, 'scheduleId', $scheduleId);
         }
 
-        $ret = [];
-
+        $res = [];
         $results = $this->_createQuery()
             ->where(['scheduleId' => $scheduleId])
             ->all();
-
         foreach ($results as $result) {
-            $timer = $this->createTimer($result);
-            $ret[] = $this->_timersById[$timer->id] = $timer;
+            $res[] = $this->createTimer($result);
         }
 
-        return $ret;
+        return $res;
     }
 
     /**
@@ -164,19 +159,28 @@ class Timers extends Component
      */
     public function getTimerById(int $id): ?TimerInterface
     {
-        if ($this->_timersById && array_key_exists($id, $this->_timersById)) {
-            return $this->_timersById[$id];
-        }
-
-        if ($this->_fetchedAllTimers) {
-            return null;
+        if ($this->_timers !== null) {
+            return $this->_timers[$id] ?? null;
         }
 
         $result = $this->_createQuery()
             ->where(['id' => $id])
             ->one();
 
-        return $this->_timersById[$id] = $result ? $this->createTimer($result) : null;
+        return $result ? $this->createTimer($result) : null;
+    }
+
+    public function getTimerByUid(string $uid): ?TimerInterface
+    {
+        if ($this->_timers !== null) {
+            return ArrayHelper::firstWhere($this->_timers, 'uid', $uid);
+        }
+
+        $result = $this->_createQuery()
+            ->where(['uid' => $uid])
+            ->one();
+
+        return $result ? $this->createTimer($result) : null;
     }
 
     /**
@@ -216,62 +220,75 @@ class Timers extends Component
             return false;
         }
 
+        if ($isNewTimer) {
+            $timer->uid = StringHelper::UUID();
+        } elseif ($timer->uid === null) {
+            $timer->uid = Db::uidById(Table::SCHEDULETIMERS, $timer->id);
+        }
+
         if ($runValidation && !$timer->validate()) {
             Craft::info("Timer not saved due to validation error.", __METHOD__);
             return false;
         }
 
-        $transaction = Craft::$app->getDb()->beginTransaction();
-        try {
-            if (!$isNewTimer) {
-                $record = TimerRecord::findOne(['id' => $timer->id]);
-                if (!$record) {
-                    throw new TimerException("No timer exists with the ID: “{$timer->id}“.");
+        if ($timer->getSchedule()->static) {
+            $path = "schedule.schedules.{$timer->getSchedule()->uid}.timers.$timer->uid";
+            Craft::$app->getProjectConfig()->set($path, $this->getTimerConfig($timer));
+        } else {
+            $transaction = Craft::$app->getDb()->beginTransaction();
+            try {
+                if (!$isNewTimer) {
+                    $record = TimerRecord::findOne(['id' => $timer->id]);
+                    if (!$record) {
+                        throw new TimerException("No timer exists with the ID: “{$timer->id}“.");
+                    }
+                } else {
+                    $record = new TimerRecord();
                 }
-            } else {
-                $record = new TimerRecord();
+
+                if ($isNewTimer) {
+                    $record->scheduleId = $timer->scheduleId;
+                }
+
+                $record->type = get_class($timer);
+                $record->minute = $this->_normalizeCronExpress($timer->minute);
+                $record->hour = $this->_normalizeCronExpress($timer->hour);
+                $record->day = $this->_normalizeCronExpress($timer->day);
+                $record->month = $this->_normalizeCronExpress($timer->month);
+                $record->week = $this->_normalizeCronExpress($timer->week);
+                $record->enabled = $timer->enabled;
+                $record->settings = Json::encode($timer->getSettings());
+
+                if ($isNewTimer) {
+                    $lastSortOrder = (new Query())
+                        ->select('sortOrder')
+                        ->from(Table::SCHEDULETIMERS)
+                        ->where([
+                            'scheduleId' => $timer->scheduleId,
+                        ])
+                        ->orderBy('sortOrder')
+                        ->scalar();
+
+                    $record->sortOrder = (int)$lastSortOrder + 1;
+                }
+
+                $record->save(false);
+
+                if ($isNewTimer) {
+                    $timer->id = $record->id;
+                }
+
+                $transaction->commit();
+            } catch (Throwable $exception) {
+                $transaction->rollBack();
+
+                throw $exception;
             }
 
-            if ($isNewTimer) {
-                $record->scheduleId = $timer->scheduleId;
+            if ($isNewTimer && $this->_timers !== null) {
+                $this->_timers[$timer->id] = $timer;
             }
-
-            $record->type = get_class($timer);
-            $record->minute = $this->_normalizeCronExpress($timer->minute);
-            $record->hour = $this->_normalizeCronExpress($timer->hour);
-            $record->day = $this->_normalizeCronExpress($timer->day);
-            $record->month = $this->_normalizeCronExpress($timer->month);
-            $record->week = $this->_normalizeCronExpress($timer->week);
-            $record->enabled = $timer->enabled;
-            $record->settings = Json::encode($timer->getSettings());
-
-            if ($isNewTimer) {
-                $lastSortOrder = (new Query())
-                    ->select('sortOrder')
-                    ->from(Table::SCHEDULETIMERS)
-                    ->where([
-                        'scheduleId' => $timer->scheduleId,
-                    ])
-                    ->orderBy('sortOrder')
-                    ->scalar();
-
-                $record->sortOrder = (int)$lastSortOrder + 1;
-            }
-
-            $record->save(false);
-
-            if ($isNewTimer) {
-                $timer->id = $record->id;
-            }
-
-            $transaction->commit();
-        } catch (Throwable $exception) {
-            $transaction->rollBack();
-
-            throw $exception;
         }
-
-        $this->_timersById[$timer->id] = $timer;
 
         $timer->afterSave($isNewTimer);
 
@@ -298,27 +315,32 @@ class Timers extends Component
             ]));
         }
 
-        $db = Craft::$app->getDb();
+        if ($timer->getSchedule()->static) {
+            $path = "schedule.schedules.{$timer->getSchedule()->uid}.timers.$timer->uid";
+            Craft::$app->getProjectConfig()->remove($path);
+        } else {
+            $db = Craft::$app->getDb();
 
-        $transaction = $db->beginTransaction();
-        try {
-            $db->createCommand()
-                ->delete(Table::SCHEDULETIMERS, [
-                    'id' => $timer->id,
-                ])
-                ->execute();
+            $transaction = $db->beginTransaction();
+            try {
+                $db->createCommand()
+                    ->delete(Table::SCHEDULETIMERS, [
+                        'id' => $timer->id,
+                    ])
+                    ->execute();
 
-            $transaction->commit();
-        } catch (Throwable $exception) {
-            $transaction->rollBack();
+                $transaction->commit();
+            } catch (Throwable $exception) {
+                $transaction->rollBack();
 
-            throw $exception;
-        }
+                throw $exception;
+            }
 
-        if ($this->hasEventHandlers(self::EVENT_AFTER_DELETE_TIMER)) {
-            $this->trigger(self::EVENT_AFTER_DELETE_TIMER, new TimerEvent([
-                'timer' => $timer,
-            ]));
+            if ($this->hasEventHandlers(self::EVENT_AFTER_DELETE_TIMER)) {
+                $this->trigger(self::EVENT_AFTER_DELETE_TIMER, new TimerEvent([
+                    'timer' => $timer,
+                ]));
+            }
         }
 
         return true;
@@ -337,7 +359,7 @@ class Timers extends Component
             foreach ($timerIds as $order => $id) {
                 $db->createCommand()
                     ->update(Table::SCHEDULETIMERS, [
-                        'sortOrder' => $order + 1
+                        'sortOrder' => $order + 1,
                     ], [
                         'id' => $id,
                     ])
@@ -352,6 +374,89 @@ class Timers extends Component
         }
 
         return true;
+    }
+
+
+    /**
+     * @param ConfigEvent $event
+     * @return void
+     */
+    public function handleChangeTimer(ConfigEvent $event): void
+    {
+        $scheduleUid = $event->tokenMatches[0];
+        $uid = $event->tokenMatches[1];
+
+        $id = Db::idByUid(Table::SCHEDULETIMERS, $uid);
+        $isNew = empty($id);
+
+        $config = [
+            'type' => $event->newValue['type'],
+            'minute' => $event->newValue['minute'],
+            'hour' => $event->newValue['hour'],
+            'day' => $event->newValue['day'],
+            'month' => $event->newValue['month'],
+            'week' => $event->newValue['week'],
+            'settings' => isset($event->newValue['settings']) ? Json::encode($event->newValue['settings']) : null,
+            'enabled' => (bool)$event->newValue['enabled'],
+        ];
+
+        if ($isNew) {
+            $scheduleId= DB::idByUid(Table::SCHEDULES, $scheduleUid);
+            $config['scheduleId'] = $scheduleId;
+            $config['uid'] = $uid;
+            Db::insert(Table::SCHEDULETIMERS, $config);
+        } else {
+            Db::update(Table::SCHEDULETIMERS, $config, ['id' => $id]);
+        }
+
+        if ($this->hasEventHandlers(self::EVENT_AFTER_SAVE_TIMER)) {
+            $this->trigger(self::EVENT_AFTER_SAVE_TIMER, new ScheduleEvent([
+                'schedule' => $this->getTimerByUid($uid),
+                'isNew' => $isNew,
+            ]));
+        }
+    }
+
+    /**
+     * @param ConfigEvent $event
+     * @return void
+     */
+    public function handleDeleteTimer(ConfigEvent $event): void
+    {
+        $uid = $event->tokenMatches[1];
+
+        $timer = $this->getTimerByUid($uid);
+        if (!$timer) {
+            return;
+        }
+
+        if ($this->hasEventHandlers(self::EVENT_BEFORE_APPLY_DELETE_TIMER)) {
+            $this->trigger(self::EVENT_BEFORE_APPLY_DELETE_TIMER, new TimerEvent([
+                'timer' => $timer,
+            ]));
+        }
+
+        Db::delete(Table::SCHEDULETIMERS, ['id' => $timer->id]);
+
+        if ($this->hasEventHandlers(self::EVENT_AFTER_DELETE_TIMER)) {
+            $this->trigger(self::EVENT_AFTER_DELETE_TIMER, new TimerEvent([
+                'timer' => $timer,
+            ]));
+        }
+    }
+
+    public function getTimerConfig(TimerInterface $timer): array
+    {
+        return [
+            'type' => get_class($timer),
+            'minute' => $this->_normalizeCronExpress($timer->minute),
+            'hour' => $this->_normalizeCronExpress($timer->hour),
+            'day' => $this->_normalizeCronExpress($timer->day),
+            'month' => $this->_normalizeCronExpress($timer->month),
+            'week' => $this->_normalizeCronExpress($timer->week),
+            'enabled' => $timer->enabled,
+            'settings' => $timer->getSettings(),
+        ];
     }
 
     // Private Methods
@@ -374,7 +479,8 @@ class Timers extends Component
                 'week',
                 'settings',
                 'enabled',
-                'sortOrder'
+                'sortOrder',
+                'uid',
             ])
             ->from(Table::SCHEDULETIMERS)
             ->orderBy(['sortOrder' => SORT_ASC]);

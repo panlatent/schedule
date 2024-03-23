@@ -41,6 +41,12 @@ trait ScheduleTrait
     public ?string $user = null;
 
     /**
+     * Static schedules are stored in the project config.
+     * @var bool
+     */
+    public bool $static = false;
+
+    /**
      * @var bool
      */
     public bool $enabled = true;

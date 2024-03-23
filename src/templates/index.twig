@@ -5,7 +5,14 @@
 {% set selectedSubnavItem = "schedules" %}
 {% set groups = craft.schedule.schedules.getAllGroups() %}
 {% set groupId = groupId is defined ? groupId : null %}
-{% set schedules = craft.schedule.schedules.getSchedulesByGroupId(groupId) %}
+
+{% if groupId == null %}
+    {% set schedules = craft.schedule.schedules.getAllSchedules() %}
+{% elseif groupId == 'static' %}
+    {% set schedules = craft.schedule.schedules.getStaticSchedules() %}
+{% else %}
+    {% set schedules = craft.schedule.schedules.getSchedulesByGroupId(groupId) %}
+{% endif %}
 
 {% import "_includes/forms" as forms %}
 
@@ -18,8 +25,13 @@
     <nav>
         <ul id="groups">
             <li>
-                <a href="{{ url('schedule') }}"{% if not groupId %} class="sel"{% endif %}>{{ 'Ungrouped'|t('schedule') }}</a>
+                <a href="{{ url('schedule') }}"{% if not groupId %} class="sel"{% endif %}>{{ 'All schedule'|t('schedule') }}</a>
             </li>
+            {% if craft.schedule.schedules.totalStaticSchedules %}
+            <li>
+                <a href="{{ url('schedule/groups/static') }}"{% if groupId == 'static' %} class="sel"{% endif %}>{{ 'Static'|t('schedule') }}</a>
+            </li>
+            {% endif %}
             {% for group in groups %}
                 <li>
                     <a href="{{ url('schedule/groups/'~group.id) }}"{% if groupId is defined and group.id == groupId %} class="sel"{% endif %}
@@ -31,7 +43,7 @@
     <div class="buttons">
         <div id="newgroupbtn" class="btn add icon">{{ "New group"|t('app') }}</div>
 
-        {% if groupId %}
+        {% if groupId and groupId != 'static' %}
             <div id="groupsettingsbtn" class="btn settings icon menubtn" title="{{ 'Settings'|t('app') }}"></div>
             <div class="menu">
                 <ul>
@@ -51,11 +63,14 @@
             <thead>
             <th scope="col">{{ "Name"|t('app') }}</th>
             <th scope="col">{{ "Handle"|t('app') }}</th>
+            {% if groupId == null %}
+            <th scope="col">{{ "Group"|t('app') }}</th>
+            {% endif %}
             <th scope="col">{{ "Type"|t('app') }}</th>
             <th scope="col">{{ "Timers"|t('schedule') }}</th>
             <th scope="col">{{ "Last Running Date"|t('schedule') }}</th>
-            <th scope="col">{{ 'Enabled'|t('schedule') }}</th>
             <th scope="col">{{ "Logs"|t('schedule') }}</th>
+            <th scope="col">{{ 'Enabled'|t('schedule') }}</th>
             <th></th>
             {% if sortable %}<td class="thin"></td>{% endif %}
             <td class="thin"></td>
@@ -66,6 +81,17 @@
                     <th scope="row" data-title="{{ 'Name'|t('app') }}"><a
                                 href="{{ url('schedule/' ~ schedule.id) }}">{{ schedule.name }}</a></th>
                     <td data-title="{{ 'Handle'|t('app') }}" class="code">{{ schedule.handle }}</td>
+                    {% if groupId == null %}
+                    <td>
+                        {% if schedule.groupId %}
+                            <a class="go" href="{{ url('schedule/groups/' ~ schedule.groupId) }}"> {{ schedule.group.name }}</a>
+                        {% elseif schedule.static %}
+                            <a class="go" href="{{ url('schedule/groups/static') }}"> {{ 'Static'|t }}</a>
+                        {% else %}
+                            {{ schedule.groupId ? schedule.group.name : 'Ungrouped'|t }}
+                        {% endif %}
+                    </td>
+                    {% endif %}
                     <td data-title="{{ 'Type'|t('app') }}">
                         {% if schedule is missing %}
                             <span class="error">{{ schedule.expectedType }}</span>
@@ -100,14 +126,14 @@
                             {{ schedule.lastFinishedDate|datetime('short') }}
                         {% endif %}
                     </td>
+                    <td>{% if schedule.enabledLog %}<a class="go" href="{{ url('schedule/' ~ schedule.id ~ '/logs') }}"></a>{% endif %}</td>
                     <td>
-                         {{ forms.lightswitchField({
-                             name: 'enabled',
-                             small: true,
-                             on: schedule.enabled,
-                         }) }}
+                        {{ forms.lightswitchField({
+                            name: 'enabled',
+                            small: true,
+                            on: schedule.enabled,
+                        }) }}
                     </td>
-                    <td><a class="go" href="{{ url('schedule/' ~ schedule.id ~ '/logs') }}"></a></td>
                     {% if sortable %}<td class="thin"><a class="move icon" title="{{ 'Reorder'|t('app') }}" role="button"></a></td>{% endif %}
                     <td class="thin"><a class="delete icon" title="{{ 'Delete'|t('app') }}" role="button"></a></td>
                 </tr>

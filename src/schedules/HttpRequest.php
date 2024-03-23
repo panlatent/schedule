@@ -14,7 +14,6 @@ use panlatent\schedule\base\Schedule;
 use panlatent\schedule\db\Table;
 use panlatent\schedule\models\ScheduleLog;
 use Psr\Http\Message\ResponseInterface;
-use yii\base\Model;
 
 /**
  * Class HttpRequest
@@ -209,9 +208,9 @@ class HttpRequest extends Schedule
 
         $successful = $statusCode >= 200 && $statusCode < 300;
         if ($successful) {
-            Craft::info("Http Request Schedule: a http request has been sent to {$this->url}({$statusCode}) successfully.", __METHOD__);
+            Craft::info("Http Request Schedule: a http request has been sent to $this->url($statusCode) successfully.", __METHOD__);
         } else {
-            Craft::warning("Http Request Schedule: a http request has been sent to {$this->url}({$statusCode}) failed.", __METHOD__);
+            Craft::warning("Http Request Schedule: a http request has been sent to $this->url($statusCode) failed.", __METHOD__);
         }
 
         if ($logId) {

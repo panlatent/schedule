@@ -9,8 +9,11 @@ namespace panlatent\schedule;
 
 use Craft;
 use craft\base\Model;
+use craft\events\ConfigEvent;
+use craft\events\RebuildConfigEvent;
 use craft\events\RegisterUserPermissionsEvent;
 use craft\helpers\UrlHelper;
+use craft\services\ProjectConfig;
 use craft\services\UserPermissions;
 use craft\web\Response;
 use craft\web\twig\variables\CraftVariable;
@@ -95,6 +98,7 @@ class Plugin extends \craft\base\Plugin
 
         $this->_setComponents();
         $this->_registerCpRoutes();
+        $this->_registerProjectConfigEvents();
         $this->_registerUserPermissions();
         $this->_registerVariables();
     }
@@ -159,6 +163,47 @@ class Plugin extends \craft\base\Plugin
     // Private Methods
     // =========================================================================
 
+    private function _registerProjectConfigEvents(): void
+    {
+        $config = Craft::$app->getProjectConfig();
+
+        Event::on(ProjectConfig::class, ProjectConfig::EVENT_REBUILD, function(RebuildConfigEvent $event) {
+            $schedules = $this->getSchedules();
+            $timers = $this->getTimers();
+
+            $config = [];
+            foreach ($schedules->getStaticSchedules() as $schedule) {
+                $scheduleConfig = $this->getSchedules()->getScheduleConfig($schedule);
+                $scheduleConfig['timers'] = [];
+                foreach ($schedule->getTimers() as $timer) {
+                    $scheduleConfig['timers'][$timer->uid] = $timers->getTimerConfig($timer);
+                }
+                $config[$schedule->uid] = $scheduleConfig;
+            }
+            $event->config['schedule']['schedules'] = $config;
+        });
+
+        $config->onAdd('schedule.schedules.{uid}', function(ConfigEvent $event) {
+            $this->getSchedules()->handleChangeSchedule($event);
+        });
+        $config->onUpdate('schedule.schedules.{uid}', function (ConfigEvent $event) {
+            $this->getSchedules()->handleChangeSchedule($event);
+        });
+        $config->onRemove('schedule.schedules.{uid}', function (ConfigEvent $event) {
+            $this->getSchedules()->handleDeleteSchedule($event);
+        });
+
+        $config->onAdd('schedule.schedules.{uid}.timers.{uid}', function(ConfigEvent $event) {
+            $this->getTimers()->handleChangeTimer($event);
+        });
+        $config->onUpdate('schedule.schedules.{uid}.timers.{uid}', function (ConfigEvent $event) {
+            $this->getTimers()->handleChangeTimer($event);
+        });
+        $config->onRemove('schedule.schedules.{uid}.timers.{uid}', function (ConfigEvent $event) {
+            $this->getTimers()->handleDeleteTimer($event);
+        });
+    }
+
     /**
      * Register user permissions.
      */
@@ -174,7 +219,7 @@ class Plugin extends \craft\base\Plugin
                     Permissions::MANAGE_LOGS => [
                         'label' => Craft::t('schedule', 'Manage Logs'),
                     ],
-                ]
+                ],
             ];
         });
     }

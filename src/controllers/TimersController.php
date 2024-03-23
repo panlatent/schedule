@@ -103,7 +103,7 @@ class TimersController extends Controller
      *
      * @return Response|null
      */
-    public function actionSaveTimer()
+    public function actionSaveTimer(): ?Response
     {
         $this->requirePostRequest();
 

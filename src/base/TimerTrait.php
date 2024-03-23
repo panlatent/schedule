@@ -57,4 +57,9 @@ trait TimerTrait
      * @var int|null
      */
     public ?int $sortOrder = null;
+
+    /**
+     * @var string|null
+     */
+    public ?string $uid = null;
 }

@@ -47,10 +47,10 @@ To install the plugin, follow these instructions.
    $ ./craft schedules/listen
    ```
 
-   If you use nitro:
+   If you use DDEV:
 
    ```shell
-   $ nitro craft schedules/listen
+   $ ddev craft schedules/listen
    ```
 
 Documentation

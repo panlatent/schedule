@@ -122,7 +122,7 @@ class Logs extends Component
      * @param Carbon $datetime
      * @return bool
      */
-    public function deleteLogsByDateCreated($datetime): bool
+    public function deleteLogsByDateCreated(Carbon $datetime): bool
     {
         Craft::$app->getDb()
             ->createCommand()

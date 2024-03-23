@@ -11,7 +11,6 @@ use Carbon\CarbonInterval;
 use Craft;
 use Carbon\Carbon;
 use omnilight\scheduling\Event;
-use panlatent\schedule\base\Schedule;
 use panlatent\schedule\Plugin;
 use panlatent\schedule\validators\CarbonStringIntervalValidator;
 use yii\console\Controller;
@@ -79,13 +78,17 @@ class SchedulesController extends Controller
         $schedules = Plugin::$plugin->getSchedules();
 
         $i = 0;
-        if ($ungroupedSchedules = $schedules->getSchedulesByGroupId()) {
-            $this->stdout(Craft::t('schedule', 'Ungrouped') . ": \n", Console::FG_YELLOW);
-            foreach ($ungroupedSchedules as $schedule) {
-                /** @var Schedule $schedule */
-                $this->stdout(Console::renderColoredString("    > #$i %c$schedule->handle\n"));
-                ++$i;
-            }
+        $ungroupedSchedules = $schedules->getSchedulesByGroupId();
+        $this->stdout(Craft::t('schedule', 'Static') . ": \n", Console::FG_YELLOW);
+        foreach ($ungroupedSchedules as $schedule) {
+            if ($schedule->static)
+            $this->stdout(Console::renderColoredString("    > #$i %c$schedule->handle\n"));
+            ++$i;
+        }
+        $this->stdout(Craft::t('schedule', 'Ungrouped') . ": \n", Console::FG_YELLOW);
+        foreach ($ungroupedSchedules as $schedule) {
+            $this->stdout(Console::renderColoredString("    > #$i %c$schedule->handle\n"));
+            ++$i;
         }
 
         foreach ($schedules->getAllGroups() as $group) {

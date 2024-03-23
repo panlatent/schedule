@@ -3,7 +3,11 @@
 {% set groupId = groupId is defined ? groupId : craft.app.request.getQueryParam('groupId') %}
 {% set title = isNewSchedule ? 'New a schedule'|t('schedule') : 'Edit: {name}'|t('schedule', {name: schedule.name}) %}
 {% set selectedSubnavItem = "schedules" %}
-{% set fullPageForm = true %}
+
+{% if craft.app.config.general.allowAdminChanges %}
+    {% set fullPageForm = true %}
+{% endif %}
+
 {% set crumbs = [{
     label: 'Schedule'|t('schedule'),
     url: url('schedule')
@@ -20,13 +24,15 @@
         <input type="hidden" name="action" value="schedule/schedules/save-schedule">
         <input type="hidden" name="scheduleId" value="{{ schedule.id }}">
 
-        {{ forms.selectField({
-            label: 'Group'|t('app'),
-            id: 'groupId',
-            name: 'groupId',
-            value: schedule.groupId ?? groupId,
-            options: groupOptions,
-        }) }}
+        <div id="group" {% if schedule.static %}class="hidden"{% endif %}>
+            {{ forms.selectField({
+                label: 'Group'|t('app'),
+                id: 'groupId',
+                name: 'groupId',
+                value: schedule.groupId ?? groupId,
+                options: groupOptions,
+            }) }}
+        </div>
 
         {{ forms.textField({
             label: 'Name'|t('app'),
@@ -97,6 +103,15 @@
             name: 'enabled',
             on: schedule.enabled,
             errors: schedule.getErrors('enabled'),
+        }) }}
+
+        {{ forms.lightswitchField({
+            label: 'Static'|t('schedule'),
+            id: 'static',
+            name: 'static',
+            on: schedule.static,
+            errors: schedule.getErrors('static'),
+            reverseToggle: 'group',
         }) }}
     </div>
     <div class="meta read-only">

@@ -28,5 +28,5 @@ class TimerEvent extends Event
     /**
      * @var bool
      */
-    public $isNew = false;
+    public bool $isNew = false;
 }

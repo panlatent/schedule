@@ -43,6 +43,7 @@ class Install extends Migration
             'type' => $this->string()->notNull(),
             'user' => $this->string(),
             'settings' => $this->text(),
+            'static' => $this->boolean()->defaultValue(false),
             'enabled' => $this->boolean()->notNull()->defaultValue(true),
             'enabledLog' => $this->boolean()->defaultValue(false),
             'lastStartedTime' =>  $this->bigInteger(),

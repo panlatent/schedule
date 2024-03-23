@@ -26,7 +26,7 @@ trait Routes
     {
         Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function (RegisterUrlRulesEvent $event) {
             $event->rules = array_merge($event->rules, [
-                'schedule/groups/<groupId:\d+>' => ['template' => 'schedule'],
+                'schedule/groups/<groupId:\d+|static>' => ['template' => 'schedule'],
                 'schedule/new' => 'schedule/schedules/edit-schedule',
                 'schedule/<scheduleId:\d+>' => 'schedule/schedules/edit-schedule',
                 'schedule/<scheduleId:\d+>/timers' => ['template' => 'schedule/timers'],

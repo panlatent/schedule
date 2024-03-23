@@ -119,7 +119,7 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
             [['name', 'handle', 'description', 'user'], 'string'],
             [['handle'], UniqueValidator::class, 'targetClass' => ScheduleRecord::class, 'targetAttribute' => 'handle'],
             [['handle'], HandleValidator::class],
-            [['enabledLog', 'lastStatus'], 'boolean'],
+            [['static', 'enabledLog', 'lastStatus'], 'boolean'],
         ];
     }
 

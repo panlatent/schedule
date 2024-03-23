@@ -11,14 +11,6 @@
 
     {{ redirectInput('schedule/' ~ timer.scheduleId ~ '/timers') }}
 
-    {{ forms.lightSwitchField({
-        label: "Enabled"|t('app'),
-        id: "enabled",
-        name: "enabled",
-        on: timer.enabled,
-        errors: timer.getErrors('enabled'),
-    }) }}
-
     {{ forms.selectField({
         label: "When to execute?"|t('schedule'),
         id: 'type',
@@ -38,5 +30,19 @@
                 {% endnamespace %}
             </div>
         {% endfor %}
+    </div>
+{% endblock %}
+
+{% block details %}
+    <div class="meta">
+        {{ forms.lightSwitchField({
+            label: "Enabled"|t('app'),
+            id: "enabled",
+            name: "enabled",
+            on: timer.enabled,
+            errors: timer.getErrors('enabled'),
+        }) }}
+    </div>
+    <div class="meta read-only">
     </div>
 {% endblock %}

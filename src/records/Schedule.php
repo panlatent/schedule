@@ -22,6 +22,7 @@ use panlatent\schedule\db\Table;
  * @property string $type
  * @property string $user
  * @property string $settings
+ * @property bool $static
  * @property bool $enabled
  * @property bool $enabledLog
  * @property int $lastStartedTime

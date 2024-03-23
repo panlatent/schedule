@@ -7,12 +7,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ## [Unreleased]
 ### Added
 - Property/Method/Parameter type declarations
+- Static schedule and static group
 
 ### Updated
 - Minimal support for craft 4 and PHP 8.0.2
 - Advance schedule service repository store mode
+- Advance CP pages.
 
 ### Fixed
+- Fix queue job and event class suggestions
 
 ### Removed
 - Deprecated classes and methods

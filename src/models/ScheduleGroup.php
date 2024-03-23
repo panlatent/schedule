@@ -35,6 +35,11 @@ class ScheduleGroup extends Model
     public ?string $name = null;
 
     /**
+     * @var string|null
+     */
+    public ?string $uid = null;
+
+    /**
      * @var ScheduleInterface[]|null
      */
     private ?array $_schedules = null;
