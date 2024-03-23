@@ -26,6 +26,7 @@ use panlatent\schedule\events\ScheduleEvent;
 use panlatent\schedule\events\ScheduleGroupEvent;
 use panlatent\schedule\models\ScheduleCriteria;
 use panlatent\schedule\models\ScheduleGroup;
+use panlatent\schedule\Plugin;
 use panlatent\schedule\records\Schedule as ScheduleRecord;
 use panlatent\schedule\records\ScheduleGroup as ScheduleGroupRecord;
 use panlatent\schedule\schedules\Console;
@@ -502,7 +503,15 @@ class Schedules extends Component
 
         if ($schedule->static) {
             $path = "schedule.schedules.$schedule->uid";
-            Craft::$app->getProjectConfig()->set($path, $this->getScheduleConfig($schedule));
+            $config = $this->getScheduleConfig($schedule);
+            if (!$isNewSchedule) {
+                $config['timers'] = [];
+                foreach ($schedule->getTimers() as $timer) {
+                    $config['timers'][$timer->uid] = Plugin::$plugin->getTimers()->getTimerConfig($timer);
+                }
+            }
+
+            Craft::$app->getProjectConfig()->set($path, $config);
             if ($isNewSchedule) {
                 $schedule->id = Db::idByUid(Table::SCHEDULES, $schedule->uid);
             }
