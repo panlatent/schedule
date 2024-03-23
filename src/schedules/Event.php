@@ -62,12 +62,7 @@ class Event extends Schedule
      */
     public function getSettingsHtml(): ?string
     {
-        $classSuggestions = [
-            [
-                'label' => '',
-                'data' => $this->_getClassSuggestions(),
-            ]
-        ];
+        $classSuggestions = array_values($this->_getClassSuggestions());
 
         return Craft::$app->getView()->renderTemplate('schedule/_components/schedules/Event/settings', [
             'schedule' => $this,
@@ -101,9 +96,31 @@ class Event extends Schedule
         $suggestions = [];
         foreach (ClassHelper::findClasses() as $class) {
             if (is_subclass_of($class, Component::class)) {
-                $suggestions[] = [
+                $reflection = new ReflectionClass($class);
+                if (!$reflection->isInstantiable()) {
+                    continue;
+                }
+
+                $hasEvent = false;
+                foreach (array_keys($reflection->getConstants()) as $constant) {
+                    if (str_starts_with($constant, 'EVENT_')) {
+                        $hasEvent = true;
+                        break;
+                    }
+                }
+
+                if (!$hasEvent) {
+                    continue;
+                }
+
+                $namespace = $reflection->getNamespaceName();
+                if (!isset($suggestions[$namespace])) {
+                    $suggestions[$namespace] = ['label' => $namespace, 'data' => []];
+                }
+
+                $suggestions[$namespace]['data'][] = [
                     'name' => $class,
-                    'hint' => ClassHelper::getPhpDocSummary((new ReflectionClass($class))->getDocComment()),
+                    'hint' => ClassHelper::getPhpDocSummary($reflection->getDocComment()),
                 ];
             }
         }

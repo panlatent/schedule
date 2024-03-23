@@ -54,7 +54,7 @@ class Queue extends Schedule
     /**
      * @var string|null
      */
-    public ?string $jobClass;
+    public ?string $jobClass = null;
 
     // Public Methods
     // =========================================================================
@@ -71,12 +71,7 @@ class Queue extends Schedule
             ]
         ];
 
-        $jobClassSuggestions = [
-            [
-                'label' => '',
-                'data' => $this->_getJobClassSuggestions(),
-            ]
-        ];
+        $jobClassSuggestions = array_values($this->_getJobClassSuggestions());
 
         return Craft::$app->getView()->renderTemplate('schedule/_components/schedules/Queue/settings', [
             'schedule' => $this,
@@ -155,7 +150,12 @@ class Queue extends Schedule
                     continue;
                 }
 
-                $suggestions[] = [
+                $namespace = $reflection->getNamespaceName();
+                if (!isset($suggestions[$namespace])) {
+                    $suggestions[$namespace] = ['label' => $namespace, 'data' => []];
+                }
+
+                $suggestions[$namespace]['data'][] = [
                     'name' => $class,
                     'hint' => ClassHelper::getPhpDocSummary($reflection->getDocComment()),
                 ];
