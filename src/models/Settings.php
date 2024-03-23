@@ -29,6 +29,7 @@ class Settings extends Model
     public string $cliPath = 'php';
 
     /**
+     * @deprecated
      * @var string|null
      */
     public ?string $customName = null;
@@ -43,12 +44,6 @@ class Settings extends Model
      */
     public ?string $logExpireAfter = null;
 
-    /**
-     * @deprecated
-     * @var bool
-     */
-    public bool $modifyPluginName = false;
-
     // Public Methods
     // =========================================================================
 
@@ -58,8 +53,8 @@ class Settings extends Model
     public function rules(): array
     {
         return [
-            [['cliPath', 'customName', 'customCpNavName', 'logExpireAfter'], 'string'],
-            [['modifyPluginName'], 'boolean'],
+            [['cliPath', 'customCpNavName', 'logExpireAfter'], 'string'],
+            [['customCpNavName'], 'trim'],
             [['cliPath'], PhpBinaryValidator::class, 'minVersion' => '7.1', 'allowParseEnv' => true],
             [['logExpireAfter'], CarbonStringIntervalValidator::class],
         ];
@@ -71,5 +66,13 @@ class Settings extends Model
     public function getCliPath(): string
     {
         return App::parseEnv($this->cliPath) ?: 'php';
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getCustomCpNavName(): ?string
+    {
+        return App::parseEnv($this->customCpNavName);
     }
 }

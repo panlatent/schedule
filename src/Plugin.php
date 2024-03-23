@@ -81,12 +81,7 @@ class Plugin extends \craft\base\Plugin
         parent::init();
         self::$plugin = $this;
         Craft::setAlias('@schedule', $this->getBasePath());
-
-        if (strval($this->getSettings()->customName) !== "") {
-            $this->name = $this->getSettings()->customName;
-        } else {
-            $this->name = Craft::t('schedule', 'Schedule');
-        }
+        $this->name = Craft::t('schedule', 'Schedule');
 
         // Replace omnilight controller to this plugin controller in console.
         if (Craft::$app instanceof Application) {
@@ -109,12 +104,7 @@ class Plugin extends \craft\base\Plugin
     public function getCpNavItem(): ?array
     {
         $ret = parent::getCpNavItem();
-
-        if (strval($this->getSettings()->customCpNavName)) {
-            $ret['label'] = $this->getSettings()->customCpNavName;
-        } else {
-            $ret['label'] = $this->name;
-        }
+        $ret['label'] = $this->getSettings()->getCustomCpNavName() ?? $this->name;
 
         $user = Craft::$app->getUser();
         if ($user->checkPermission(Permissions::MANAGE_SCHEDULES)) {

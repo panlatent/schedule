@@ -19,7 +19,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ### Removed
 - Deprecated classes and methods
-
+- Deprecated plugin custom name
 
 ## [0.4.0] - 2022-06-20
 ### Updated

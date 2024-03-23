@@ -12,20 +12,13 @@
         <input type="hidden" name="action" value="schedule/settings/save-general">
         {{ csrfInput() }}
 
-        {{ forms.textField({
-            label: "Custom Name"|t('schedule'),
-            id: "customName",
-            name: "customName",
-            value: settings.customName,
-            errors: settings.getErrors('customName'),
-        }) }}
-
-        {{ forms.textField({
+        {{ forms.autoSuggestField({
             label: "Custom Cp Nav Name"|t('schedule'),
             id: "customCpNavName",
             name: "customCpNavName",
             value: settings.customCpNavName,
             errors: settings.getErrors('customCpNavName'),
+            suggestEnvVars: true,
         }) }}
 
         {{ forms.autoSuggestField({
