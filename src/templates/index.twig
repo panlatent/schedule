@@ -87,9 +87,9 @@
                         {% if schedule.groupId %}
                             <a class="go" href="{{ url('schedule/groups/' ~ schedule.groupId) }}"> {{ schedule.group.name }}</a>
                         {% elseif schedule.static %}
-                            <a class="go" href="{{ url('schedule/groups/static') }}"> {{ 'Static'|t }}</a>
+                            <a class="go" href="{{ url('schedule/groups/static') }}"> {{ 'Static'|t('schedule') }}</a>
                         {% else %}
-                            {{ schedule.groupId ? schedule.group.name : 'Ungrouped'|t }}
+                            {{ schedule.groupId ? schedule.group.name : 'Ungrouped'|t('schedule') }}
                         {% endif %}
                     </td>
                     {% endif %}
