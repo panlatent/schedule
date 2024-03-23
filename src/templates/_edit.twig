@@ -55,15 +55,6 @@
             errors: schedule.getErrors('handle'),
         }) }}
 
-        {{ forms.textareaField({
-            label: 'Description'|t('app'),
-            readonly: not allowChange,
-            id: 'description',
-            name: 'description',
-            value: schedule.description,
-            errors: schedule.getErrors('description'),
-        }) }}
-
         <hr>
 
         {{ forms.selectField({
@@ -94,22 +85,6 @@
 
 {% block details %}
     <div class="meta">
-        {{ forms.lightswitchField({
-            label: 'Enabled'|t('schedule'),
-            id: 'enabled',
-            name: 'enabled',
-            on: schedule.enabled,
-            errors: schedule.getErrors('enabled'),
-        }) }}
-
-        {{ forms.lightswitchField({
-            label: 'Enabled Log'|t('schedule'),
-            id: 'enabledLog',
-            name: 'enabledLog',
-            on: schedule.enabledLog,
-            errors: schedule.getErrors('enabledLog'),
-        }) }}
-
         {% if craft.app.config.general.allowAdminChanges or not isNewSchedule %}
             {{ forms.lightswitchField({
                 label: 'Static'|t('schedule'),
@@ -122,6 +97,36 @@
             }) }}
         {% endif %}
     </div>
+    <fieldset>
+        <legend class="h6">Status</legend>
+        <div class="meta">
+            {{ forms.lightswitchField({
+                label: 'Enabled'|t('schedule'),
+                id: 'enabled',
+                name: 'enabled',
+                on: schedule.enabled,
+                errors: schedule.getErrors('enabled'),
+            }) }}
+
+            {{ forms.lightswitchField({
+                label: 'Enabled Log'|t('schedule'),
+                id: 'enabledLog',
+                name: 'enabledLog',
+                on: schedule.enabledLog,
+                errors: schedule.getErrors('enabledLog'),
+            }) }}
+        </div>
+    </fieldset>
+
+    {{ forms.textareaField({
+        label: 'Description'|t('app'),
+        readonly: not allowChange,
+        id: 'description',
+        name: 'description',
+        value: schedule.description,
+        errors: schedule.getErrors('description'),
+    }) }}
+
     <div class="meta read-only">
         <div class="data">
             <h5 class="heading">{{ "Created at"|t('app') }}</h5>
