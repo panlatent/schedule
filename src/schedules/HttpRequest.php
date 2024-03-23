@@ -146,6 +146,13 @@ class HttpRequest extends Schedule
     {
         return Craft::$app->getView()->renderTemplate('schedule/_components/schedules/HttpRequest/settings', [
             'schedule' => $this,
+            // Craft editableTable not support custom suggestions
+            // 'httpHeaderSuggestions' => [
+            //     [
+            //          'label' => '',
+            //         'data' => $this->_getHttpHeaderSuggestions(),
+            //     ]
+            // ],
         ]);
     }
 
@@ -224,5 +231,55 @@ class HttpRequest extends Schedule
         }
 
         return $successful;
+    }
+
+    // Private Methods
+    // =========================================================================
+
+    /**
+     * Commonly used HTTP request headers
+     * @return array
+     */
+    private function _getHttpHeaderSuggestions(): array
+    {
+        return array_map(function(string $header) {
+            return [
+                'label' => $header,
+                'data' => $header,
+            ];
+        }, [
+            'Accept',
+            'Accept-Charset',
+            'Accept-Encoding',
+            'Accept-Language',
+            'Accept-Datetime',
+            'Authorization',
+            'Cache-Control',
+            'Connection',
+            'Content-Length',
+            'Content-Type',
+            'Cookie',
+            'Date',
+            'Expect',
+            'Forwarded',
+            'From',
+            'Host',
+            'If-Match',
+            'If-Modified-Since',
+            'If-None-Match',
+            'If-Range',
+            'If-Unmodified-Since',
+            'Max-Forwards',
+            'Origin',
+            'Pragma',
+            'Proxy-Authorization',
+            'Range',
+            'Referer',
+            'TE',
+            'User-Agent',
+            'Upgrade',
+            'Via',
+            'Warning',
+        ]);
     }
 }
