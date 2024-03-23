@@ -6,20 +6,26 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## [Unreleased]
 ### Added
-- Property/Method/Parameter type declarations
-- Static schedule and static group
+### Updated
+### Fixed
+### Removed
+
+## [0.5.0] - 2024-03-23
+### Added
+- Static schedule and static group.
 
 ### Updated
-- Minimal support for craft 4 and PHP 8.0.2
-- Advance schedule service repository store mode
+- Minimal support for craft 4 and PHP 8.0.2.
+- Advance schedule service repository store mode.
 - Advance CP pages.
+- Advance Property/Method/Parameter type declarations.
 
 ### Fixed
-- Fix queue job and event class suggestions
+- Fix queue job and event class suggestions.
 
 ### Removed
-- Deprecated classes and methods
-- Deprecated plugin custom name
+- Deprecated classes and methods.
+- Deprecated plugin custom name.
 
 ## [0.4.0] - 2022-06-20
 ### Updated
