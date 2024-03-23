@@ -17,8 +17,12 @@
     {label: schedule, url: url('schedule/' ~ schedule.id)},
 ]) %}
 
+{% set allowChange = craft.app.config.general.allowAdminChanges or not schedule.static  %}
+
 {% block actionButton %}
+    {% if allowChange %}
     <a href="{{ url('schedule/' ~ schedule.id ~ '/timers/new') }}" class="btn submit icon add">{{ "New timer"|t('schedule') }}</a>
+    {% endif %}
 {% endblock %}
 
 {% block content %}

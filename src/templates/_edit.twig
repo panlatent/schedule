@@ -3,8 +3,9 @@
 {% set groupId = groupId is defined ? groupId : craft.app.request.getQueryParam('groupId') %}
 {% set title = isNewSchedule ? 'New a schedule'|t('schedule') : 'Edit: {name}'|t('schedule', {name: schedule.name}) %}
 {% set selectedSubnavItem = "schedules" %}
+{% set allowChange = isNewSchedule or not schedule.static or craft.app.config.general.allowAdminChanges %}
 
-{% if craft.app.config.general.allowAdminChanges %}
+{% if allowChange %}
     {% set fullPageForm = true %}
 {% endif %}
 
@@ -37,6 +38,7 @@
         {{ forms.textField({
             label: 'Name'|t('app'),
             required: true,
+            readonly: not allowChange,
             id: 'name',
             name: 'name',
             value: schedule.name,
@@ -46,22 +48,16 @@
         {{ forms.textField({
             label: 'Handle'|t('app'),
             required: true,
+            readonly: not allowChange,
             id: 'handle',
             name: 'handle',
             value: schedule.handle,
             errors: schedule.getErrors('handle'),
         }) }}
 
-        {{ forms.checkboxField({
-            label: 'Enabled Log'|t('schedule'),
-            id: 'enabledLog',
-            name: 'enabledLog',
-            checked: schedule.enabledLog,
-            errors: schedule.getErrors('enabledLog'),
-        }) }}
-
         {{ forms.textareaField({
             label: 'Description'|t('app'),
+            readonly: not allowChange,
             id: 'description',
             name: 'description',
             value: schedule.description,
@@ -72,6 +68,7 @@
 
         {{ forms.selectField({
             label: 'Schedule Type'|t('schedule'),
+            disabled: not allowChange,
             name: 'type',
             value: className(schedule),
             options: scheduleTypeOptions,
@@ -106,13 +103,24 @@
         }) }}
 
         {{ forms.lightswitchField({
-            label: 'Static'|t('schedule'),
-            id: 'static',
-            name: 'static',
-            on: schedule.static,
-            errors: schedule.getErrors('static'),
-            reverseToggle: 'group',
+            label: 'Enabled Log'|t('schedule'),
+            id: 'enabledLog',
+            name: 'enabledLog',
+            on: schedule.enabledLog,
+            errors: schedule.getErrors('enabledLog'),
         }) }}
+
+        {% if craft.app.config.general.allowAdminChanges or not isNewSchedule %}
+            {{ forms.lightswitchField({
+                label: 'Static'|t('schedule'),
+                id: 'static',
+                name: 'static',
+                disabled: not allowChange,
+                on: schedule.static,
+                errors: schedule.getErrors('static'),
+                reverseToggle: 'group',
+            }) }}
+        {% endif %}
     </div>
     <div class="meta read-only">
         <div class="data">

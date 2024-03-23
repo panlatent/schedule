@@ -1,6 +1,11 @@
 {% extends "_layouts/cp" %}
 
-{% set fullPageForm = true %}
+
+{% set allowChange = craft.app.config.general.allowAdminChanges or not timer.schedule.static  %}
+
+{% if allowChange %}
+    {% set fullPageForm = true %}
+{% endif %}
 
 {% import "_includes/forms" as forms %}
 
@@ -13,6 +18,7 @@
 
     {{ forms.selectField({
         label: "When to execute?"|t('schedule'),
+        disabled: not allowChange,
         id: 'type',
         name: 'type',
         value: className(timer),
@@ -37,6 +43,7 @@
     <div class="meta">
         {{ forms.lightSwitchField({
             label: "Enabled"|t('app'),
+            disabled: not allowChange,
             id: "enabled",
             name: "enabled",
             on: timer.enabled,

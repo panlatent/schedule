@@ -77,6 +77,7 @@
             </thead>
             <tbody>
             {% for schedule in schedules %}
+                {% set allowChange = not schedule.static or craft.app.config.general.allowAdminChanges %}
                 <tr data-id="{{ schedule.id }}" data-name="{{ schedule.name|t('site') }}">
                     <th scope="row" data-title="{{ 'Name'|t('app') }}"><a
                                 href="{{ url('schedule/' ~ schedule.id) }}">{{ schedule.name }}</a></th>
@@ -101,9 +102,9 @@
                     </td>
                     <td data-title="{{ 'Timers'|t('schedule') }}">
                         {% if schedule.timers|length == 0 %}
-                            <a href="{{ url('schedule/' ~ schedule.id ~ '/timers') }}">{{ "Edit Timers"|t('schedule') }}</a>
+                            <a href="{{ url('schedule/' ~ schedule.id ~ '/timers') }}">{{ allowChange ? "Edit Timers"|t('schedule') : "View Timers"|t('schedule') }}</a>
                         {% else %}
-                            <a href="{{ url('schedule/' ~ schedule.id ~ '/timers') }}">{{ "Edit Timers ({count})"|t('schedule', { count: schedule.timers|length }) }}</a>
+                            <a href="{{ url('schedule/' ~ schedule.id ~ '/timers') }}">{{ allowChange ? "Edit Timers ({count})"|t('schedule', { count: schedule.timers|length }) : "View Timers ({count})"|t('schedule', { count: schedule.timers|length }) }}</a>
                             <a class="menubtn" title="{{ 'Timers'|t('schedule') }}"></a>
                             <div class="menu">
                                 <ul>
@@ -128,11 +129,15 @@
                     </td>
                     <td>{% if schedule.enabledLog %}<a class="go" href="{{ url('schedule/' ~ schedule.id ~ '/logs') }}"></a>{% endif %}</td>
                     <td>
-                        {{ forms.lightswitchField({
-                            name: 'enabled',
-                            small: true,
-                            on: schedule.enabled,
-                        }) }}
+                        {% if allowChange %}
+                            {{ forms.lightswitchField({
+                                name: 'enabled',
+                                small: true,
+                                on: schedule.enabled,
+                            }) }}
+                        {% else %}
+                            {% if schedule.enabled %}<span data-icon="check"></span>{% endif %}
+                        {% endif %}
                     </td>
                     {% if sortable %}<td class="thin"><a class="move icon" title="{{ 'Reorder'|t('app') }}" role="button"></a></td>{% endif %}
                     <td class="thin"><a class="delete icon" title="{{ 'Delete'|t('app') }}" role="button"></a></td>
