@@ -83,12 +83,8 @@ class Plugin extends \craft\base\Plugin
         Craft::setAlias('@schedule', $this->getBasePath());
         $this->name = Craft::t('schedule', 'Schedule');
 
-        // Replace omnilight controller to this plugin controller in console.
         if (Craft::$app instanceof Application) {
-            if (isset(Craft::$app->controllerMap['schedule']) && Craft::$app->controllerMap['schedule'] == 'omnilight\scheduling\ScheduleController') {
-                unset(Craft::$app->controllerMap['schedule']);
-                Craft::$app->controllerMap['schedules'] = SchedulesController::class;
-            }
+            Craft::$app->controllerMap['schedules'] = SchedulesController::class;
         }
 
         $this->_setComponents();

@@ -74,7 +74,7 @@ class Relay extends Timer
         $schedule = $this->getSchedule();
 
         if (!$schedule->getLastFinishedDate()) {
-            return '* * * * * *';
+            return '* * * * *';
         }
 
         $date = $schedule->getLastFinishedDate()->add(new DateInterval("PT{$this->wait}M"));
@@ -82,7 +82,7 @@ class Relay extends Timer
             $date = new DateTime('now');
         }
 
-        return $date->format('i H d m * *');
+        return $date->format('i H d m *');
     }
 
     /**

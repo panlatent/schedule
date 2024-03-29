@@ -7,19 +7,22 @@
 
 namespace panlatent\schedule;
 
-use omnilight\scheduling\Event;
-use omnilight\scheduling\Schedule;
+use Closure;
+use Craft;
+use Crunz\Event;
+use Crunz\Schedule as Scheduler;
+use DateTimeZone;
 use panlatent\schedule\base\ScheduleInterface;
 use panlatent\schedule\events\ScheduleBuildEvent;
+use yii\base\Component;
 
 /**
  * Class Builder
  *
  * @package panlatent\schedule
- * @method  Event call(callable $callback, array $parameters = [])
  * @author Panlatent <panlatent@gmail.com>
  */
-class Builder extends Schedule
+class Builder extends Component
 {
     // Constants
     // =========================================================================
@@ -35,16 +38,51 @@ class Builder extends Schedule
     const EVENT_AFTER_BUILD = 'afterBuild';
 
     /**
-     * @inheritdoc
+     * @var string
      */
-    public $cliScriptName = 'craft';
+    public string $cliScriptName = 'craft';
+
+    // Properties
+    // =========================================================================
+
+    /**
+     * @var BuilderEvent[]
+     */
+    private array $_events = [];
+
+    // Public Methods
+    // =========================================================================
 
     /**
      * @param ScheduleInterface $schedule
+     * @deprecated
      */
     public function schedule(ScheduleInterface $schedule): void
     {
         $schedule->build($this);
+    }
+
+    /**
+     * @deprecated
+     * @see Builder::closure()
+     */
+    public function call(callable $callback, array $parameters = []): BuilderEvent
+    {
+        if (!$callback instanceof Closure) {
+            $callback = Closure::fromCallable($callback);
+        }
+        return $this->closure($callback);
+    }
+
+    /**
+     * @param Closure $callback
+     * @return BuilderEvent
+     */
+    public function closure(Closure $callback): BuilderEvent
+    {
+        $event = new BuilderEvent($callback);
+        $this->_events[] = $event;
+        return $event;
     }
 
     /**
@@ -65,6 +103,21 @@ class Builder extends Schedule
         $this->afterBuild();
 
         return $this;
+    }
+
+    /**
+     * @return Event[]
+     */
+    public function dueEvents($app = null): array
+    {
+        if ($app === null) {
+            $app = Craft::$app;
+        }
+
+        return array_filter($this->_events, function(BuilderEvent $event) use ($app)
+        {
+            return $event->isDue($app);
+        });
     }
 
     /**

@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Updated
 ### Fixed
 ### Removed
+- Remove 'omnilight/yii2-scheduling' package
 
 ## [0.5.0] - 2024-03-23
 ### Added

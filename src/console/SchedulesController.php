@@ -10,7 +10,7 @@ namespace panlatent\schedule\console;
 use Carbon\CarbonInterval;
 use Craft;
 use Carbon\Carbon;
-use omnilight\scheduling\Event;
+use panlatent\schedule\BuilderEvent;
 use panlatent\schedule\Plugin;
 use panlatent\schedule\validators\CarbonStringIntervalValidator;
 use yii\console\Controller;
@@ -105,14 +105,14 @@ class SchedulesController extends Controller
     /**
      * Run all schedules.
      *
-     * @param Event[]|null $events
+     * @param BuilderEvent[]|null $events
      */
     public function actionRun(array $events = null): void
     {
         if ($events === null) {
             $events = Plugin::$plugin->createBuilder()
                 ->build($this->force ?? false)
-                ->dueEvents(Craft::$app);
+                ->dueEvents();
         }
 
         if (empty($events)) {
@@ -121,12 +121,20 @@ class SchedulesController extends Controller
         }
 
         foreach ($events as $event) {
-            $command = $event->getSummaryForDisplay();
-            $this->stdout("Running scheduled command: $command\n");
-
-            $event->run(Craft::$app);
-
-            Craft::info("Running scheduled command: $command", __METHOD__);
+            $summary = $event->getSummary();
+            $start = microtime(true);
+            $this->stdout("Running schedule: $summary ... ");
+            try {
+                $event->run();
+                $duration = round((microtime(true) - $start), 2);
+                $this->stdout("done({$duration}s)\n");
+                Craft::info("Running schedule: $summary", __METHOD__);
+            } catch (\Throwable $e) {
+                $duration = round((microtime(true) - $start), 2);
+                $this->stdout("failed({$duration}s)\n");
+                $this->stderr("Error: {$e->getMessage()}\n");
+                Craft::error("Running schedule: $summary", __METHOD__);
+            }
         }
 
         Craft::info("Running scheduled event total: " . count($events), __METHOD__);
@@ -201,7 +209,7 @@ class SchedulesController extends Controller
             // Use free time to get events.
             $events = Plugin::$plugin->createBuilder()
                 ->build($this->force ?? false)
-                ->dueEvents(Craft::$app);
+                ->dueEvents();
         } else {
             $events = null;
         }

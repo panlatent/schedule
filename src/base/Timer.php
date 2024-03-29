@@ -80,7 +80,7 @@ abstract class Timer extends SavableComponent implements TimerInterface
      */
     public function getCronExpression(): string
     {
-        return sprintf('%s %s %s %s %s *', $this->minute, $this->hour, $this->day, $this->month, $this->week);
+        return sprintf('%s %s %s %s %s', $this->minute, $this->hour, $this->day, $this->month, $this->week);
     }
 
     /**

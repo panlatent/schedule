@@ -267,8 +267,9 @@ abstract class Schedule extends SavableComponent implements ScheduleInterface
     {
         if (static::isRunnable()) {
             foreach ($this->getActiveTimers() as $timer) {
-                $builder->call([$this, 'run'])
-                    ->cron($timer->getCronExpression());
+                $builder->closure(\Closure::fromCallable([$this, 'run']))
+                    ->expression($timer->getCronExpression())
+                    ->timer($timer);
             }
         }
     }
