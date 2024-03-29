@@ -25,7 +25,7 @@
     ],
     "require": {
         "php": "^8.0.2",
-        "craftcms/cms": "^4.0",
+        "craftcms/cms": "^4.0|^5.0",
         "nesbot/carbon": "^1.22 || ^2.10",
         "omnilight/yii2-scheduling": "^1.1",
         "symfony/process": "^4.2 || ^5.0 || ^6.0",
@@ -50,7 +50,9 @@
         }
     },
     "require-dev": {
-        "codeception/codeception": "^4.1"
+        "codeception/codeception": "^4.1",
+        "craftcms/phpstan": "dev-main",
+        "craftcms/rector": "dev-main"
     },
     "config": {
         "platform": {
@@ -60,5 +62,7 @@
             "yiisoft/yii2-composer": true,
             "craftcms/plugin-installer": true
         }
-    }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }
