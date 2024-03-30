@@ -31,14 +31,10 @@ To install the plugin, follow these instructions.
 
         composer require panlatent/schedule
 
-   The plugin supports CraftCMS 4 since version 0.4, CraftCMS 3 requires version 0.3.x:
-
-        composer require "panlatent/schedule:^0.3.2"
-
 3. In the Control Panel, go to Settings → Plugins and click the “Install” button for Schedule.
 
 4. Add a record to system crontab:
-    
+
         * * * * * php /path/to/craft schedules/run 1>> /dev/null 2>&1
 
    Or use built-in `schedules/listen` command:
@@ -52,6 +48,33 @@ To install the plugin, follow these instructions.
    ```shell
    $ ddev craft schedules/listen
    ```
+
+Usage
+------
+
+For the command line we support some actions and options:
+
+Delete logs 
+```bash
+craft schedules/clear-logs [interval]
+```
+
+Delete all logs
+```bash
+craft schedules/clear-logs --all
+```
+
+Run schedules asynchronously:
+```bash
+craft schedules/run --async
+craft schedules/listen --async
+```
+
+Listen all active timer events with clear log:
+```bash
+craft schedules/listen --with-clear-log
+```
+
 
 Documentation
 -------------

@@ -10,13 +10,13 @@ namespace panlatent\schedule\console;
 use Carbon\CarbonInterval;
 use Craft;
 use Carbon\Carbon;
-use craft\validators\HandleValidator;
 use panlatent\schedule\base\ScheduleInterface;
 use panlatent\schedule\BuilderEvent;
 use panlatent\schedule\Plugin;
 use panlatent\schedule\schedules\Console as ConsoleSchedule;
 use panlatent\schedule\validators\CarbonStringIntervalValidator;
 use Symfony\Component\Process\Process;
+use Throwable;
 use yii\console\Controller;
 use yii\helpers\Console;
 
@@ -56,6 +56,16 @@ class SchedulesController extends Controller
      */
     public ?string $expire = null;
 
+    /**
+     * @var string
+     */
+    public string $expireDefault = '7days';
+
+    /**
+     * @var bool True will automatically clear logs.
+     */
+    public bool $withClearLogs = false;
+
     // Public Methods
     // =========================================================================
 
@@ -66,10 +76,15 @@ class SchedulesController extends Controller
     {
         $options = parent::options($actionID);
         switch ($actionID) {
-            case 'run': // no break
+            case 'run':
+                $options[] = 'force';
+                $options[] = 'async';
+                break;
             case 'listen':
                 $options[] = 'force';
                 $options[] = 'async';
+                $options[] = 'withClearLogs';
+                $options[] = 'expire';
                 break;
             case 'clear-logs':
                 $options[] = 'all';
@@ -161,11 +176,11 @@ class SchedulesController extends Controller
                 $schedule = Plugin::$plugin->getSchedules()->getScheduleByUid($search);
                 $type = 'uid';
             }
-        }
 
-        if (!$schedule) {
-            $this->stderr("Not found schedule with $type: $search\n");
-            return 1;
+            if (!$schedule) {
+                $this->stderr("Not found schedule with $type: $search\n");
+                return 1;
+            }
         }
 
         $info = sprintf('#%d %s[%s]', $schedule->id, $schedule->name, $schedule->handle);
@@ -176,7 +191,7 @@ class SchedulesController extends Controller
             $duration = round((microtime(true) - $start), 2);
             $this->stdout("done({$duration}s)\n");
             Craft::info("Running schedule: $info", __METHOD__);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $duration = round((microtime(true) - $start), 2);
             $this->stdout("failed({$duration}s)\n");
             $this->stderr("Error: {$e->getMessage()}\n");
@@ -211,38 +226,36 @@ class SchedulesController extends Controller
     /**
      * Clear schedules logs with an optional time offset.
      *
-     * @return void
+     * If expire cannot be obtained from any settings, it defaults to `expireDefault`(7 days).
+     *
+     * @param string|null $expire Default: 7day
      */
-    public function actionClearLogs(): void
+    public function actionClearLogs(string $expire = null): void
     {
-        if($this->all) {
+        if ($this->all) {
             Plugin::$plugin->getLogs()->deleteAllLogs();
             $this->stdout("Deleted all logs \n", Console::FG_GREEN);
-
             return;
         }
 
-        if(Plugin::getInstance()->getSettings()->logExpireAfter || $this->expire) {
+        if ($expire === null) {
             $expire = $this->expire ?: Plugin::getInstance()->getSettings()->logExpireAfter;
-            $validator = new CarbonStringIntervalValidator;
-
-            if($validator->validate($expire, $error)) {
-                Plugin::$plugin->getLogs()->deleteLogsByDateCreated(
-                    Carbon::now()->subtract($expire)
-                );
-
-                $interval = CarbonInterval::make($expire);
-                $this->stdout("Deleted all logs older than {$interval->forHumans()} \n", Console::FG_GREEN);
-
-                return;
+            if ($expire === null) {
+                $expire = $this->expireDefault;
             }
+        }
 
+        $validator = new CarbonStringIntervalValidator();
+        if(!$validator->validate($expire, $error)) {
             $this->stderr($error .  ".\n", Console::FG_RED);
-
             return;
         }
 
-        $this->stdout("Provide the expire or all option to use this command. \n", Console::FG_YELLOW);
+        Plugin::$plugin->getLogs()->deleteLogsByDateCreated(
+            Carbon::now()->subtract($expire)
+        );
+        $interval = CarbonInterval::make($expire);
+        $this->stdout("Deleted all logs older than {$interval->forHumans()} \n", Console::FG_GREEN);
     }
 
     protected function triggerCronCall(array $events = null): void
@@ -257,6 +270,10 @@ class SchedulesController extends Controller
             $events = Plugin::$plugin->createBuilder()
                 ->build($this->force ?? false)
                 ->dueEvents();
+
+            if ($this->withClearLogs) {
+                $this->actionClearLogs();
+            }
         } else {
             $events = null;
         }

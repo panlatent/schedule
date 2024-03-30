@@ -16,7 +16,7 @@ use yii\validators\Validator;
  * Class CarbonStringIntervalValidator
  *
  * @package panlatent\schedule\validators
- * @author Panlatent <panlatent@gmail.com>
+ * @author Thomas De Marez <thomasdm@glue.be>
  */
 class CarbonStringIntervalValidator extends Validator
 {
