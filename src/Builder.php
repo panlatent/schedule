@@ -7,12 +7,10 @@
 
 namespace panlatent\schedule;
 
-use Closure;
 use Craft;
-use Crunz\Event;
-use Crunz\Schedule as Scheduler;
-use DateTimeZone;
+use craft\errors\DeprecationException;
 use panlatent\schedule\base\ScheduleInterface;
+use panlatent\schedule\base\TimerInterface;
 use panlatent\schedule\events\ScheduleBuildEvent;
 use yii\base\Component;
 
@@ -54,33 +52,21 @@ class Builder extends Component
     // =========================================================================
 
     /**
-     * @param ScheduleInterface $schedule
      * @deprecated
-     */
-    public function schedule(ScheduleInterface $schedule): void
-    {
-        $schedule->build($this);
-    }
-
-    /**
-     * @deprecated
-     * @see Builder::closure()
      */
     public function call(callable $callback, array $parameters = []): BuilderEvent
     {
-        if (!$callback instanceof Closure) {
-            $callback = Closure::fromCallable($callback);
-        }
-        return $this->closure($callback);
+        throw new DeprecationException();
     }
 
     /**
-     * @param Closure $callback
+     * @param ScheduleInterface $schedule
+     * @param TimerInterface $timer
      * @return BuilderEvent
      */
-    public function closure(Closure $callback): BuilderEvent
+    public function resolve(ScheduleInterface $schedule, TimerInterface $timer): BuilderEvent
     {
-        $event = new BuilderEvent($callback);
+        $event = new BuilderEvent($schedule, $timer);
         $this->_events[] = $event;
         return $event;
     }
@@ -106,7 +92,7 @@ class Builder extends Component
     }
 
     /**
-     * @return Event[]
+     * @return BuilderEvent[]
      */
     public function dueEvents($app = null): array
     {

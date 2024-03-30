@@ -10,9 +10,13 @@ namespace panlatent\schedule\console;
 use Carbon\CarbonInterval;
 use Craft;
 use Carbon\Carbon;
+use craft\validators\HandleValidator;
+use panlatent\schedule\base\ScheduleInterface;
 use panlatent\schedule\BuilderEvent;
 use panlatent\schedule\Plugin;
+use panlatent\schedule\schedules\Console as ConsoleSchedule;
 use panlatent\schedule\validators\CarbonStringIntervalValidator;
+use Symfony\Component\Process\Process;
 use yii\console\Controller;
 use yii\helpers\Console;
 
@@ -38,6 +42,11 @@ class SchedulesController extends Controller
     public ?bool $force = null;
 
     /**
+     * @var bool Async run schedules.
+     */
+    public bool $async = false;
+
+    /**
      * @var bool|null Clear all logs.
      */
     public ?bool $all = null;
@@ -60,6 +69,7 @@ class SchedulesController extends Controller
             case 'run': // no break
             case 'listen':
                 $options[] = 'force';
+                $options[] = 'async';
                 break;
             case 'clear-logs':
                 $options[] = 'all';
@@ -121,23 +131,60 @@ class SchedulesController extends Controller
         }
 
         foreach ($events as $event) {
-            $summary = $event->getSummary();
-            $start = microtime(true);
-            $this->stdout("Running schedule: $summary ... ");
-            try {
-                $event->run();
-                $duration = round((microtime(true) - $start), 2);
-                $this->stdout("done({$duration}s)\n");
-                Craft::info("Running schedule: $summary", __METHOD__);
-            } catch (\Throwable $e) {
-                $duration = round((microtime(true) - $start), 2);
-                $this->stdout("failed({$duration}s)\n");
-                $this->stderr("Error: {$e->getMessage()}\n");
-                Craft::error("Running schedule: $summary", __METHOD__);
+            if (!$this->async) {
+                $this->actionRunSchedule(null, $event->schedule);
+            } else {
+                $this->stdout("Running async schedule: " . $event->schedule->handle . "\n");
+                $process = new Process([PHP_BINARY, ConsoleSchedule::CRAFT_CLI_SCRIPT, 'schedules/run-schedule', $event->schedule->uid], dirname(Craft::$app->request->getScriptFile()));
+                $process->start();
             }
         }
 
         Craft::info("Running scheduled event total: " . count($events), __METHOD__);
+    }
+
+    /**
+     * @param string|null $search
+     * @param ScheduleInterface|null $schedule
+     * @return int
+     */
+    public function actionRunSchedule(string $search = null, ScheduleInterface $schedule = null): int
+    {
+        if ($schedule === null) {
+            if (ctype_digit($search)) {
+                $schedule = Plugin::$plugin->getSchedules()->getScheduleById($search);
+                $type = 'id';
+            } elseif (preg_match('#^[a-zA-Z][a-zA-Z0-9_]*$#', $search)) {
+                $schedule = Plugin::$plugin->getSchedules()->getScheduleByHandle($search);
+                $type = 'handle';
+            } else {
+                $schedule = Plugin::$plugin->getSchedules()->getScheduleByUid($search);
+                $type = 'uid';
+            }
+        }
+
+        if (!$schedule) {
+            $this->stderr("Not found schedule with $type: $search\n");
+            return 1;
+        }
+
+        $info = sprintf('#%d %s[%s]', $schedule->id, $schedule->name, $schedule->handle);
+        $this->stdout("Running schedule: $info ... ");
+        $start = microtime(true);
+        try {
+            $schedule->run();
+            $duration = round((microtime(true) - $start), 2);
+            $this->stdout("done({$duration}s)\n");
+            Craft::info("Running schedule: $info", __METHOD__);
+        } catch (\Throwable $e) {
+            $duration = round((microtime(true) - $start), 2);
+            $this->stdout("failed({$duration}s)\n");
+            $this->stderr("Error: {$e->getMessage()}\n");
+            Craft::error("Running schedule: $info", __METHOD__);
+            return -1;
+        }
+
+        return 0;
     }
 
     /**

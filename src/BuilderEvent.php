@@ -4,22 +4,18 @@ namespace panlatent\schedule;
 
 use Closure;
 use Cron\CronExpression;
+use panlatent\schedule\base\Schedule;
+use panlatent\schedule\base\ScheduleInterface;
 use panlatent\schedule\base\TimerInterface;
+use yii\base\Component;
 
-class BuilderEvent
+/**
+ * @property-read ScheduleInterface $schedule
+ */
+class BuilderEvent extends Component
 {
     // Properties
     // =========================================================================
-
-    /**
-     * @var TimerInterface|null
-     */
-    public ?TimerInterface $timer = null;
-
-    /**
-     * @var string Cron expression
-     */
-    public string $expression = '';
 
     /**
      * @var \DateTimeZone|null
@@ -27,75 +23,41 @@ class BuilderEvent
     public ?\DateTimeZone $timezone = null;
 
     /**
-     * @var Closure
+     * @var ScheduleInterface
      */
-    protected Closure $callback;
+    private ScheduleInterface $_schedule;
+
+    /**
+     * @var TimerInterface
+     */
+    private TimerInterface $_timer;
 
     // Public Methods
     // =========================================================================
 
-    /**
-     * @param Closure $callback
-     */
-    public function __construct(Closure $callback)
+    public function __construct(ScheduleInterface $schedule, TimerInterface $timer, $config = [])
     {
-        $this->callback = $callback;
+        $this->_schedule = $schedule;
+        $this->_timer = $timer;
+        parent::__construct($config);
     }
 
-    /**
-     * @return string
-     */
-    public function getSummary(): string
+    public function getSchedule(): ScheduleInterface
     {
-        if ($this->timer === null) {
-            return '';
-        }
-        $schedule = $this->timer->getSchedule();
-        return sprintf('%d#%s[%s] %d#%s', $schedule->id, $schedule->name, $schedule->handle, $this->timer->id, $this->timer->uid);
+        return $this->_schedule;
     }
 
     /**
      * @deprecated
-     * @see BuilderEvent::getSummary()
      */
     public function getSummaryForDisplay(): string
     {
-        return $this->getSummary();
-    }
-
-    /**
-     * @param string $expression
-     * @return $this
-     */
-    public function expression(string $expression): static
-    {
-        $this->expression = $expression;
-        return $this;
-    }
-
-    /**
-     * @param TimerInterface $timer
-     * @return $this
-     */
-    public function timer(TimerInterface $timer): static
-    {
-        $this->timer = $timer;
-        return $this;
-    }
-
-    /**
-     * @deprecated Use expression()
-     * @see BuilderEvent::expression()
-     */
-    public function cron(string $expression): static
-    {
-        $this->expression = $expression;
-        return $this;
+        return sprintf('%d#%s[%s] %d#%s', $this->_schedule->id, $this->_schedule->name, $this->_schedule->handle, $this->_timer->id, $this->_timer->uid);
     }
 
     public function run(): void
     {
-        call_user_func($this->callback);
+        $this->_schedule->run();
     }
 
     public function isDue($app): bool
@@ -104,6 +66,6 @@ class BuilderEvent
         if ($this->timezone) {
             $date->setTimezone($this->timezone);
         }
-        return (new CronExpression($this->expression))->isDue($date);
+        return (new CronExpression($this->_timer->getCronExpression()))->isDue($date);
     }
 }
