@@ -6,13 +6,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## [Unreleased]
 ### Added
+### Updated
+### Fixed
+### Removed
+
+## [0.6.0] - 2024-04-07
+### Added
 - Add `schedule/run-schedule` command to run a schedule immediately
 - Add `async` option on `listen` and `run` to execute schedules asynchronously
-
 ### Updated
 - Support CraftCMS 5.0
-
-### Fixed
 ### Removed
 - Remove 'omnilight/yii2-scheduling' package
 
