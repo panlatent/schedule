@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Fixed
 ### Removed
 
+## [0.6.1] -2024-05-15
+## Updated
+- Compatible with Feed Me plugin
+
 ## [0.6.0] - 2024-04-07
 ### Added
 - Add `schedule/run-schedule` command to run a schedule immediately
