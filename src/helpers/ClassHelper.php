@@ -8,8 +8,6 @@
 namespace panlatent\schedule\helpers;
 
 use Composer\Autoload\ClassLoader;
-use Composer\Factory;
-use Composer\IO\NullIO;
 use Craft;
 use Throwable;
 
@@ -48,13 +46,9 @@ class ClassHelper
                 }
             }
 
-            $jsonPath = Craft::$app->getComposer()->getJsonPath();
-            $composer = (new Factory())->createComposer(new NullIO(), $jsonPath);
-            $autoload = $composer->getPackage()->getAutoload();
-            if (!empty($autoload['psr-4'])) {
-                foreach (array_keys($autoload['psr-4']) as $namespace) {
-                    $namespaces[] = rtrim($namespace, '\\');
-                }
+            $psr4Config = Craft::$app->getComposer()->getConfig()['autoload']['psr-4'] ?? [];
+            foreach (array_keys($psr4Config) as $namespace) {
+                $namespaces[] = rtrim($namespace, '\\');
             }
 
             $namespaces = array_unique($namespaces);
