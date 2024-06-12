@@ -12,6 +12,7 @@ namespace panlatent\schedule\base;
  *
  * @package panlatent\schedule\base
  * @author Panlatent <panlatent@gmail.com>
+ * @deprecated since 1.0.0
  */
 trait ScheduleTrait
 {

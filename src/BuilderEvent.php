@@ -11,6 +11,7 @@ use yii\base\Component;
 
 /**
  * @property-read ScheduleInterface $schedule
+ * @deprecated since 1.0.0
  */
 class BuilderEvent extends Component
 {

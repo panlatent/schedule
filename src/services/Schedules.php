@@ -8,6 +8,7 @@
 namespace panlatent\schedule\services;
 
 use Craft;
+use craft\errors\DeprecationException;
 use craft\errors\MissingComponentException;
 use craft\events\ConfigEvent;
 use craft\events\RegisterComponentTypesEvent;
@@ -52,64 +53,66 @@ class Schedules extends Component
 
     /**
      * @event RegisterComponentTypesEvent
+     * @deprecated Since 1.0.0
      */
-    const EVENT_REGISTER_ALL_SCHEDULE_TYPES = 'registerAllScheduleTypes';
+    public const EVENT_REGISTER_ALL_SCHEDULE_TYPES = 'registerAllScheduleTypes';
 
     /**
      * @event ScheduleGroupEvent The event that is triggered before a tag group is saved.
      */
-    const EVENT_BEFORE_SAVE_GROUP = 'beforeSaveGroup';
+    public const EVENT_BEFORE_SAVE_GROUP = 'beforeSaveGroup';
 
     /**
      * @event ScheduleGroupEvent The event that is triggered after a tag group is saved.
      */
-    const EVENT_AFTER_SAVE_GROUP = 'afterSaveGroup';
+    public const EVENT_AFTER_SAVE_GROUP = 'afterSaveGroup';
 
     /**
      * @event ScheduleGroupEvent The event that is triggered before a tag group is deleted.
      */
-    const EVENT_BEFORE_DELETE_GROUP = 'beforeDeleteGroup';
+    public const EVENT_BEFORE_DELETE_GROUP = 'beforeDeleteGroup';
 
     /**
      * @event ScheduleGroupEvent The event that is triggered after a tag group is deleted.
      */
-    const EVENT_AFTER_DELETE_GROUP = 'afterDeleteGroup';
+    public const EVENT_AFTER_DELETE_GROUP = 'afterDeleteGroup';
 
     /**
      * @event ScheduleGroupEvent The event that is triggered before a tag group is applied.
      */
-    const EVENT_BEFORE_APPLY_DELETE_GROUP = 'beforeApplyDeleteGroup';
+    public const EVENT_BEFORE_APPLY_DELETE_GROUP = 'beforeApplyDeleteGroup';
 
     /**
      * @event ScheduleEvent
      */
-    const EVENT_BEFORE_SAVE_SCHEDULE = 'beforeSaveSchedule';
+    public const EVENT_BEFORE_SAVE_SCHEDULE = 'beforeSaveSchedule';
 
     /**
      * @event ScheduleEvent
      */
-    const EVENT_AFTER_SAVE_SCHEDULE = 'afterSaveSchedule';
+    public const EVENT_AFTER_SAVE_SCHEDULE = 'afterSaveSchedule';
 
     /**
      * @event ScheduleEvent
      */
-    const EVENT_BEFORE_DELETE_SCHEDULE = 'beforeDeleteSchedule';
+    public const EVENT_BEFORE_DELETE_SCHEDULE = 'beforeDeleteSchedule';
 
     /**
      * @event ScheduleEvent
      */
-    const EVENT_AFTER_DELETE_SCHEDULE = 'afterDeleteSchedule';
+    public const EVENT_AFTER_DELETE_SCHEDULE = 'afterDeleteSchedule';
 
     /**
      * @event ScheduleEvent
      */
-    const EVENT_BEFORE_APPLY_DELETE_SCHEDULE = 'beforeApplyDeleteSchedule';
+    public const EVENT_BEFORE_APPLY_DELETE_SCHEDULE = 'beforeApplyDeleteSchedule';
 
     // Properties
     // =========================================================================
 
     /**
      * @var bool Force fetch groups or schedules. (Not cache)
+     * @deprecated Since 1.0.0
      */
     public bool $force = false;
 
@@ -268,23 +271,11 @@ class Schedules extends Component
 
     /**
      * @return string[]
+     * @deprecated Since 1.0.0
      */
     public function getAllScheduleTypes(): array
     {
-        $types = [
-            HttpRequest::class,
-            Console::class,
-            Event::class,
-            Queue::class,
-        ];
-
-        $event = new RegisterComponentTypesEvent([
-            'types' => $types,
-        ]);
-
-        $this->trigger(static::EVENT_REGISTER_ALL_SCHEDULE_TYPES, $event);
-
-        return $event->types;
+        throw new DeprecationException();
     }
 
     /**
@@ -292,7 +283,7 @@ class Schedules extends Component
      */
     public function getAllSchedules(): array
     {
-        if ($this->force || $this->_schedules === null) {
+        if ($this->_schedules === null) {
             $this->_schedules = [];
             $results = $this->_createScheduleQuery()->all();
             foreach ($results as $result) {
@@ -756,9 +747,9 @@ class Schedules extends Component
                 'schedules.name',
                 'schedules.handle',
                 'schedules.description',
-                'schedules.type',
-                'schedules.user',
-                'schedules.settings',
+                //'schedules.type',
+                //'schedules.user',
+                //'schedules.settings',
                 'schedules.static',
                 'schedules.enabled',
                 'schedules.enabledLog',

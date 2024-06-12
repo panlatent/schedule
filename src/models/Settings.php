@@ -44,6 +44,12 @@ class Settings extends Model
      */
     public ?string $logExpireAfter = null;
 
+    /**
+     * Static schedules
+     * @var array
+     */
+    public array $schedules = [];
+
     // Public Methods
     // =========================================================================
 

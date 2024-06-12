@@ -6,9 +6,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## [Unreleased]
 ### Added
+- Static schedules in config file
+- Verification conditions before schedule execution
+- Response actions after the schedule is completed
+- A scheduler based on ReactPHP
+
 ### Updated
+- Decoupled logging components and only depend on PSR Log
+
 ### Fixed
 ### Removed
+- Remove schedule savable components.
+
 
 ## [0.6.1] -2024-05-15
 ## Updated

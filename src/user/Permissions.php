@@ -18,6 +18,6 @@ abstract class Permissions
     // Constants
     // =========================================================================
 
-    const MANAGE_SCHEDULES = 'schedule-manageSchedules';
-    const MANAGE_LOGS = 'schedule-manageLogs';
+    public const MANAGE_SCHEDULES = 'schedule-manageSchedules';
+    public const MANAGE_LOGS = 'schedule-manageLogs';
 }

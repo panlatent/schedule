@@ -10,6 +10,7 @@ namespace panlatent\schedule\base;
 use Craft;
 use craft\base\SavableComponent;
 use panlatent\schedule\helpers\CronHelper;
+use panlatent\schedule\models\Schedule;
 use panlatent\schedule\Plugin;
 use yii\base\InvalidConfigException;
 
@@ -31,9 +32,9 @@ abstract class Timer extends SavableComponent implements TimerInterface
     // =========================================================================
 
     /**
-     * @var ScheduleInterface|null
+     * @var Schedule|null
      */
-    private ?ScheduleInterface $_schedule = null;
+    private ?Schedule $_schedule = null;
 
     // Public Methods
     // =========================================================================
@@ -67,6 +68,11 @@ abstract class Timer extends SavableComponent implements TimerInterface
         return $rules;
     }
 
+    public function trigger(): bool
+    {
+        return $this->getSchedule()->run();
+    }
+
     /**
      * @inheritdoc
      */
@@ -84,20 +90,16 @@ abstract class Timer extends SavableComponent implements TimerInterface
     }
 
     /**
-     * @return ScheduleInterface
+     * @return Schedule
+     * @throws InvalidConfigException
      */
-    public function getSchedule(): ScheduleInterface
+    public function getSchedule(): Schedule
     {
-        if ($this->_schedule !== null) {
-            return $this->_schedule;
-        }
-
-        if ($this->scheduleId === null) {
-            throw new InvalidConfigException('The timer missing its schedule ID');
-        }
-
-        $this->_schedule = Plugin::getInstance()->getSchedules()->getScheduleById($this->scheduleId);
         if ($this->_schedule === null) {
+            if ($this->scheduleId === null) {
+                throw new InvalidConfigException('The timer missing its schedule ID');
+            }
+            $this->_schedule = Plugin::getInstance()->schedules->getScheduleById($this->scheduleId);
             throw new InvalidConfigException('Invalid schedule ID: ' . $this->scheduleId);
         }
 
@@ -105,9 +107,9 @@ abstract class Timer extends SavableComponent implements TimerInterface
     }
 
     /**
-     * @param ScheduleInterface $schedule
+     * @param Schedule $schedule
      */
-    public function setSchedule(ScheduleInterface $schedule): void
+    public function setSchedule(Schedule $schedule): void
     {
         $this->_schedule = $schedule;
     }

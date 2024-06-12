@@ -24,30 +24,34 @@
         }
     ],
     "require": {
-        "php": "^8.0.2",
-        "craftcms/cms": "^4.0|^5.0",
+        "php": ">=8.2",
+        "craftcms/cms": "^5.0",
         "dragonmantank/cron-expression": "^3.3",
-        "nesbot/carbon": "^1.22 || ^2.10 || ^3.0",
-        "symfony/process": "^4.2 || ^5.0 || ^6.0 || ^7.0",
         "guzzlehttp/guzzle": "^7.2",
-        "panlatent/cron-expression-descriptor": "^1.1"
+        "nesbot/carbon": "^1.22 || ^2.10 || ^3.0",
+        "panlatent/craft-action-abstract": "@dev",
+        "panlatent/cron-expression-descriptor": "^1.1",
+        "psr/log": "^1.0 || ^2.0 || ^3.0",
+        "react/event-loop": "^1.5",
+        "symfony/process": "^6.0 || ^7.0"
+    },
+    "replace": {
+        "panlatent/craft-action-abstract": "self.version"
     },
     "suggest": {
         "ext-intl": "Help translate cron express description"
     },
     "autoload": {
         "psr-4": {
-          "panlatent\\schedule\\": "src/"
+            "panlatent\\schedule\\": "src/",
+            "panlatent\\craft\\actions\\abstract\\": "abstract/"
         }
     },
     "extra": {
         "name": "Schedule",
         "handle": "schedule",
         "changelogUrl": "https://raw.githubusercontent.com/panlatent/schedule/master/CHANGELOG.md",
-        "class": "panlatent\\schedule\\Plugin",
-        "branch-alias": {
-            "dev-master": "0.4.x-dev"
-        }
+        "class": "panlatent\\schedule\\Plugin"
     },
     "require-dev": {
         "codeception/codeception": "^4.1",
@@ -56,7 +60,7 @@
     },
     "config": {
         "platform": {
-            "php": "8.0.2"
+            "php": "8.2"
         },
         "allow-plugins": {
             "yiisoft/yii2-composer": true,

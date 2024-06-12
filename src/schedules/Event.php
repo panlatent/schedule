@@ -19,6 +19,7 @@ use yii\base\Event as BaseEvent;
  *
  * @package panlatent\schedule\schedules
  * @author Panlatent <panlatent@gmail.com>
+ * @deprecated since 1.0.0
  */
 class Event extends Schedule
 {

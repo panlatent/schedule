@@ -19,6 +19,7 @@ use yii\base\Component;
  *
  * @package panlatent\schedule
  * @author Panlatent <panlatent@gmail.com>
+ * @deprecated since 1.0.0
  */
 class Builder extends Component
 {

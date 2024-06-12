@@ -21,6 +21,7 @@ use yii\queue\JobInterface;
  *
  * @package panlatent\schedule\schedules
  * @author Panlatent <panlatent@gmail.com>
+ * @deprecated since 1.0.0
  */
 class Queue extends Schedule
 {

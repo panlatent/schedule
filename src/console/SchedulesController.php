@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use panlatent\schedule\base\ScheduleInterface;
 use panlatent\schedule\BuilderEvent;
 use panlatent\schedule\Plugin;
+use panlatent\schedule\Scheduler;
 use panlatent\schedule\schedules\Console as ConsoleSchedule;
 use panlatent\schedule\validators\CarbonStringIntervalValidator;
 use Symfony\Component\Process\Process;
@@ -100,7 +101,7 @@ class SchedulesController extends Controller
      */
     public function actionList(): void
     {
-        $schedules = Plugin::$plugin->getSchedules();
+        $schedules = Plugin::getInstance()->schedules;
 
         $i = 0;
         $ungroupedSchedules = $schedules->getSchedulesByGroupId();
@@ -185,6 +186,10 @@ class SchedulesController extends Controller
 
         $info = sprintf('#%d %s[%s]', $schedule->id, $schedule->name, $schedule->handle);
         $this->stdout("Running schedule: $info ... ");
+
+        $scheduler = new Scheduler();
+        $scheduler->runSchedule($schedule);
+
         $start = microtime(true);
         try {
             $schedule->run();
@@ -204,10 +209,8 @@ class SchedulesController extends Controller
 
     /**
      * Run a permanent command to call crons run command every minute
-     *
-     * @return void
      */
-    public function actionListen(): void
+    public function actionListen(): never
     {
         if ($this->force === null) {
             $this->force = true;
@@ -217,10 +220,15 @@ class SchedulesController extends Controller
             $this->stdout("(!) Notice: Force option is disable, all schedules updates will not be synchronized.\n");
         }
 
-        $waitSeconds = $this->nextMinute();
-        $this->stdout("Waiting $waitSeconds seconds for next run of scheduler\n");
-        sleep($waitSeconds);
-        $this->triggerCronCall();
+        $scheduler = new Scheduler();
+        $scheduler->listen(function($output) {
+            $this->stdout($output);
+           // $this->stdout("Waiting $waitSeconds seconds for next run of scheduler\n");
+        });
+//        $waitSeconds = $this->nextMinute();
+//        $this->stdout("Waiting $waitSeconds seconds for next run of scheduler\n");
+//        sleep($waitSeconds);
+//        $this->triggerCronCall();
     }
 
     /**

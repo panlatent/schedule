@@ -39,6 +39,7 @@ use yii\db\Query;
  * @property-read DateTime $lastFinishedDate
  * @property-read int $lastDuration
  * @author Panlatent <panlatent@gmail.com>
+ * @deprecated since 1.0.0
  */
 abstract class Schedule extends SavableComponent implements ScheduleInterface
 {

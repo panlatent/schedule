@@ -20,6 +20,7 @@ use Psr\Http\Message\ResponseInterface;
  *
  * @package panlatent\schedule\schedules
  * @author Panlatent <panlatent@gmail.com>
+ * @deprecated since 1.0.0
  */
 class HttpRequest extends Schedule
 {

@@ -7,13 +7,16 @@
 
 namespace panlatent\schedule\base;
 
+use panlatent\craft\actions\abstract\TriggerInterface;
+use panlatent\schedule\models\Schedule;
+
 /**
  * Interface TimerInterface
  *
  * @package panlatent\schedule\base
  * @author Panlatent <panlatent@gmail.com>
  */
-interface TimerInterface
+interface TimerInterface extends TriggerInterface
 {
     /**
      * @see \panlatent\schedule\services\Timers::getAllTimers()
@@ -28,4 +31,9 @@ interface TimerInterface
      * @return string
      */
     public function getCronExpression(): string;
+
+    /**
+     * @return Schedule
+     */
+    public function getSchedule(): Schedule;
 }

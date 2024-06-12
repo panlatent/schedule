@@ -20,6 +20,7 @@ use yii\db\Expression;
  *
  * @package panlatent\schedule\schedules
  * @author Panlatent <panlatent@gmail.com>
+ * @deprecated since 1.0.0
  */
 class Console extends Schedule
 {

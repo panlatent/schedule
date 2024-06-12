@@ -18,6 +18,7 @@ use yii\base\NotSupportedException;
  *
  * @package panlatent\schedule\schedules
  * @author Panlatent <panlatent@gmail.com>
+ * @deprecated since 1.0.0
  */
 class MissingSchedule extends Schedule
 {

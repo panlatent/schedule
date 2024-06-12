@@ -1,13 +1,8 @@
 Schedule
 ========
-[![Build Status](https://travis-ci.org/panlatent/schedule.svg)](https://travis-ci.org/panlatent/schedule)
-[![Coverage Status](https://coveralls.io/repos/github/panlatent/schedule/badge.svg?branch=master)](https://coveralls.io/github/panlatent/schedule?branch=master)
 [![Latest Stable Version](https://poser.pugx.org/panlatent/schedule/v/stable.svg)](https://packagist.org/packages/panlatent/schedule)
-[![Total Downloads](https://poser.pugx.org/panlatent/schedule/downloads.svg)](https://packagist.org/packages/panlatent/schedule) 
-[![Latest Unstable Version](https://poser.pugx.org/panlatent/schedule/v/unstable.svg)](https://packagist.org/packages/panlatent/schedule)
 [![License](https://poser.pugx.org/panlatent/schedule/license.svg)](https://packagist.org/packages/panlatent/schedule)
 [![Craft CMS](https://img.shields.io/badge/Powered_by-Craft_CMS-orange.svg?style=flat)](https://craftcms.com/)
-[![Yii2](https://img.shields.io/badge/Powered_by-Yii_Framework-green.svg?style=flat)](https://www.yiiframework.com/)
 
 Manage your CraftCMS application schedules in Cp. Run a command, trigger an event, 
 push a queue task, or send HTTP requests at a specified time. You can flexibly customize

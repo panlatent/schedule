@@ -16,6 +16,7 @@ use panlatent\schedule\models\ScheduleLog;
  *
  * @package panlatent\schedule\base
  * @author Panlatent <panlatent@gmail.com>
+ * @deprecated
  */
 interface ScheduleInterface extends SavableComponentInterface
 {
