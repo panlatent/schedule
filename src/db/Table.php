@@ -15,8 +15,23 @@ namespace panlatent\schedule\db;
  */
 abstract class Table
 {
-    const SCHEDULES = '{{%schedules}}';
+    public const ACTIONS = '{{%schedule_actions}}';
+    public const SCHEDULES = '{{%schedule_schedules}}';
+    public const SCHEDULE_GROUPS = '{{%schedule_schedulegroups}}';
+    public const TIMERS = '{{%schedule_timers}}';
+
+    /**
+     * @deprecated since 1.0.0
+     */
     const SCHEDULEGROUPS = '{{%schedulegroups}}';
+
+    /**
+     * @deprecated since 1.0.0
+     */
     const SCHEDULELOGS = '{{%schedulelogs}}';
+
+    /**
+     * @deprecated since 1.0.0
+     */
     const SCHEDULETIMERS = '{{%scheduletimers}}';
 }

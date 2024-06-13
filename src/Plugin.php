@@ -40,6 +40,9 @@ use yii\console\Application as ConsoleApplication;
  */
 class Plugin extends \craft\base\Plugin
 {
+    public const EDITION_STANDARD = 'standard';
+    public const EDITION_PRO = 'pro';
+
     // Properties
     // =========================================================================
 
@@ -67,12 +70,18 @@ class Plugin extends \craft\base\Plugin
         ];
     }
 
-    /**
-     * Init.
-     */
+    public static function editions(): array
+    {
+        return [
+            self::EDITION_STANDARD,
+            self::EDITION_PRO,
+        ];
+    }
+
     public function init(): void
     {
         parent::init();
+        self::$plugin = $this;
         Craft::setAlias('@schedule', $this->getBasePath());
         $this->name = Craft::t('schedule', 'Schedule');
 

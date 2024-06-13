@@ -9,32 +9,23 @@ namespace panlatent\schedule\services;
 
 use Craft;
 use craft\errors\DeprecationException;
-use craft\errors\MissingComponentException;
 use craft\events\ConfigEvent;
-use craft\events\RegisterComponentTypesEvent;
 use craft\helpers\ArrayHelper;
-use craft\helpers\Component as ComponentHelper;
 use craft\helpers\Db;
 use craft\helpers\Json;
 use craft\helpers\StringHelper;
 use craft\web\Request;
-use panlatent\schedule\base\Schedule;
-use panlatent\schedule\base\ScheduleInterface;
 use panlatent\schedule\db\Table;
 use panlatent\schedule\errors\ScheduleException;
 use panlatent\schedule\errors\ScheduleGroupException;
 use panlatent\schedule\events\ScheduleEvent;
 use panlatent\schedule\events\ScheduleGroupEvent;
+use panlatent\schedule\models\Schedule;
 use panlatent\schedule\models\ScheduleCriteria;
 use panlatent\schedule\models\ScheduleGroup;
 use panlatent\schedule\Plugin;
 use panlatent\schedule\records\Schedule as ScheduleRecord;
 use panlatent\schedule\records\ScheduleGroup as ScheduleGroupRecord;
-use panlatent\schedule\schedules\Console;
-use panlatent\schedule\schedules\Event;
-use panlatent\schedule\schedules\HttpRequest;
-use panlatent\schedule\schedules\MissingSchedule;
-use panlatent\schedule\schedules\Queue;
 use Throwable;
 use yii\base\Component;
 use yii\db\Expression;
@@ -122,7 +113,7 @@ class Schedules extends Component
     private ?array $_groups = null;
 
     /**
-     * @var ScheduleInterface[]|null
+     * @var Schedule[]|null
      */
     private ?array $_schedules = null;
 
@@ -279,7 +270,7 @@ class Schedules extends Component
     }
 
     /**
-     * @return ScheduleInterface[]
+     * @return Schedule[]
      */
     public function getAllSchedules(): array
     {
@@ -296,21 +287,21 @@ class Schedules extends Component
     }
 
     /**
-     * @return ScheduleInterface[]
+     * @return Schedule[]
      */
     public function getActiveSchedules(): array
     {
-        return array_filter($this->getAllSchedules(), function(ScheduleInterface $schedule) {
+        return array_filter($this->getAllSchedules(), function(Schedule $schedule) {
             return $schedule->isValid();
         });
     }
 
     /**
-     * @return ScheduleInterface[]
+     * @return Schedule[]
      */
     public function getStaticSchedules(): array
     {
-        return ArrayHelper::where($this->getAllSchedules(), 'static');
+        return $this->getAllSchedules(); //ArrayHelper::where($this->getAllSchedules(), 'static');
     }
 
     /**
@@ -318,12 +309,12 @@ class Schedules extends Component
      */
     public function getTotalStaticSchedules(): int
     {
-        return $this->_createScheduleQuery()->where(['schedules.static' => true])->count('[[schedules.id]]');
+        return 0;// $this->_createScheduleQuery()->where(['schedules.static' => true])->count('[[schedules.id]]');
     }
 
     /**
      * @param int|null $groupId
-     * @return ScheduleInterface[]
+     * @return Schedule[]
      */
     public function getSchedulesByGroupId(int $groupId = null): array
     {
@@ -332,34 +323,34 @@ class Schedules extends Component
 
     /**
      * @param int $scheduleId
-     * @return ScheduleInterface|null
+     * @return Schedule|null
      */
-    public function getScheduleById(int $scheduleId): ?ScheduleInterface
+    public function getScheduleById(int $scheduleId): ?Schedule
     {
         return ArrayHelper::firstWhere($this->getAllSchedules(), 'id', $scheduleId);
     }
 
     /**
      * @param string $handle
-     * @return ScheduleInterface|null
+     * @return Schedule|null
      */
-    public function getScheduleByHandle(string $handle): ?ScheduleInterface
+    public function getScheduleByHandle(string $handle): ?Schedule
     {
         return ArrayHelper::firstWhere($this->getAllSchedules(), 'handle', $handle);
     }
 
     /**
      * @param string $uid
-     * @return ScheduleInterface|null
+     * @return Schedule|null
      */
-    public function getScheduleByUid(string $uid): ?ScheduleInterface
+    public function getScheduleByUid(string $uid): ?Schedule
     {
         return ArrayHelper::firstWhere($this->getAllSchedules(), 'uid', $uid);
     }
 
     /**
      * @param array|ScheduleCriteria $criteria
-     * @return ScheduleInterface[]
+     * @return Schedule[]
      */
     public function findSchedules(array|ScheduleCriteria $criteria): array
     {
@@ -385,9 +376,9 @@ class Schedules extends Component
 
     /**
      * @param array|ScheduleCriteria $criteria
-     * @return ScheduleInterface|null
+     * @return Schedule|null
      */
-    public function findSchedule(array|ScheduleCriteria $criteria): ?ScheduleInterface
+    public function findSchedule(array|ScheduleCriteria $criteria): ?Schedule
     {
         if (!$criteria instanceof ScheduleCriteria) {
             $criteria = new ScheduleCriteria($criteria);
@@ -420,9 +411,9 @@ class Schedules extends Component
 
     /**
      * @param Request|null $request
-     * @return ScheduleInterface
+     * @return Schedule
      */
-    public function createScheduleFromRequest(Request $request = null): ScheduleInterface
+    public function createScheduleFromRequest(Request $request = null): Schedule
     {
         if ($request === null) {
             $request = Craft::$app->getRequest();
@@ -446,26 +437,19 @@ class Schedules extends Component
 
     /**
      * @param mixed $config
-     * @return ScheduleInterface
+     * @return Schedule
      */
-    public function createSchedule(mixed $config): ScheduleInterface
+    public function createSchedule(mixed $config): Schedule
     {
-        try {
-            $schedule = ComponentHelper::createComponent($config, ScheduleInterface::class);
-        } catch (MissingComponentException) {
-            unset($config['type']);
-            $schedule = new MissingSchedule($config);
-        }
-
-        return $schedule;
+        return new Schedule($config);
     }
 
     /**
-     * @param ScheduleInterface $schedule
+     * @param Schedule $schedule
      * @param bool $runValidation
      * @return bool
      */
-    public function saveSchedule(ScheduleInterface $schedule, bool $runValidation = true): bool
+    public function saveSchedule(Schedule $schedule, bool $runValidation = true): bool
     {
         /** @var Schedule $schedule */
         $isNewSchedule = $schedule->getIsNew();
@@ -600,10 +584,10 @@ class Schedules extends Component
     /**
      * Delete a schedule.
      *
-     * @param ScheduleInterface $schedule
+     * @param Schedule $schedule
      * @return bool
      */
-    public function deleteSchedule(ScheduleInterface $schedule): bool
+    public function deleteSchedule(Schedule $schedule): bool
     {
         /** @var Schedule $schedule */
         if ($this->hasEventHandlers(self::EVENT_BEFORE_DELETE_SCHEDULE)) {
@@ -705,10 +689,10 @@ class Schedules extends Component
     }
 
     /**
-     * @param ScheduleInterface $schedule
+     * @param Schedule $schedule
      * @return array
      */
-    public function getScheduleConfig(ScheduleInterface $schedule): array
+    public function getScheduleConfig(Schedule $schedule): array
     {
         return [
             'name' => $schedule->name,
@@ -725,19 +709,17 @@ class Schedules extends Component
     // Private Methods
     // =========================================================================
 
-    /**
-     * @return Query
-     */
     private function _createGroupQuery(): Query
     {
         return (new Query())
-            ->select(['id', 'name', 'uid'])
-            ->from(Table::SCHEDULEGROUPS);
+            ->select([
+                'groups.id',
+                'groups.name',
+                'groups.uid'
+            ])
+            ->from(['groups' => Table::SCHEDULE_GROUPS]);
     }
 
-    /**
-     * @return Query
-     */
     private function _createScheduleQuery(): Query
     {
         return (new Query())
@@ -750,17 +732,18 @@ class Schedules extends Component
                 //'schedules.type',
                 //'schedules.user',
                 //'schedules.settings',
-                'schedules.static',
+                //'schedules.static',
                 'schedules.enabled',
-                'schedules.enabledLog',
-                'schedules.lastStartedTime',
-                'schedules.lastFinishedTime',
-                'schedules.lastStatus',
-                'schedules.dateCreated',
-                'schedules.dateUpdated',
+                //'schedules.enabledLog',
+                //'schedules.lastStartedTime',
+                //'schedules.lastFinishedTime',
+                //'schedules.lastStatus',
+                //'schedules.dateCreated',
+                //'schedules.dateUpdated',
                 'schedules.uid',
             ])
             ->from(['schedules' => Table::SCHEDULES])
+            ->innerJoin(['actions' => Table::ACTIONS], '[[schedules.actionId]] = [[actions.id]]')
             ->orderBy('schedules.sortOrder');
     }
 

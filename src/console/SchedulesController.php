@@ -12,6 +12,7 @@ use Craft;
 use Carbon\Carbon;
 use panlatent\schedule\base\ScheduleInterface;
 use panlatent\schedule\BuilderEvent;
+use panlatent\schedule\models\Schedule;
 use panlatent\schedule\Plugin;
 use panlatent\schedule\Scheduler;
 use panlatent\schedule\schedules\Console as ConsoleSchedule;
@@ -19,6 +20,8 @@ use panlatent\schedule\validators\CarbonStringIntervalValidator;
 use Symfony\Component\Process\Process;
 use Throwable;
 use yii\console\Controller;
+use yii\console\ExitCode;
+use yii\console\widgets\Table;
 use yii\helpers\Console;
 
 /**
@@ -67,8 +70,11 @@ class SchedulesController extends Controller
      */
     public bool $withClearLogs = false;
 
+    public bool $check = false;
+
     // Public Methods
     // =========================================================================
+
 
     /**
      * @inheritdoc
@@ -77,6 +83,8 @@ class SchedulesController extends Controller
     {
         $options = parent::options($actionID);
         switch ($actionID) {
+            case 'run-schedule':
+                $options[] = 'check';
             case 'run':
                 $options[] = 'force';
                 $options[] = 'async';
@@ -103,29 +111,31 @@ class SchedulesController extends Controller
     {
         $schedules = Plugin::getInstance()->schedules;
 
-        $i = 0;
-        $ungroupedSchedules = $schedules->getSchedulesByGroupId();
-        $this->stdout(Craft::t('schedule', 'Static') . ": \n", Console::FG_YELLOW);
-        foreach ($ungroupedSchedules as $schedule) {
-            if ($schedule->static)
-            $this->stdout(Console::renderColoredString("    > #$i %c$schedule->handle\n"));
-            ++$i;
-        }
-        $this->stdout(Craft::t('schedule', 'Ungrouped') . ": \n", Console::FG_YELLOW);
-        foreach ($ungroupedSchedules as $schedule) {
-            $this->stdout(Console::renderColoredString("    > #$i %c$schedule->handle\n"));
-            ++$i;
-        }
+        $i = 1;
+        $rows = [];
 
+        $ungroupedSchedules = $schedules->getSchedulesByGroupId();
+        foreach ($ungroupedSchedules as $schedule) {
+            if ($schedule->static) {
+                $rows[] = [$i++, $schedule->id, Console::ansiFormat('Static', [Console::FG_PURPLE]), $schedule->name, $schedule->handle];
+            }
+        }
+        foreach ($ungroupedSchedules as $schedule) {
+            if (!$schedule->static) {
+                $rows[] = [$i++, $schedule->id, Console::ansiFormat('Ungrouped', [Console::FG_YELLOW]), $schedule->name, $schedule->handle];
+            }
+        }
         foreach ($schedules->getAllGroups() as $group) {
             $this->stdout("$group->name: \n", Console::FG_YELLOW);
             foreach ($group->getSchedules() as $schedule) {
-                // @var Schedule $schedule
-
-                $this->stdout(Console::renderColoredString("    > #$i %c$schedule->handle\n"));
-                ++$i;
+                $rows[] = [$i++, $schedule->id, $group->name, $schedule->name, $schedule->handle];
             }
         }
+
+        echo Table::widget([
+            'headers' => ['No.', 'ID', 'Group', 'Name', 'Handle'],
+            'rows' => $rows,
+        ]);
     }
 
     /**
@@ -161,23 +171,28 @@ class SchedulesController extends Controller
 
     /**
      * @param string|null $search
-     * @param ScheduleInterface|null $schedule
+     * @param Schedule|null $schedule
      * @return int
      */
-    public function actionRunSchedule(string $search = null, ScheduleInterface $schedule = null): int
+    public function actionRunSchedule(string $search = null, Schedule $schedule = null): int
     {
+        if ($this->check) {
+            return ExitCode::OK;
+        }
+
+        $schedules = Plugin::getInstance()->schedules;
+
         if ($schedule === null) {
             if (ctype_digit($search)) {
-                $schedule = Plugin::$plugin->getSchedules()->getScheduleById($search);
+                $schedule = $schedules->getScheduleById($search);
                 $type = 'id';
             } elseif (preg_match('#^[a-zA-Z][a-zA-Z0-9_]*$#', $search)) {
-                $schedule = Plugin::$plugin->getSchedules()->getScheduleByHandle($search);
+                $schedule = $schedules->getScheduleByHandle($search);
                 $type = 'handle';
             } else {
-                $schedule = Plugin::$plugin->getSchedules()->getScheduleByUid($search);
+                $schedule = $schedules->getScheduleByUid($search);
                 $type = 'uid';
             }
-
             if (!$schedule) {
                 $this->stderr("Not found schedule with $type: $search\n");
                 return 1;
@@ -188,11 +203,12 @@ class SchedulesController extends Controller
         $this->stdout("Running schedule: $info ... ");
 
         $scheduler = new Scheduler();
-        $scheduler->runSchedule($schedule);
 
         $start = microtime(true);
         try {
-            $schedule->run();
+            if (!$scheduler->runSchedule($schedule)) {
+                throw new \RuntimeException("Failed to run schedule");
+            }
             $duration = round((microtime(true) - $start), 2);
             $this->stdout("done({$duration}s)\n");
             Craft::info("Running schedule: $info", __METHOD__);
@@ -204,7 +220,7 @@ class SchedulesController extends Controller
             return -1;
         }
 
-        return 0;
+        return ExitCode::OK;
     }
 
     /**

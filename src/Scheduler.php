@@ -12,7 +12,10 @@ use Symfony\Component\Process\Process;
 
 class Scheduler
 {
-    public ?int $maxConcurrent = null;
+    /**
+     * @var int The maximum number of concurrent schedules. `0` for not used concurrent and `-1` for unlimited
+     */
+    public int $maxConcurrent = 0;
 
     public int $heartbeatSeconds = 5;
 
@@ -26,10 +29,20 @@ class Scheduler
             throw new \RuntimeException('Scheduler can only be run from the CLI.');
         }
 
+        if ($this->maxConcurrent > 0 && !$this->validateRunCommand()) {
+            throw new \RuntimeException('Cannot concurrent run scheduler due to schedules/run-schedule command error.');
+        }
+
+        if ($callback === null) {
+            $callback = fn($message) => Craft::info($callback, 'scheduler');
+        }
+
         $loop = Loop::get();
 
-        $dispatch = function($dispatch) use($loop) {
-            $loop->addTimer($this->getSecondsToNext(10), function() use($dispatch) {
+        $dispatch = function($dispatch) use($loop, $callback) {
+            $waitSeconds = $this->getSecondsToNext();
+            $callback("Waiting $waitSeconds seconds for next dispatch of scheduler\n");
+            $loop->addTimer($waitSeconds, function() use($dispatch) {
                 $this->dispatch();
                 $dispatch($dispatch);
             });
@@ -45,11 +58,10 @@ class Scheduler
 
     public function dispatch(): void
     {
-        echo '10:' . (new \DateTime())->format('Y-m-d H:i:s') . "\n";
         $timers = $this->getTriggerTimers();
 
         foreach ($timers as $timer) {
-            if (!$this->maxConcurrent) {
+            if ($this->maxConcurrent === 0) {
                 $timer->trigger();
                 continue;
             }
@@ -62,13 +74,10 @@ class Scheduler
     public function runSchedule(Schedule $schedule): bool
     {
         $start = microtime(true);
-        try {
-            $schedule->run();
-            $duration = round((microtime(true) - $start), 2);
-        } catch (\Throwable $e) {
-            $duration = round((microtime(true) - $start), 2);
-            return false;
-        }
+        $schedule->run();
+//            $duration = round((microtime(true) - $start), 2);
+//            $duration = round((microtime(true) - $start), 2);
+
 
         return true;
     }
@@ -88,5 +97,24 @@ class Scheduler
     protected function getSecondsToNext(int $seconds = 60): int
     {
         return $seconds - ($this->useTimestamp ? time()%$seconds : Carbon::now()->second%$seconds);
+    }
+
+    private function createRunProcess(): Process
+    {
+        return new Process([PHP_BINARY, 'craft', 'schedules/run-schedule'], dirname(Craft::$app->request->getScriptFile()));
+    }
+
+    private function validateRunCommand(): bool
+    {
+        $process = new Process([PHP_BINARY, 'craft', 'schedules/run-schedule', '--check'], dirname(Craft::$app->request->getScriptFile()));
+        try {
+            $process->run();
+        } catch (\Throwable $e) {
+            return false;
+        }
+        if (!$process->isSuccessful()) {
+            return false;
+        }
+        return true;
     }
 }

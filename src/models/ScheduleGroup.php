@@ -9,7 +9,6 @@ namespace panlatent\schedule\models;
 
 use Craft;
 use craft\base\Model;
-use panlatent\schedule\base\ScheduleInterface;
 use panlatent\schedule\Plugin;
 use panlatent\schedule\records\ScheduleGroup as ScheduleGroupRecord;
 
@@ -40,7 +39,7 @@ class ScheduleGroup extends Model
     public ?string $uid = null;
 
     /**
-     * @var ScheduleInterface[]|null
+     * @var Schedule[]|null
      */
     private ?array $_schedules = null;
 
@@ -79,7 +78,7 @@ class ScheduleGroup extends Model
     }
 
     /**
-     * @return ScheduleInterface[]
+     * @return Schedule[]
      */
     public function getSchedules(): array
     {
@@ -91,6 +90,6 @@ class ScheduleGroup extends Model
             return [];
         }
 
-        return $this->_schedules = Plugin::$plugin->getSchedules()->getSchedulesByGroupId($this->id);
+        return $this->_schedules = Plugin::getInstance()->schedules->getSchedulesByGroupId($this->id);
     }
 }

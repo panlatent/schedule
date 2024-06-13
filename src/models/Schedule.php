@@ -2,9 +2,12 @@
 
 namespace panlatent\schedule\models;
 
+use Craft;
 use craft\base\Model;
 use panlatent\craft\actions\abstract\ActionInterface;
 use panlatent\schedule\base\TimerInterface;
+use panlatent\schedule\log\LogAdapter;
+use Psr\Log\LoggerInterface;
 
 /**
  * @property-read ScheduleGroup $group
@@ -14,6 +17,7 @@ use panlatent\schedule\base\TimerInterface;
  */
 class Schedule extends Model
 {
+    public ?int $id = null;
     /**
      * @var int|null
      */
@@ -28,8 +32,6 @@ class Schedule extends Model
      * @var string|null
      */
     public ?string $handle = null;
-
-
 
     /**
      * @var string|null
@@ -74,6 +76,8 @@ class Schedule extends Model
      */
     public ?int $sortOrder = null;
 
+    public ?string $uid = null;
+
     /**
      * @return TimerInterface[]
      */
@@ -100,7 +104,8 @@ class Schedule extends Model
     {
         $task = new ScheduleTask();
 
-        $context = new Context(\Craft::$app->getLog()->getLogger());
+        $context = new Context($this->getLogger());
+
         $this->action->execute($context);
 
         if ($context->getOutput()->canStored()) {
@@ -124,5 +129,10 @@ class Schedule extends Model
     public function onFailure(): void
     {
 
+    }
+
+    protected function getLogger(): LoggerInterface
+    {
+        return new LogAdapter(Craft::$app->getLog()->getLogger(), 'schedule');
     }
 }
