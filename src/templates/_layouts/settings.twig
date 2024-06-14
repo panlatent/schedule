@@ -8,7 +8,10 @@
 {% if currentUser.admin %}
     {% set navItems = {
         'general': { title: "General"|t('schedule') },
+        'webcron': { title: "Web Cron"|t('schedule') },
         'logs': { title: "Logs"|t('schedule') },
+        'actions': { heading: "Actions"|t('schedule') },
+        'httprequest': { title: "HTTP Request"|t('schedule') },
     } %}
 {% endif %}
 

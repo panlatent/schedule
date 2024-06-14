@@ -3,9 +3,11 @@
 namespace panlatent\schedule\builder;
 
 use panlatent\craft\actions\abstract\ActionInterface;
+use panlatent\schedule\actions\Closure;
 use panlatent\schedule\actions\Command;
 use panlatent\schedule\actions\Console;
 use panlatent\schedule\actions\HttpRequest;
+use panlatent\schedule\models\Schedule as ScheduleModel;
 
 final class Schedule
 {
@@ -16,9 +18,22 @@ final class Schedule
 
     }
 
-    public static function command(string $command, array $arguments = [])
+    public static function closure(\Closure $closure)
+    {
+        $action = new Closure();
+        $action->closure = $closure;
+        return new Schedule($action);
+    }
+
+    public static function exec(string $command, array $arguments = [])
     {
         $action = new Command();
+        return new Schedule($action);
+    }
+
+    public static function console(string $command, array $arguments = [])
+    {
+        $action = new Console();
         return new Schedule($action);
     }
 
@@ -27,5 +42,12 @@ final class Schedule
         $action = new HttpRequest();
         $action->url = $url;
         return new Schedule($action);
+    }
+
+    public function create(): ScheduleModel
+    {
+        $schedule = new ScheduleModel();
+        $schedule->action = $this->action;
+        return $schedule;
     }
 }

@@ -27,10 +27,23 @@ theme:
     - content.code.copy
     - navigation.instant
     - navigation.instant.progress
+    - navigation.footer
+    - navigation.path
+    - navigation.top
+    - toc.integrate
+    - search.suggest
+    - search.highlight
+  logo: assets/logo.png
   icon:
     repo: fontawesome/brands/github
 
+copyright: Copyright © 2024 Panlatent
+
 extra:
+  generator: false
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/panlatent
   version:
     provider: mike
 #  alternate:
@@ -90,6 +103,11 @@ markdown_extensions:
       custom_checkbox: true
   - pymdownx.tilde
 
+plugins:
+  - search
+  - git-revision-date-localized:
+      type: timeago
+
 nav:
   - 'introduction.md'
   - 'Getting Started':
@@ -103,4 +121,5 @@ nav:
       - About: about.md
 
 repo_url: https://github.com/panlatent/schedule
+repo_name: panlatent/schedule
 edit_uri: edit/main/docs

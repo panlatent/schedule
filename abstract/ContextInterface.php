@@ -2,10 +2,13 @@
 
 namespace panlatent\craft\actions\abstract;
 
+use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 
 interface ContextInterface
 {
+    public function getContainer(): ContainerInterface;
+
     public function getErrors(): array;
 
     public function getLogger(): LoggerInterface;

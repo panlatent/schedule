@@ -7,8 +7,8 @@
 
 namespace panlatent\schedule\events;
 
+use craft\events\ModelEvent;
 use panlatent\schedule\models\ScheduleGroup;
-use yii\base\Event;
 
 /**
  * Class ScheduleGroupEvent
@@ -16,15 +16,10 @@ use yii\base\Event;
  * @package panlatent\schedule\events
  * @author Panlatent <panlatent@gmail.com>
  */
-class ScheduleGroupEvent extends Event
+class ScheduleGroupEvent extends ModelEvent
 {
     /**
      * @var ScheduleGroup|null
      */
     public ?ScheduleGroup $group = null;
-
-    /**
-     * @var bool
-     */
-    public bool $isNew = false;
 }

@@ -419,7 +419,13 @@ class Schedules extends Component
             $request = Craft::$app->getRequest();
         }
 
-        $type = $request->getBodyParam('type');
+        $actionType = $request->getRequiredBodyParam('actionType');
+        $actionConfig =  $request->getBodyParam('actionTypes.' . $actionType) ?? [];
+        $action = Plugin::getInstance()->actions->createAction(['type' => $actionType] + $actionConfig);
+
+        $timerType = $request->getBodyParam('timerType');
+        $timerConfig = $request->getBodyParam('timeTypes.' . $timerType) ?? [];
+        $timer = Plugin::getInstance()->timers->createTimer(['type' => $timerType] + $timerConfig);
 
         return $this->createSchedule([
             'id' => $request->getBodyParam('scheduleId'),
@@ -427,9 +433,9 @@ class Schedules extends Component
             'name' => $request->getBodyParam('name'),
             'handle' => $request->getBodyParam('handle'),
             'description' => $request->getBodyParam('description'),
-            'type' => $type,
-            'settings' => $request->getBodyParam('types.' . $type, []),
-            'static' => (bool)$request->getBodyParam('static'),
+            //'static' => (bool)$request->getBodyParam('static'),
+            'timer' => $timer,
+            'action' => $action,
             'enabled' => (bool)$request->getBodyParam('enabled'),
             'enabledLog' => $request->getBodyParam('enabledLog'),
         ]);
@@ -438,6 +444,7 @@ class Schedules extends Component
     /**
      * @param mixed $config
      * @return Schedule
+     * @internal
      */
     public function createSchedule(mixed $config): Schedule
     {
@@ -451,18 +458,13 @@ class Schedules extends Component
      */
     public function saveSchedule(Schedule $schedule, bool $runValidation = true): bool
     {
-        /** @var Schedule $schedule */
-        $isNewSchedule = $schedule->getIsNew();
+        $isNewSchedule = !$schedule->id;
 
         if ($this->hasEventHandlers(self::EVENT_BEFORE_SAVE_SCHEDULE)) {
             $this->trigger(self::EVENT_BEFORE_SAVE_SCHEDULE, new ScheduleEvent([
                 'schedule' => $schedule,
                 'isNew' => $isNewSchedule,
             ]));
-        }
-
-        if (!$schedule->beforeSave($isNewSchedule)) {
-            return false;
         }
 
         if ($isNewSchedule) {
@@ -506,14 +508,15 @@ class Schedules extends Component
                     $record = new ScheduleRecord();
                 }
 
+                Plugin::getInstance()->actions->saveAction($schedule->action);
+
                 $record->groupId = $schedule->groupId;
                 $record->name = $schedule->name;
                 $record->handle = $schedule->handle;
                 $record->description = $schedule->description;
-                $record->type = get_class($schedule);
-                $record->user = $schedule->user;
-                $record->settings = Json::encode($schedule->getSettings());
-                $record->static = false;
+                $record->actionId = $schedule->action->id;
+                $record->onSuccess = null;
+                $record->onFailed = null;
                 $record->enabled = (bool)$schedule->enabled;
                 $record->enabledLog = (bool)$schedule->enabledLog;
                 $record->save(false);
@@ -539,8 +542,6 @@ class Schedules extends Component
         if ($isNewSchedule) {
             $this->_schedules[] = $schedule;
         }
-
-        $schedule->afterSave($isNewSchedule);
 
         if ($this->hasEventHandlers(self::EVENT_AFTER_SAVE_SCHEDULE)) {
             $this->trigger(self::EVENT_AFTER_SAVE_SCHEDULE, new ScheduleEvent([
@@ -729,9 +730,10 @@ class Schedules extends Component
                 'schedules.name',
                 'schedules.handle',
                 'schedules.description',
-                //'schedules.type',
                 //'schedules.user',
-                //'schedules.settings',
+                'schedules.actionId',
+                'schedules.onSuccess',
+                'schedules.onFailed',
                 //'schedules.static',
                 'schedules.enabled',
                 //'schedules.enabledLog',
@@ -743,7 +745,7 @@ class Schedules extends Component
                 'schedules.uid',
             ])
             ->from(['schedules' => Table::SCHEDULES])
-            ->innerJoin(['actions' => Table::ACTIONS], '[[schedules.actionId]] = [[actions.id]]')
+            //->innerJoin(['actions' => Table::ACTIONS], '[[schedules.actionId]] = [[actions.id]]')
             ->orderBy('schedules.sortOrder');
     }
 

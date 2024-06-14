@@ -8,9 +8,9 @@
 namespace panlatent\schedule\timers;
 
 use Craft;
+use Cron\CronExpression;
 use DateInterval;
 use DateTime;
-use panlatent\schedule\base\Schedule;
 use panlatent\schedule\base\Timer;
 
 /**
@@ -65,25 +65,36 @@ class Relay extends Timer
         return $attributeLabels;
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function getCronExpression(): string
+    public function isDue(): bool
     {
-        /** @var Schedule $schedule */
         $schedule = $this->getSchedule();
-
-        if (!$schedule->getLastFinishedDate()) {
-            return '* * * * *';
+        $lastFinishedTime = $schedule->getInfo()->getLastFinishedTime();
+        if (!$lastFinishedTime) {
+            return true;
         }
+        $date = $lastFinishedTime->add(new DateInterval("PT{$this->wait}M"));
+        return $date->format('YmdHi') <= date('YmdHi');
 
-        $date = $schedule->getLastFinishedDate()->add(new DateInterval("PT{$this->wait}M"));
-        if ($date->format('YmdHi') < date('YmdHi')) {
-            $date = new DateTime('now');
-        }
-
-        return $date->format('i H d m *');
+//        $now = new \DateTime('now');
+//        return (new CronExpression($this->getCronExpression()))->isDue($now);
     }
+
+//    public function getCronExpression(): string
+//    {
+//        $schedule = $this->getSchedule();
+//
+//        $lastFinishedTime = $schedule->getInfo()->getLastFinishedTime();
+//        if (!$lastFinishedTime) {
+//            return '* * * * *';
+//        }
+//
+//        $date = $lastFinishedTime->add(new DateInterval("PT{$this->wait}M"));
+//        if ($date->format('YmdHi') <= date('YmdHi')) {
+//            $date = new DateTime('now');
+//        }
+//
+//        return $date->format('i H d m *');
+//    }
 
     /**
      * @inheritdoc

@@ -1,0 +1,22 @@
+{%- set id = id ?? "actionType#{random()}" %}
+{%- set containerId = "#{id}-container" %}
+
+<div id="{{ containerId }}">
+    <button id="{{ id }}" class="btn add icon">{{ "Add Action"|t("schedule") }}</button>
+</div>
+
+{% js %}
+$('#{{ id }}').click(function() {
+  const slideout = new Craft.CpScreenSlideout('schedule/actions/edit');
+  slideout.on('submit', ev => {
+    createOption({
+      text: ev.data.name,
+      value: ev.data.id,
+    });
+  });
+  slideout.on('close', () => {
+    selectize.focus();
+  });
+  return false;
+});
+{% endjs %}

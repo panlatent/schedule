@@ -20,6 +20,7 @@ use craft\web\twig\variables\CraftVariable;
 use craft\web\UrlManager;
 use panlatent\schedule\console\SchedulesController;
 use panlatent\schedule\models\Settings;
+use panlatent\schedule\services\Actions;
 use panlatent\schedule\services\Logs;
 use panlatent\schedule\services\Schedules;
 use panlatent\schedule\services\Timers;
@@ -33,6 +34,7 @@ use yii\console\Application as ConsoleApplication;
  *
  * @package panlatent\schedule
  * @method Settings getSettings()
+ * @property-read Actions $actions
  * @property-read Schedules $schedules
  * @property-read Timers $timers
  * @property-read Settings $settings
@@ -40,7 +42,7 @@ use yii\console\Application as ConsoleApplication;
  */
 class Plugin extends \craft\base\Plugin
 {
-    public const EDITION_STANDARD = 'standard';
+    public const EDITION_LITE = 'lite';
     public const EDITION_PRO = 'pro';
 
     // Properties
@@ -63,6 +65,7 @@ class Plugin extends \craft\base\Plugin
     {
         return [
             'components' => [
+                'actions' => Actions::class,
                 'schedules' => Schedules::class,
                 'timers' => Timers::class,
                 'logs' => Logs::class,
@@ -73,7 +76,7 @@ class Plugin extends \craft\base\Plugin
     public static function editions(): array
     {
         return [
-            self::EDITION_STANDARD,
+            self::EDITION_LITE,
             self::EDITION_PRO,
         ];
     }
@@ -94,6 +97,10 @@ class Plugin extends \craft\base\Plugin
             $this->_registerProjectConfigEvents();
             $this->_registerUserPermissions();
             $this->_registerVariables();
+
+            if ($this->settings->enabledWebCron) {
+                $this->_registerWebCron();
+            }
         });
     }
 
@@ -227,6 +234,13 @@ class Plugin extends \craft\base\Plugin
             /** @var CraftVariable $variable */
             $variable = $event->sender;
             $variable->attachBehavior('schedule', CraftVariableBehavior::class);
+        });
+    }
+
+    private function _registerWebCron()
+    {
+        Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_SITE_URL_RULES, function (RegisterUrlRulesEvent $event) {
+            $event->rules[$this->settings->endpoint] = 'schedule/web-cron/trigger';
         });
     }
 }

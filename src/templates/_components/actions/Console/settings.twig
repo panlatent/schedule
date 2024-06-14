@@ -1,0 +1,30 @@
+{% import "_includes/forms" as forms %}
+
+{% set scheduleType = className(schedule) %}
+
+{{ forms.autosuggestField({
+    label: 'Command'|t('schedule'),
+    required: true,
+    id: 'command',
+    name: 'command',
+    value: schedule.command,
+    errors: schedule.getErrors('command'),
+    suggestions: suggestions,
+}) }}
+
+{{ forms.textField({
+    label: 'Arguments'|t('schedule'),
+    id: 'arguments',
+    name: 'arguments',
+    value: schedule.arguments,
+    errors: schedule.getErrors('arguments'),
+}) }}
+
+{{ forms.textField({
+    label: 'Timeout'|t('schedule'),
+    id: 'timeout',
+    name: 'timeout',
+    value: schedule.timeout ?: '',
+    size: 5,
+    errors: schedule.getErrors('timeout'),
+}) }}

@@ -1,0 +1,102 @@
+{% import "_includes/forms.twig" as forms %}
+
+<div id="every" class="field every-field">
+    {{ forms.radio({
+        label: 'Every'|t('schedule'),
+        name: 'mode',
+        value: 'every'
+    }) }}
+
+    {% set options = [] %}
+    {% for label, option in timer.everyOptions %}
+        {% set options = options|merge([
+            {
+                label: label|t('schedule'),
+                value: option
+            }
+        ]) %}
+    {% endfor %}
+
+    {{ forms.select({
+        required: true,
+        id: 'every',
+        name: 'every',
+        value: timer.every,
+        options: options,
+        errors: timer.getErrors('every'),
+    }) }}
+</div>
+
+<div id="datetime" class="field every-field">
+    {{ forms.radio({
+        label: 'Datetime'|t('schedule'),
+        name: 'mode',
+        value: 'datetime'
+    }) }}
+
+    {% include "_includes/forms/datetime.twig" with {
+        name: 'datetime',
+        value: timer.datetime,
+        errors: timer.getErrors('datetime'),
+    } %}
+</div>
+
+<div id="expression" class="field every-field">
+    {{ forms.radio({
+        label: 'Cron Expression'|t('schedule'),
+        name: 'mode',
+        value: 'expression'
+    }) }}
+
+    <div class="expression">
+        <div class="expression-item">
+            <input id="minute" class="text" type="text" name="minute" value="{{ timer.minute }}">
+        </div>
+        <div class="expression-item">
+            <input id="hour" class="text" type="text" name="hour" value="{{ timer.hour }}">
+        </div>
+        <div class="expression-item">
+            <input id="day" class="text" type="text" name="day" value="{{ timer.day }}">
+        </div>
+        <div class="expression-item">
+            <input id="month" class="text" type="text" name="month" value="{{ timer.month }}">
+        </div>
+        <div class="expression-item">
+            <input id="week" class="text" type="text" name="week" value="{{ timer.week }}">
+        </div>
+    </div>
+</div>
+
+<div id="advance" class="field every-field">
+
+</div>
+
+{{ forms.timezoneField({
+    label: 'Timezone'|t('schedule'),
+    name: 'timezone',
+    value: timer.timezone ?: craft.app.timezone
+}) }}
+
+{% css %}
+#datetime fieldset {
+    display: inline-block;
+}
+.every-field {
+    margin: 12px 0;
+}
+.expression {
+    display: inline-block;
+    width: 100%;
+}
+.expression-item {
+    display: inline-block;
+    width: 18%;
+}
+.expression-item input {
+    width: 100%;
+}
+.every-field .datetimewrapper,.every-field .clear-btn {
+    display: inline-block;
+}
+{% endcss %}
+

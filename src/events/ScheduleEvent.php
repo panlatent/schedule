@@ -7,8 +7,8 @@
 
 namespace panlatent\schedule\events;
 
-use panlatent\schedule\base\ScheduleInterface;
-use yii\base\Event;
+use craft\events\ModelEvent;
+use panlatent\schedule\models\Schedule;
 
 /**
  * Class ScheduleEvent
@@ -16,15 +16,7 @@ use yii\base\Event;
  * @package panlatent\schedule\events
  * @author Panlatent <panlatent@gmail.com>
  */
-class ScheduleEvent extends Event
+class ScheduleEvent extends ModelEvent
 {
-    /**
-     * @var ScheduleInterface|null
-     */
-    public ?ScheduleInterface $schedule = null;
-
-    /**
-     * @var bool
-     */
-    public bool $isNew = false;
+    public ?Schedule $schedule = null;
 }

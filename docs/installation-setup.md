@@ -1,5 +1,7 @@
 # Installation and Setup
 
+
+
 You can install Schedule via the plugin store, or through Composer.
 
 ## Craft Plugin Store

@@ -1,0 +1,63 @@
+{% import "_includes/forms" as forms %}
+
+{{ forms.selectField({
+    first: true,
+    label: "Element Type"|t("schedule"),
+    instructions: "",
+    id: "elementType",
+    name: "elementType",
+    value: action.elementType,
+    options: elementTypeOptions,
+    required: true,
+    errors: action.getErrors("elementType"),
+    toggle: true,
+}) }}
+
+ {% for elementType, elementActionOptions  in allElementActionOptions %}
+     {% set isCurrent = (elementType == action.elementType) %}
+     <div id="{{ elementType|id }}"{% if not isCurrent %} class="hidden"{% endif %}>
+         {% namespace "elementTypes[" ~ elementType ~ "]" %}
+             {{ forms.selectField({
+                 first: true,
+                 label: "Element Action"|t("schedule"),
+                 instructions: "",
+                 id: "elementAction",
+                 name: "elementAction",
+                 options: elementActionOptions,
+                 required: true,
+                 errors: action.getErrors("elementType"),
+             }) }}
+
+             {{ forms.editableTableField({
+                 label: "Sources"|t("schedule"),
+                 id: "sources",
+                 name: "sources",
+                 cols: {
+                     enabled: {
+                         type: 'lightswitch',
+                         thin: true,
+                     },
+                     label: {
+                         type: 'heading',
+                         heading: "Source"|t("schedule"),
+                         placeholder: "Add URL Parameter"|t("schedule"),
+                         code: true,
+                     },
+                     value: {
+                         type: 'heading',
+                         heading: "Value"|t("schedule"),
+                         placeholder: "Add Value"|t("schedule"),
+                         code: true,
+                     },
+                 },
+                 rows: allElementSourceOptions[elementType],
+                 defaultValues: {
+                     enabled: true,
+                 },
+                 errors: action.getErrors("queryParams"),
+             }) }}
+         {% endnamespace %}
+     </div>
+ {% endfor %}
+
+

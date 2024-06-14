@@ -15,51 +15,8 @@ namespace panlatent\schedule\base;
  */
 trait TimerTrait
 {
-    // Properties
-    // =========================================================================
-
-    /**
-     * @var int|null
-     */
     public ?int $scheduleId = null;
-
-    /**
-     * @var string|null
-     */
-    public ?string $minute = null;
-
-    /**
-     * @var string|null
-     */
-    public ?string $hour = null;
-
-    /**
-     * @var string|null
-     */
-    public ?string $day = null;
-
-    /**
-     * @var string|null
-     */
-    public ?string $month = null;
-
-    /**
-     * @var string|null
-     */
-    public ?string $week = null;
-
-    /**
-     * @var bool|null
-     */
     public ?bool $enabled = true;
-
-    /**
-     * @var int|null
-     */
     public ?int $sortOrder = null;
-
-    /**
-     * @var string|null
-     */
     public ?string $uid = null;
 }

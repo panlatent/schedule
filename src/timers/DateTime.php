@@ -17,6 +17,7 @@ use panlatent\schedule\base\Timer;
  *
  * @package panlatent\schedule\timers
  * @author Panlatent <panlatent@gmail.com>
+ * @deprecated since 1.0
  */
 class DateTime extends Timer
 {

@@ -19,15 +19,11 @@ use panlatent\schedule\db\Table;
  * @property string $name
  * @property string $handle
  * @property string $description
- * @property string $type
- * @property string $user
- * @property string $settings
- * @property bool $static
+ * @property int $actionId
+ * @property int $onSuccess
+ * @property int $onFailed
  * @property bool $enabled
  * @property bool $enabledLog
- * @property int $lastStartedTime
- * @property int $lastFinishedTime
- * @property bool $lastStatus
  * @property int $sortOrder
  * @author Panlatent <panlatent@gmail.com>
  */

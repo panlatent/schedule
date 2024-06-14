@@ -9,7 +9,6 @@ namespace panlatent\schedule\base;
 
 use Craft;
 use craft\base\SavableComponent;
-use panlatent\schedule\helpers\CronHelper;
 use panlatent\schedule\models\Schedule;
 use panlatent\schedule\Plugin;
 use yii\base\InvalidConfigException;
@@ -40,16 +39,6 @@ abstract class Timer extends SavableComponent implements TimerInterface
     // =========================================================================
 
     /**
-     * @return string
-     */
-    public function __toString()
-    {
-        return Craft::t('schedule', '# {order}' , [
-            'order' => (int)$this->sortOrder
-        ]);
-    }
-
-    /**
      * @return array
      */
     public function rules(): array
@@ -57,36 +46,16 @@ abstract class Timer extends SavableComponent implements TimerInterface
         $rules = parent::rules();
         $rules[] = [['scheduleId', 'enabled'], 'required'];
         $rules[] = [['scheduleId', 'sortOrder'], 'integer'];
-        $rules[] = [['minute', 'hour', 'day', 'month', 'week'], 'string'];
         $rules[] = [['enabled'], 'boolean'];
-        $rules[] = [['minute', 'hour', 'day', 'month', 'week'], function($property) {
-            if ($this->$property === null || $this->$property === '') {
-                $this->$property = '*';
-            }
-        }];
-
         return $rules;
     }
 
-    public function trigger(): bool
-    {
-        return $this->getSchedule()->run();
-    }
-
     /**
-     * @inheritdoc
+     * @deprecated
      */
     public function isValid(): bool
     {
-        return $this->getSchedule()->isValid() && $this->enabled;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getCronExpression(): string
-    {
-        return sprintf('%s %s %s %s %s', $this->minute, $this->hour, $this->day, $this->month, $this->week);
+        return true;
     }
 
     /**
@@ -112,21 +81,5 @@ abstract class Timer extends SavableComponent implements TimerInterface
     public function setSchedule(Schedule $schedule): void
     {
         $this->_schedule = $schedule;
-    }
-
-    /**
-     * @return string
-     */
-    public function getCronDescription(): string
-    {
-        return CronHelper::toDescription($this->getCronExpression());
-    }
-
-    /**
-     * @param string $cron
-     */
-    public function setCronExpression(string $cron): void
-    {
-        [$this->minute, $this->hour, $this->day, $this->month, $this->week, ] = explode(' ', $cron);
     }
 }

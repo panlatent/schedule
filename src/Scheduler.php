@@ -87,10 +87,8 @@ class Scheduler
      */
     public function getTriggerTimers(): array
     {
-        $timers = Plugin::getInstance()->timers->getActiveTimers();
-        $now = new \DateTime('now', $this->timezone);
-        return array_filter($timers, static function (TimerInterface $timer) use($now) {
-            return (new CronExpression($timer->getCronExpression()))->isDue($now);
+        return array_filter(Plugin::getInstance()->timers->getActiveTimers(), static function (TimerInterface $timer)  {
+            return $timer->isDue();
         });
     }
 

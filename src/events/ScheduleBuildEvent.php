@@ -15,6 +15,7 @@ use yii\base\Event;
  *
  * @package panlatent\schedule\events
  * @author Panlatent <panlatent@gmail.com>
+ * @deprecated since 1.0
  */
 class ScheduleBuildEvent extends Event
 {

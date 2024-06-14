@@ -9,8 +9,10 @@ namespace panlatent\schedule\models;
 
 use craft\base\Model;
 use craft\helpers\App;
+use panlatent\schedule\builder\Schedule as ScheduleBuilder;
 use panlatent\schedule\validators\CarbonStringIntervalValidator;
 use panlatent\schedule\validators\PhpBinaryValidator;
+use yii\base\InvalidConfigException;
 
 /**
  * Class Settings
@@ -38,6 +40,22 @@ class Settings extends Model
      * @var string|null
      */
     public ?string $customCpNavName = null;
+
+    // Web Cron
+    // =========================================================================
+
+    public bool $enabledWebCron = false;
+
+    public ?string $endpoint = null;
+
+    public ?array  $allowMethods = null;
+
+    public ?array  $allowUserAgents = null;
+
+    public ?string $token = null;
+
+    // Logs
+    // =========================================================================
 
     /**
      * @var string|null
@@ -80,5 +98,20 @@ class Settings extends Model
     public function getCustomCpNavName(): ?string
     {
         return App::parseEnv($this->customCpNavName);
+    }
+
+    public function getSchedules(): array
+    {
+        return array_map(function($item) {
+            if ($item instanceof Schedule) {
+                return $item;
+            }
+
+            if ($item instanceof ScheduleBuilder) {
+                return $item->create();
+            }
+
+            throw new InvalidConfigException();
+        }, $this->schedules);
     }
 }

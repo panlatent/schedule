@@ -1,0 +1,53 @@
+{% import "_includes/forms.twig" as forms %}
+
+{{ forms.selectField({
+    label: 'Type'|t('schedule'),
+    id: 'actionType',
+    name: 'actionType',
+    value: className(action),
+    options: actionTypeOptions,
+    toggle: true,
+}) }}
+
+{% for actionType in actionTypes %}
+    {% set isCurrent = (actionType == className(action)) %}
+    <div id="{{ actionType|id }}"{% if not isCurrent %} class="hidden"{% endif %}>
+        {% if isCurrent %}
+            {{ action.getSettingsHtml()|raw }}
+        {% else %}
+            <div class="settings-loading">
+                <div class="spinner"></div>
+            </div>
+        {% endif %}
+    </div>
+{% endfor %}
+
+{% set actionTypeIds = [] %}
+{% for actionType in actionTypes %}
+    {% if actionType != className(action) %}
+        {% set actionTypeIds = actionTypeIds|merge({(actionType): actionType|id|namespaceInputId}) %}
+    {% endif %}
+{% endfor %}
+
+{% js %}
+var actionTypes = {{ actionTypeIds|json_encode|raw }};
+$('#{{ 'actionType'|namespaceInputId }}').on('change', function(value) {
+    var actionType = $(this).val();
+    if (actionType in actionTypes) {
+        var id = '#' + actionTypes[actionType];
+        let _cancelToken = axios.CancelToken.source();
+        Craft.sendActionRequest("POST", "schedule/actions/render-settings", {
+            cancelToken: _cancelToken.token,
+            data: {
+                type: actionType,
+            },
+        }).then(function(response) {
+            let $settings = $(response.data.settingsHtml || '');
+            $(id).html(response.data.settingsHtml);
+            Craft.appendHeadHtml(response.data.headHtml);
+            Craft.appendBodyHtml(response.data.bodyHtml);
+        })
+        delete actionTypes[actionType]
+    }
+});
+{% endjs %}

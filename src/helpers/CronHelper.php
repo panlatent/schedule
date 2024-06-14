@@ -65,4 +65,10 @@ class CronHelper
 
         return $descriptor->getDescription();
     }
+
+    public function nextTime(string $expression, int $total = 5): int
+    {
+        $cron = new \Cron\CronExpression($expression);
+        return $cron->getNextRunDate($time)->getTimeStamp();
+    }
 }

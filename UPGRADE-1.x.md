@@ -6,7 +6,7 @@ This is a 0.x - 1.0 update note. This article assumes that you have already used
 
 ## Documentation Promise
 
-The new version will promise a relatively complete documentation.py     
+The new version will promise a relatively complete documentation
 
 ## Schedule
 

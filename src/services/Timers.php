@@ -23,9 +23,7 @@ use panlatent\schedule\errors\TimerException;
 use panlatent\schedule\events\ScheduleEvent;
 use panlatent\schedule\events\TimerEvent;
 use panlatent\schedule\records\Timer as TimerRecord;
-use panlatent\schedule\timers\Custom;
-use panlatent\schedule\timers\DateTime;
-use panlatent\schedule\timers\Every;
+use panlatent\schedule\timers\Cron;
 use panlatent\schedule\timers\MissingTimer;
 use panlatent\schedule\timers\Relay;
 use Throwable;
@@ -90,9 +88,7 @@ class Timers extends Component
     public function getAllTimerTypes(): array
     {
         $types = [
-            Custom::class,
-            DateTime::class,
-            Every::class,
+            Cron::class,
             Relay::class,
         ];
 

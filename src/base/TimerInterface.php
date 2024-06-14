@@ -22,18 +22,11 @@ interface TimerInterface extends TriggerInterface
      * @see \panlatent\schedule\services\Timers::getAllTimers()
      *
      * @return bool whether to run the timer.
+     * @deprecated since 1.0.0
      */
     public function isValid(): bool;
 
-    /**
-     * Returns cron expression.
-     *
-     * @return string
-     */
-    public function getCronExpression(): string;
+    public function isDue(): bool;
 
-    /**
-     * @return Schedule
-     */
     public function getSchedule(): Schedule;
 }

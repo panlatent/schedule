@@ -9,8 +9,8 @@
 
 namespace panlatent\schedule\events;
 
+use craft\events\ModelEvent;
 use panlatent\schedule\base\TimerInterface;
-use yii\base\Event;
 
 /**
  * Class TimerEvent
@@ -18,15 +18,10 @@ use yii\base\Event;
  * @package panlatent\schedule\events
  * @author Panlatent <panlatent@gmail.com>
  */
-class TimerEvent extends Event
+class TimerEvent extends ModelEvent
 {
     /**
      * @var TimerInterface|null
      */
     public ?TimerInterface $timer = null;
-
-    /**
-     * @var bool
-     */
-    public bool $isNew = false;
 }

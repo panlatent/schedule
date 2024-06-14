@@ -24,6 +24,7 @@ use yii\web\Response;
  *
  * @package panlatent\schedule\controllers
  * @author Panlatent <panlatent@gmail.com>
+ * @deprecated since 1.0
  */
 class TimersController extends Controller
 {
@@ -183,6 +184,24 @@ class TimersController extends Controller
 
         return $this->asJson([
             'success' => Plugin::$plugin->getTimers()->reorderTimers($ids)
+        ]);
+    }
+
+    public function actionRenderSettings(): Response
+    {
+        $this->requirePostRequest();
+        $this->requireAcceptsJson();
+
+        $type = $this->request->getRequiredBodyParam('type');
+        $action = Plugin::getInstance()->timers->createTimer($type);
+
+        $view = Craft::$app->getView();
+        $html = $action->getSettingsHtml();
+
+        return $this->asJson([
+            'settingsHtml' => $html,
+            'headHtml' => $view->getHeadHtml(),
+            'bodyHtml' => $view->getBodyHtml(),
         ]);
     }
 }

@@ -13,10 +13,10 @@
     ],
     "homepage": "https://github.com/panlatent/schedule",
     "support": {
-        "docs": "https://docs.panlatent.com/schedule",
+        "docs": "https://docs.panlatent.com/projects/schedule",
         "issues": "https://github.com/panlatent/schedule/issues"
     },
-    "license": "MIT",
+    "license": "proprietary",
     "authors": [
         {
             "name": "panlatent@gmail.com",
@@ -31,9 +31,11 @@
         "nesbot/carbon": "^1.22 || ^2.10 || ^3.0",
         "panlatent/craft-action-abstract": "@dev",
         "panlatent/cron-expression-descriptor": "^1.1",
+        "psr/container": "^1.0 || ^2.0",
         "psr/log": "^1.0 || ^2.0 || ^3.0",
         "react/event-loop": "^1.5",
-        "symfony/process": "^6.0 || ^7.0"
+        "symfony/process": "^6.0 || ^7.0",
+        "alexanderpas/http-enum": "^1.0"
     },
     "replace": {
         "panlatent/craft-action-abstract": "self.version"

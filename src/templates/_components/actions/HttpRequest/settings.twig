@@ -1,0 +1,146 @@
+{% import "_includes/forms" as forms %}
+
+{% set actionType = className(action) %}
+
+{% set methodOptions = [] %}
+{% for method in action.methods %}
+    {% set methodOptions = methodOptions|merge([{
+        label: method,
+        value: method,
+    }]) %}
+{% endfor %}
+
+{{ forms.selectField({
+    label: "HTTP Method"|t('action'),
+    required: true,
+    id: 'method',
+    name: 'method',
+    value: action.method,
+    options: methodOptions,
+    errors: action.getErrors('method'),
+}) }}
+
+{{ forms.autosuggestField({
+    label: 'Request URL'|t('schedule'),
+    requied: true,
+    id: 'url',
+    name: 'url',
+    value: action.url,
+    errors: action.getErrors('url'),
+    suggestEnvVars: true,
+}) }}
+
+{{ forms.editableTableField({
+    label: "Headers"|t("schedule"),
+    id: "headers",
+    name: "headers",
+    addRowLabel: "Add a header"|t("schedule"),
+    cols: {
+        enabled: {
+            type: 'checkbox',
+            thin: true,
+            checked: true,
+        },
+        name: {
+            type: 'singleline',
+            heading: "Header Name"|t("schedule"),
+            placeholder: "Add Header Name"|t("schedule"),
+            code: true,
+        },
+        value: {
+            type: 'singleline',
+            heading: "Header Value"|t("schedule"),
+            placeholder: "Add Header Value"|t("schedule"),
+            code: true,
+        }
+    },
+    rows: action.headers,
+    defaultValues: {
+        enabled: true,
+    },
+    allowAdd: true,
+    allowReorder: true,
+    allowDelete: true,
+    errors: action.getErrors("headers"),
+}) }}
+
+{{ forms.editableTableField({
+    label: "Query Params"|t("schedule"),
+    id: "queryParams",
+    name: "queryParams",
+    addRowLabel: "Add a parameter"|t("schedule"),
+    cols: {
+        enabled: {
+            type: 'checkbox',
+            thin: true,
+        },
+        name: {
+            type: 'singleline',
+            heading: "Parameter"|t("schedule"),
+            placeholder: "Add URL Parameter"|t("schedule"),
+            code: true,
+        },
+        value: {
+            type: 'singleline',
+            heading: "Value"|t("schedule"),
+            placeholder: "Add Value"|t("schedule"),
+            code: true,
+        },
+    },
+    rows: action.queryParams,
+    defaultValues: {
+        enabled: true,
+    },
+    allowAdd: true,
+    allowReorder: true,
+    allowDelete: true,
+    errors: action.getErrors("queryParams"),
+}) }}
+
+{% set contentTypeSuggestions = [] %}
+{% for contentType in action.contentTypes %}
+    {% set contentTypeSuggestions = contentTypeSuggestions|merge([
+        {
+            name: contentType,
+            hint: contentType,
+        }
+    ]) %}
+{% endfor %}
+
+<div id="requestContent"{% if action.method == 'GET' or action.method == 'HEAD' %} class="hidden"{% endif %}>
+
+    {{ forms.autosuggestField({
+        label: 'Content Type'|t('schedule'),
+        requied: true,
+        id: 'contentType',
+        name: 'contentType',
+        value: action.contentType,
+        errors: action.getErrors('contentType'),
+        suggestions: [{
+            label: 'Content-Type',
+            data: contentTypeSuggestions,
+        }],
+    }) }}
+
+    {{ forms.textareaField({
+        label: 'Request Body'|t('schedule'),
+        requied: true,
+        id: 'body',
+        name: 'body',
+        value: action.body,
+        errors: action.getErrors('body'),
+        rows: 10,
+    }) }}
+
+</div>
+
+{% js %}
+    $('#{{ 'method'|namespaceInputId }}').change(function() {
+        var method = $(this).val();
+        if (method === 'GET' || method === 'HEAD') {
+            $('#{{ 'requestContent'|namespaceInputId }}').addClass('hidden');
+        } else {
+            $('#{{ 'requestContent'|namespaceInputId }}').removeClass('hidden');
+        }
+    });
+{% endjs %}

@@ -2,19 +2,21 @@
 
 namespace panlatent\schedule\actions;
 
+use Alexanderpas\Common\HTTP\Method;
+use Craft;
 use craft\helpers\Json;
 use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
 use panlatent\craft\actions\abstract\Action;
+use panlatent\craft\actions\abstract\ActionInterface;
 use panlatent\craft\actions\abstract\ContextInterface;
 use panlatent\craft\actions\abstract\OutputInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
 
 class HttpRequest extends Action
 {
-    /**
-     * @var string
-     */
-    public string $method = 'get';
+    public string $method = Method::GET->value;
 
     /**
      * @var string Request URL default is echo api.
@@ -43,22 +45,64 @@ class HttpRequest extends Action
 
     public function execute(ContextInterface $context): bool
     {
-        $client = new Client();
+        try {
+            $client = $context->getContainer()->get(ClientInterface::class);
+        } catch (NotFoundExceptionInterface) {
+            $client = new Client();
+        }
+        return $this->executeWithClient($context, $client);
+    }
 
+    public function executeWithClient(ContextInterface $context, ClientInterface $client): bool
+    {
         $response = $client->request($this->method, $this->url, $this->getOptions());
         $statusCode = $response->getStatusCode();
 
-        $context->setOutput(new class($response) implements OutputInterface {
-            public function __construct(public ResponseInterface $response) {}
-        });
+//        $context->setOutput(new class($response) implements OutputInterface {
+//            public function __construct(public ResponseInterface $response) {}
+//        });
 
         return $statusCode >= 200 && $statusCode < 400;
     }
 
-    protected function getClient(): Client
+    public function getMethods(): array
     {
-        return new Client();
+        return [
+            Method::GET->value,
+            Method::HEAD->value,
+            Method::POST->value,
+            Method::PUT->value,
+            Method::PATCH->value,
+            Method::OPTIONS->value,
+        ];
     }
+
+    public function getContentTypes(): array
+    {
+        return [
+            'multipart/form-data',
+            'application/x-www-form-urlencoded',
+            'application/json',
+            'application/xml',
+            'text/html',
+            'text/xml',
+        ];
+    }
+
+    public function getSettingsHtml(): ?string
+    {
+        return Craft::$app->getView()->renderTemplate('schedule/_components/actions/HttpRequest/settings', [
+            'action' => $this,
+            // Craft editableTable not support custom suggestions
+            // 'httpHeaderSuggestions' => [
+            //     [
+            //          'label' => '',
+            //         'data' => $this->_getHttpHeaderSuggestions(),
+            //     ]
+            // ],
+        ]);
+    }
+
 
     protected function getOptions(): array
     {

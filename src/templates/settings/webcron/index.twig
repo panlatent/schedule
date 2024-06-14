@@ -1,0 +1,58 @@
+{% extends "schedule/_layouts/settings" %}
+
+{% set settings = craft.schedule.settings %}
+
+{% import "_includes/forms" as forms %}
+
+{% block content %}
+    <form method="post" accept-charset="UTF-8">
+        <input type="hidden" name="action" value="schedule/settings/save-web-cron">
+        {{ csrfInput() }}
+
+        {{ forms.lightSwitchField({
+            first: true,
+            label: "EnabledWebCron"|t,
+            instructions: "",
+            id: "enabled-web-cron",
+            name: "enabledWebCron",
+            value: settings.enabledWebCron,
+            required: true,
+            errors: settings.getErrors("enabledWebCron"),
+        }) }}
+
+        {{ forms.autoSuggestField({
+            first: true,
+            label: "Endpoint"|t('schedule'),
+            instructions: "",
+            id: "endpoint",
+            name: "endpoint",
+            value: settings.endpoint,
+            required: true,
+            errors: settings.getErrors("endpoint"),
+        }) }}
+
+        {{ forms.textField({
+            first: true,
+            label: "Allow Methods"|t('schedule'),
+            instructions: "",
+            id: "allowMethods",
+            name: "allowMethods",
+            value: settings.allowMethods,
+            required: true,
+            errors: settings.getErrors("allowMethods"),
+        }) }}
+
+        {{ forms.autoSuggestField({
+            first: true,
+            label: "Token"|t,
+            instructions: "",
+            id: "token",
+            name: "token",
+            value: settings.token,
+            required: true,
+            errors: settings.getErrors("token"),
+        }) }}
+
+        <button class="btn submit">{{ "Save"|t('app') }}</button>
+    </form>
+{% endblock %}

@@ -4,6 +4,7 @@ namespace panlatent\schedule\models;
 
 use Craft;
 use craft\base\Model;
+use DateTime;
 use panlatent\craft\actions\abstract\ActionInterface;
 use panlatent\schedule\base\TimerInterface;
 use panlatent\schedule\log\LogAdapter;
@@ -11,31 +12,15 @@ use Psr\Log\LoggerInterface;
 
 /**
  * @property-read ScheduleGroup $group
- * @property-read TimerInterface[] $timers
- * @property-read ActionInterface[] $actions
+ * @property-read ScheduleInfo $info
  * @since 1.0.0
  */
 class Schedule extends Model
 {
     public ?int $id = null;
-    /**
-     * @var int|null
-     */
     public ?int $groupId = null;
-
-    /**
-     * @var string|null
-     */
     public ?string $name = null;
-
-    /**
-     * @var string|null
-     */
     public ?string $handle = null;
-
-    /**
-     * @var string|null
-     */
     public ?string $description = null;
 
     /**
@@ -45,6 +30,8 @@ class Schedule extends Model
     public bool $static = false;
 
     public ?ActionInterface $action = null;
+
+    public ?TimerInterface $timer = null;
 
     /**
      * @var bool
@@ -56,20 +43,7 @@ class Schedule extends Model
      */
     public ?bool $enabledLog = null;
 
-    /**
-     * @var int|null
-     */
-    public ?int $lastStartedTime = null;
-
-    /**
-     * @var int|null
-     */
-    public ?int $lastFinishedTime = null;
-
-    /**
-     * @var string|null
-     */
-    public ?string $lastStatus = null;
+//    public $timeout;
 
     /**
      * @var int|null
@@ -78,13 +52,11 @@ class Schedule extends Model
 
     public ?string $uid = null;
 
-    /**
-     * @return TimerInterface[]
-     */
-    public function getTimers(): array
-    {
-        return [];
-    }
+    public ?DateTime $dateCreated = null;
+
+    public ?DateTime $dateUpdated = null;
+
+    private ?ScheduleInfo $_info = null;
 
     /**
      * @return array
@@ -93,6 +65,14 @@ class Schedule extends Model
     public function getConditions(): array
     {
         return [];
+    }
+
+    public function getInfo(): ScheduleInfo
+    {
+        if ($this->_info === null) {
+            $this->_info = new ScheduleInfo();
+        }
+        return $this->_info;
     }
 
     public function canRun(): bool

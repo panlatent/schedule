@@ -1,0 +1,48 @@
+{% import "_includes/forms" as forms %}
+
+{{ forms.editableTableField({
+    allowAdd: true,
+    allowReorder: true,
+    allowDelete: true,
+    rows: settings.emails ?? [],
+    label: 'Addresses'|t('schedule'),
+    instructions: 'The email column supports environment variables'|t('schedule'),
+    cols: {
+        email: {
+            type: 'autosuggest',
+            suggestEnvVars: true,
+            heading: 'Email Address'|t('schedule')
+        },
+        name: {
+            type: 'singleline',
+            heading: 'Name'|t('schedule')
+        }
+    },
+    id: 'adresses',
+    name: 'adresses',
+    addRowLabel: "Add a address"|t("schedule"),
+    errors: action.getErrors('adresses') ?? []
+}) }}
+
+{{ forms.autoSuggestField({
+    first: true,
+    label: "Subject"|t,
+    instructions: "",
+    id: "subject",
+    name: "subject",
+    value: action.subject,
+    required: true,
+    errors: action.getErrors("subject"),
+}) }}
+
+{{ forms.textareaField({
+    first: true,
+    label: "Message"|t('schedule'),
+    instructions: "",
+    id: "message",
+    name: "message",
+    value: action.message|nl2br,
+    rows: 10,
+    required: true,
+    errors: action.getErrors("message"),
+}) }}

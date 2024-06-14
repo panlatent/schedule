@@ -20,58 +20,70 @@ class Install extends Migration
     /**
      * @inheritdoc
      */
-    public function safeUp(): void
+    public function safeUp(): bool
     {
-        // Schedule Groups
-        $this->createTable('{{%schedulegroups}}', [
+        $this->createTable('{{%schedule_actions}}', [
             'id' => $this->primaryKey(),
-            'name' => $this->string()->notNull(),
+            'type' => $this->string()->notNull(),
+            'settings' => $this->text(),
             'dateCreated' => $this->dateTime()->notNull(),
             'dateUpdated' => $this->dateTime()->notNull(),
             'uid' => $this->uid(),
         ]);
 
-        $this->createIndex(null, '{{%schedulegroups}}', ['name'], true);
+        $this->createTable('{{%schedule_schedulegroups}}', [
+            'id' => $this->primaryKey(),
+            'name' => $this->string()->notNull(),
+            'static' => $this->boolean()->defaultValue(false),
+            'dateCreated' => $this->dateTime()->notNull(),
+            'dateUpdated' => $this->dateTime()->notNull(),
+            'uid' => $this->uid(),
+        ]);
+        $this->createIndex(null, '{{%schedule_schedulegroups}}', ['name'], true);
 
-        // Schedules
-        $this->createTable('{{%schedules}}', [
+        $this->createTable('{{%schedule_schedules}}', [
             'id' => $this->primaryKey(),
             'groupId' => $this->integer(),
             'name' => $this->string()->notNull(),
             'handle' => $this->string()->notNull(),
             'description' => $this->string(),
-            'type' => $this->string()->notNull(),
-            'user' => $this->string(),
-            'settings' => $this->text(),
-            'static' => $this->boolean()->defaultValue(false),
+            // 'static' => $this->boolean()->defaultValue(false),
+            'actionId' => $this->integer()->notNull(),
+            'onSuccess' => $this->integer(),
+            'onFailed' => $this->integer(),
+            //'enabledLog' => $this->boolean()->defaultValue(false),
             'enabled' => $this->boolean()->notNull()->defaultValue(true),
-            'enabledLog' => $this->boolean()->defaultValue(false),
-            'lastStartedTime' =>  $this->bigInteger(),
-            'lastFinishedTime' =>  $this->bigInteger(),
-            'lastStatus' => $this->boolean(),
             'sortOrder' => $this->smallInteger()->unsigned(),
             'dateCreated' => $this->dateTime()->notNull(),
             'dateUpdated' => $this->dateTime()->notNull(),
             'uid' => $this->uid(),
         ]);
+        $this->createIndex(null, '{{%schedule_schedules}}', 'groupId');
+        $this->createIndex(null, '{{%schedule_schedules}}', 'handle', true);
+        $this->createIndex(null, '{{%schedule_schedules}}', 'dateCreated');
+        $this->createIndex(null, '{{%schedule_schedules}}', ['sortOrder', 'dateCreated']);
+        $this->addForeignKey(null, '{{%schedule_schedules}}', 'actionId', '{{%schedule_actions}}', 'id');
+        $this->addForeignKey(null, '{{%schedule_schedules}}', 'onSuccess', '{{%schedule_actions}}', 'id', 'SET NULL');
+        $this->addForeignKey(null, '{{%schedule_schedules}}', 'onFailed', '{{%schedule_actions}}', 'id', 'SET NULL');
 
-        $this->createIndex(null, '{{%schedules}}', 'groupId');
-        $this->createIndex(null, '{{%schedules}}', 'handle', true);
-        $this->createIndex(null, '{{%schedules}}', 'type');
-        $this->createIndex(null, '{{%schedules}}', 'dateCreated');
-        $this->createIndex(null, '{{%schedules}}', ['sortOrder', 'dateCreated']);
-        $this->addForeignKey(null, '{{%schedules}}', 'groupId', '{{%schedulegroups}}', 'id', 'SET NULL');
+        $this->createTable('{{%schedule_scheduletraces}}', [
+            'id' => $this->primaryKey(),
+            'scheduleId' => $this->integer()->notNull(),
+            'traces' => $this->text(),
+//            'firstStartedTime' =>  $this->bigInteger(),
+//            'lastStartedTime' =>  $this->bigInteger(),
+//            'lastFinishedTime' =>  $this->bigInteger(),
+//            'lastStatus' => $this->boolean(),
+            'dateCreated' => $this->dateTime()->notNull(),
+            'dateUpdated' => $this->dateTime()->notNull(),
+            'uid' => $this->uid(),
+        ]);
+        $this->addForeignKey(null, '{{%schedule_scheduletraces}}', 'scheduleId', '{{%schedule_schedules}}', 'id', 'CASCADE');
 
-        // Schedule Timers
-        $this->createTable('{{%scheduletimers}}', [
+        $this->createTable('{{%schedule_timers}}', [
             'id' => $this->primaryKey(),
             'scheduleId' => $this->integer()->notNull(),
             'type' => $this->string()->notNull(),
-            'minute' => $this->string()->notNull()->defaultValue('*'),
-            'hour' => $this->string()->notNull()->defaultValue('*'),
-            'day' => $this->string()->notNull()->defaultValue('*'),
-            'month' => $this->string()->notNull()->defaultValue('*'),
-            'week' => $this->string()->notNull()->defaultValue('*'),
             'settings' => $this->text(),
             'enabled' => $this->boolean()->notNull()->defaultValue(true),
             'sortOrder' => $this->smallInteger()->defaultValue(0),
@@ -80,14 +92,7 @@ class Install extends Migration
             'uid' => $this->uid(),
         ]);
 
-        $this->createIndex(null, '{{%scheduletimers}}', 'scheduleId');
-        $this->createIndex(null, '{{%scheduletimers}}', 'type');
-        $this->createIndex(null, '{{%scheduletimers}}', ['enabled', 'dateCreated']);
-        $this->createIndex(null, '{{%scheduletimers}}', ['scheduleId', 'sortOrder']);
-        $this->addForeignKey(null, '{{%scheduletimers}}', 'scheduleId', '{{%schedules}}', 'id', 'CASCADE');
-
-        // Schedule Logs
-        $this->createTable('{{%schedulelogs}}', [
+        $this->createTable('{{%schedule_tasks}}', [
             'id' => $this->primaryKey(),
             'scheduleId' => $this->integer()->notNull(),
             'status' => $this->string()->notNull(),
@@ -102,10 +107,21 @@ class Install extends Migration
             'dateUpdated' => $this->dateTime()->notNull(),
             'uid' => $this->uid(),
         ]);
+        $this->createIndex(null, '{{%schedule_tasks}}', 'scheduleId');
+        $this->createIndex(null, '{{%schedule_tasks}}', ['scheduleId', 'sortOrder']);
+        $this->addForeignKey(null, '{{%schedule_tasks}}', 'scheduleId', '{{%schedule_schedules}}', 'id', 'CASCADE');
 
-        $this->createIndex(null, '{{%schedulelogs}}', 'scheduleId');
-        $this->createIndex(null, '{{%schedulelogs}}', ['scheduleId', 'sortOrder']);
-        $this->addForeignKey(null, '{{%schedulelogs}}', 'scheduleId', '{{%schedules}}', 'id', 'CASCADE');
+        $this->createTable('{{%schedule_scheduler}}', [
+            'id' => $this->primaryKey(),
+            'instanceId' => $this->string()->notNull(),
+            'key' => $this->string()->notNull(),
+            'value' => $this->text(),
+            'dateCreated' => $this->dateTime()->notNull(),
+            'dateUpdated' => $this->dateTime()->notNull(),
+            'uid' => $this->uid(),
+        ]);
+
+        return true;
     }
 
     /**
@@ -113,9 +129,12 @@ class Install extends Migration
      */
     public function safeDown(): void
     {
-        $this->dropTableIfExists('{{%schedulelogs}}');
-        $this->dropTableIfExists('{{%scheduletimers}}');
-        $this->dropTableIfExists('{{%schedules}}');
-        $this->dropTableIfExists('{{%schedulegroups}}');
+        $this->dropTableIfExists('{{%schedule_scheduler}}');
+        $this->dropTableIfExists('{{%schedule_tasks}}');
+        $this->dropTableIfExists('{{%schedule_timers}}');
+        $this->dropTableIfExists('{{%schedule_scheduletraces}}');
+        $this->dropTableIfExists('{{%schedule_schedules}}');
+        $this->dropTableIfExists('{{%schedule_schedulegroups}}');
+        $this->dropTableIfExists('{{%schedule_actions}}');
     }
 }

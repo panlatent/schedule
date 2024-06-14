@@ -114,6 +114,8 @@ class SchedulesController extends Controller
         $i = 1;
         $rows = [];
 
+
+
         $ungroupedSchedules = $schedules->getSchedulesByGroupId();
         foreach ($ungroupedSchedules as $schedule) {
             if ($schedule->static) {

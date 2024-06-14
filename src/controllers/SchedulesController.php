@@ -10,11 +10,11 @@ namespace panlatent\schedule\controllers;
 use Craft;
 use craft\helpers\Json;
 use craft\web\Controller;
-use panlatent\schedule\base\Schedule;
-use panlatent\schedule\base\ScheduleInterface;
+use panlatent\schedule\actions\HttpRequest;
+use panlatent\schedule\models\Schedule;
 use panlatent\schedule\models\ScheduleGroup;
 use panlatent\schedule\Plugin;
-use panlatent\schedule\schedules\HttpRequest;
+use panlatent\schedule\timers\Cron;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
@@ -39,7 +39,7 @@ class SchedulesController extends Controller
         $this->requirePostRequest();
         $this->requireAcceptsJson();
 
-        $schedules = Plugin::$plugin->getSchedules();
+        $schedules = Plugin::getInstance()->schedules;
 
         $groupId = Craft::$app->getRequest()->getBodyParam('id');
         $groupName = Craft::$app->getRequest()->getBodyParam('name');
@@ -74,7 +74,7 @@ class SchedulesController extends Controller
         $this->requirePostRequest();
         $this->requireAcceptsJson();
 
-        $schedules = Plugin::$plugin->getSchedules();
+        $schedules = Plugin::getInstance()->schedules;
         $groupId = Craft::$app->getRequest()->getBodyParam('id');
 
         $group = $schedules->getGroupById($groupId);
@@ -95,14 +95,13 @@ class SchedulesController extends Controller
      * Edit a schedule.
      *
      * @param int|null $scheduleId
-     * @param ScheduleInterface|null $schedule
+     * @param Schedule|null $schedule
      * @return Response
      */
-    public function actionEditSchedule(int $scheduleId = null, ScheduleInterface $schedule = null): Response
+    public function actionEditSchedule(int $scheduleId = null, Schedule $schedule = null): Response
     {
-        $schedules = Plugin::$plugin->getSchedules();
+        $schedules = Plugin::getInstance()->schedules;
 
-        /** @var Schedule $schedule */
         if ($schedule === null) {
             if ($scheduleId !== null) {
                 $schedule = $schedules->getScheduleById($scheduleId);
@@ -110,14 +109,17 @@ class SchedulesController extends Controller
                     throw new NotFoundHttpException();
                 }
             } else {
-                $schedule = $schedules->createSchedule(HttpRequest::class);
+                $schedule = new Schedule();
+                $schedule->timer = new Cron();
+                $schedule->action = new HttpRequest();
             }
         }
 
-        $isNewSchedule = $schedule->getIsNew();
+        $isNewSchedule = !$schedule;
 
         $allGroups = $schedules->getAllGroups();
-        $allScheduleTypes = $schedules->getAllScheduleTypes();
+        $allActionTypes = Plugin::getInstance()->actions->getAllActionTypes();
+        $allTimerTypes = Plugin::getInstance()->timers->getAllTimerTypes();
 
         $groupOptions = [
             [
@@ -133,51 +135,14 @@ class SchedulesController extends Controller
             ];
         }
 
-        $scheduleInstances = [];
-        $scheduleTypeOptions = [];
-        foreach ($allScheduleTypes as $class) {
-            /** @var ScheduleInterface|string $class */
-            $scheduleInstances[$class] = new $class();
-            $scheduleTypeOptions[] = [
-                'label' => $class::displayName(),
-                'value' => $class,
-            ];
-        }
-
         return $this->renderTemplate('schedule/_edit', [
             'isNewSchedule' => $isNewSchedule,
             'groupOptions' => $groupOptions,
             'schedule' => $schedule,
-            'scheduleInstances' => $scheduleInstances,
-            'scheduleTypes' => $allScheduleTypes,
-            'scheduleTypeOptions' => $scheduleTypeOptions,
-        ]);
-    }
-
-    /**
-     * @param string $scheduleType
-     * @return Response
-     */
-    public function actionGetScheduleSettingsHtml(string $scheduleType): Response
-    {
-        if (!class_exists($scheduleType)) {
-            return $this->asFailure("schedule class $scheduleType not found");
-        }
-
-        /** @var Schedule $schedule */
-        $schedule = new $scheduleType;
-
-        $view = Craft::$app->getView();
-        $view->startJsBuffer();
-        $view->startCssBuffer();
-        $html =$schedule->getSettingsHtml();
-        $js = $view->clearJsBuffer();
-        $css = $view->clearCssBuffer();
-
-        return $this->asJson([
-            'html' => $html,
-            'js' => $js,
-            'css' => $css,
+            'actionTypes' => $allActionTypes,
+            'actionTypeOptions' => array_map(static fn($class) => ['label' => $class::displayName(), 'value' => $class], $allActionTypes),
+            'timerTypes' => $allTimerTypes,
+            'timerTypeOptions' => array_map(static fn($class) => ['label' => $class::displayName(), 'value' => $class], $allTimerTypes),
         ]);
     }
 
@@ -190,9 +155,8 @@ class SchedulesController extends Controller
     {
         $this->requirePostRequest();
 
-        $schedules = Plugin::$plugin->getSchedules();
+        $schedules = Plugin::getInstance()->schedules;
 
-        /** @var Schedule $schedule */
         $schedule = $schedules->createScheduleFromRequest();
 
         if (!$schedules->saveSchedule($schedule)) {
