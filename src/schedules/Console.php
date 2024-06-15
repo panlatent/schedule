@@ -151,12 +151,15 @@ class Console extends Schedule
     {
         $process = new Process($this->buildCommand(), dirname(Craft::$app->request->getScriptFile()), null, null, $this->timeout ?: null);
 
-        $process->run(function ($type, $buffer) use ($logId) {
+        // https://stackoverflow.com/questions/49033241/postgresql-sqlstate42p18-indeterminate-datatype-with-pdo-and-concat
+        $contactExpression = Craft::$app->getDb()->getIsMysql() ? 'CONCAT([[output]],:output)' : '[[output]] || :output';
+
+        $process->run(function ($type, $buffer) use ($logId, $contactExpression) {
             $output = $buffer . "\n";
             Craft::$app->getDb()->createCommand()
                 ->update(Table::SCHEDULELOGS, [
                     'status' => self::STATUS_PROCESSING,
-                    'output' => new Expression("CONCAT([[output]],:output)", ['output' => $output]),
+                    'output' => new Expression($contactExpression, ['output' => $output]),
                 ], [
                     'id' => $logId,
                 ])
