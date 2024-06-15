@@ -10,7 +10,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Fixed
 ### Removed
 
-## [0.6.1] -2024-05-15
+## [0.6.2] - 2024-06-15
+## Fixed
+- Fix PostgreSQL indeterminate datatype error in console schedule update logs
+
+## [0.6.1] - 2024-05-15
 ## Updated
 - Compatible with Feed Me plugin
 
