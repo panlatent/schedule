@@ -1,6 +1,10 @@
 {% extends "_includes/forms.twig" %}
 
+{% macro action(config) %}
+    {% include "schedule/_includes/forms/action.twig" with config only %}
+{% endmacro %}
+
 {% macro actionTypeField(config) %}
-    {% set config = config|merge({id: config.id ?? "entrytype#{random()}"}) %}
+    {% set config = config|merge({id: config.id ?? "actiontype#{random()}"}) %}
     {{ _self.field(config, 'template:schedule/_includes/forms/actionType') }}
 {% endmacro %}

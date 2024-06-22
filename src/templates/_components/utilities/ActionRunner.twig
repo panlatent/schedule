@@ -1,0 +1,10 @@
+{% import "schedule/_includes/forms.twig" as forms %}
+
+<form action="">
+
+{{ forms.action({
+    action: action,
+}) }}
+
+    <button type="submit" class="btn submit">{{ "Run"|t('schedule') }}</button>
+</form>

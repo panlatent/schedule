@@ -23,7 +23,6 @@ use panlatent\schedule\db\Table;
  * @property int $onSuccess
  * @property int $onFailed
  * @property bool $enabled
- * @property bool $enabledLog
  * @property int $sortOrder
  * @author Panlatent <panlatent@gmail.com>
  */

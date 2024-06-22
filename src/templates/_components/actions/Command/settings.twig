@@ -2,14 +2,14 @@
 
 {% set scheduleType = className(schedule) %}
 
-{{ forms.selectField({
+{{ forms.autosuggestField({
     label: 'Command'|t('schedule'),
     required: true,
     id: 'command',
     name: 'command',
     value: schedule.command,
-    options: schedule.commandOptions,
     errors: schedule.getErrors('command'),
+    suggestions: suggestions,
 }) }}
 
 {{ forms.textField({

@@ -66,10 +66,10 @@
             {% if groupId == null %}
             <th scope="col">{{ "Group"|t('app') }}</th>
             {% endif %}
-            <th scope="col">{{ "Type"|t('app') }}</th>
-            <th scope="col">{{ "Timers"|t('schedule') }}</th>
-            <th scope="col">{{ "Last Running Date"|t('schedule') }}</th>
-            <th scope="col">{{ "Logs"|t('schedule') }}</th>
+            <th scope="col">{{ "Action"|t('schedule') }}</th>
+            <th scope="col">{{ "When"|t('schedule') }}</th>
+            <th scope="col">{{ "Status"|t('schedule') }}</th>
+            <th scope="col">{{ "Instances"|t('schedule') }}</th>
             <th scope="col">{{ 'Enabled'|t('schedule') }}</th>
             <th></th>
             {% if sortable %}<td class="thin"></td>{% endif %}
@@ -97,37 +97,31 @@
                         {% if schedule is missing %}
                             <span class="error">{{ schedule.expectedType }}</span>
                         {% else %}
-                            {{ schedule.displayName() }}
+                            {{ schedule.action.displayName() }}
                         {% endif %}
                     </td>
-                    <td data-title="{{ 'Timers'|t('schedule') }}">
-                        {% if schedule.timers|length == 0 %}
-                            <a href="{{ url('schedule/' ~ schedule.id ~ '/timers') }}">{{ allowChange ? "Edit Timers"|t('schedule') : "View Timers"|t('schedule') }}</a>
-                        {% else %}
-                            <a href="{{ url('schedule/' ~ schedule.id ~ '/timers') }}">{{ allowChange ? "Edit Timers ({count})"|t('schedule', { count: schedule.timers|length }) : "View Timers ({count})"|t('schedule', { count: schedule.timers|length }) }}</a>
-                            <a class="menubtn" title="{{ 'Timers'|t('schedule') }}"></a>
-                            <div class="menu">
-                                <ul>
-                                    {% for timer in schedule.timers %}
-                                        <li>
-                                            <a href="{{ url('schedule/' ~ schedule.id ~ '/timers/' ~ timer.id) }}">{{ timer ~ ' ' ~ timer.cronDescription }}</a>
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                        {% endif %}
+                    <td data-title="{{ 'When'|t('schedule') }}">
+                        <a class="go" title="{{ 'Next execute at '|t('schedule') }}">{{ schedule.timer.cronDescription }}</a>
+{#                        <div class="menu">#}
+{#                            <ul>#}
+{#                                <li>#}
+{#                                </li>#}
+{#                            </ul>#}
+{#                        </div>#}
                     </td>
                     <td data-title="{{ 'Last Running Date'|t('schedule') }}">
-                        {% if schedule.lastFinishedDate is not empty %}
-                            {% if schedule.lastStatus %}
-                                <span class="status green"></span>
-                            {% else %}
-                                <span class="status red"></span>
-                            {% endif %}
-                            {{ schedule.lastFinishedDate|datetime('short') }}
-                        {% endif %}
+{#                        {% if schedule.lastFinishedDate is not empty %}#}
+{#                            {% if schedule.lastStatus %}#}
+{#                                <span class="status green"></span>#}
+{#                            {% else %}#}
+{#                                <span class="status red"></span>#}
+{#                            {% endif %}#}
+{#                            {{ schedule.lastFinishedDate|datetime('short') }}#}
+{#                        {% endif %}#}
                     </td>
-                    <td>{% if schedule.enabledLog %}<a class="go" href="{{ url('schedule/' ~ schedule.id ~ '/logs') }}"></a>{% endif %}</td>
+                    <td>
+{#                        {% if schedule.enabledLog %}<a class="go" href="{{ url('schedule/' ~ schedule.id ~ '/logs') }}"></a>{% endif %}#}
+                    </td>
                     <td>
                         {% if allowChange %}
                             {{ forms.lightswitchField({

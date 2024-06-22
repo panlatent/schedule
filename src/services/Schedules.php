@@ -16,8 +16,10 @@ use craft\helpers\Json;
 use craft\helpers\StringHelper;
 use craft\web\Request;
 use panlatent\schedule\db\Table;
+use panlatent\schedule\errors\ActionException;
 use panlatent\schedule\errors\ScheduleException;
 use panlatent\schedule\errors\ScheduleGroupException;
+use panlatent\schedule\errors\TimerException;
 use panlatent\schedule\events\ScheduleEvent;
 use panlatent\schedule\events\ScheduleGroupEvent;
 use panlatent\schedule\models\Schedule;
@@ -419,13 +421,17 @@ class Schedules extends Component
             $request = Craft::$app->getRequest();
         }
 
-        $actionType = $request->getRequiredBodyParam('actionType');
-        $actionConfig =  $request->getBodyParam('actionTypes.' . $actionType) ?? [];
-        $action = Plugin::getInstance()->actions->createAction(['type' => $actionType] + $actionConfig);
+//        try {
+            $actionType = $request->getRequiredBodyParam('actionType');
+            $actionConfig = $request->getBodyParam('actionTypes.' . $actionType) ?? [];
+            $action = Plugin::getInstance()->actions->createAction(['type' => $actionType] + $actionConfig);
 
-        $timerType = $request->getBodyParam('timerType');
-        $timerConfig = $request->getBodyParam('timeTypes.' . $timerType) ?? [];
-        $timer = Plugin::getInstance()->timers->createTimer(['type' => $timerType] + $timerConfig);
+            $timerType = $request->getRequiredBodyParam('timerType');
+            $timerConfig = $request->getBodyParam('timerTypes.' . $timerType) ?? [];
+            $timer = Plugin::getInstance()->timers->createTimer(['type' => $timerType] + $timerConfig);
+//        } catch () {
+//
+//        }
 
         return $this->createSchedule([
             'id' => $request->getBodyParam('scheduleId'),
@@ -437,7 +443,7 @@ class Schedules extends Component
             'timer' => $timer,
             'action' => $action,
             'enabled' => (bool)$request->getBodyParam('enabled'),
-            'enabledLog' => $request->getBodyParam('enabledLog'),
+            //'enabledLog' => $request->getBodyParam('enabledLog'),
         ]);
     }
 
@@ -448,6 +454,13 @@ class Schedules extends Component
      */
     public function createSchedule(mixed $config): Schedule
     {
+        if (empty($config['action'])) {
+            $config['action'] = Plugin::getInstance()->actions->createAction([
+                'id' => ArrayHelper::remove($config, 'actionId'),
+                'type' => ArrayHelper::remove($config, 'actionType'),
+                'settings' => ArrayHelper::remove($config, 'actionSettings'),
+            ]);
+        }
         return new Schedule($config);
     }
 
@@ -458,16 +471,16 @@ class Schedules extends Component
      */
     public function saveSchedule(Schedule $schedule, bool $runValidation = true): bool
     {
-        $isNewSchedule = !$schedule->id;
+        $isNew = !$schedule->id;
 
         if ($this->hasEventHandlers(self::EVENT_BEFORE_SAVE_SCHEDULE)) {
             $this->trigger(self::EVENT_BEFORE_SAVE_SCHEDULE, new ScheduleEvent([
                 'schedule' => $schedule,
-                'isNew' => $isNewSchedule,
+                'isNew' => $isNew,
             ]));
         }
 
-        if ($isNewSchedule) {
+        if ($isNew) {
             $schedule->uid = StringHelper::UUID();
         } elseif ($schedule->uid === null) {
             $schedule->uid = Db::uidById(Table::SCHEDULES, $schedule->id);
@@ -481,7 +494,7 @@ class Schedules extends Component
         if ($schedule->static) {
             $path = "schedule.schedules.$schedule->uid";
             $config = $this->getScheduleConfig($schedule);
-            if (!$isNewSchedule) {
+            if (!$isNew) {
                 $config['timers'] = [];
                 foreach ($schedule->getTimers() as $timer) {
                     $config['timers'][$timer->uid] = Plugin::$plugin->getTimers()->getTimerConfig($timer);
@@ -489,14 +502,14 @@ class Schedules extends Component
             }
 
             Craft::$app->getProjectConfig()->set($path, $config);
-            if ($isNewSchedule) {
+            if ($isNew) {
                 $schedule->id = Db::idByUid(Table::SCHEDULES, $schedule->uid);
             }
         } else {
             $transaction = Craft::$app->getDb()->beginTransaction();
             try {
                 $deleteConfig = false;
-                if (!$isNewSchedule) {
+                if (!$isNew) {
                     $record = ScheduleRecord::findOne(['id' => $schedule->id]);
                     if (!$record) {
                         throw new ScheduleException("No schedule exists with the ID: “{$schedule->id}“.");
@@ -508,7 +521,11 @@ class Schedules extends Component
                     $record = new ScheduleRecord();
                 }
 
-                Plugin::getInstance()->actions->saveAction($schedule->action);
+
+
+                if (!Plugin::getInstance()->actions->saveAction($schedule->action)) {
+                    throw new ActionException();
+                }
 
                 $record->groupId = $schedule->groupId;
                 $record->name = $schedule->name;
@@ -518,8 +535,14 @@ class Schedules extends Component
                 $record->onSuccess = null;
                 $record->onFailed = null;
                 $record->enabled = (bool)$schedule->enabled;
-                $record->enabledLog = (bool)$schedule->enabledLog;
+//                $record->enabledLog = (bool)$schedule->enabledLog;
                 $record->save(false);
+
+
+                $schedule->timer->scheduleId = $record->id;
+                if (!Plugin::getInstance()->timers->saveTimer($schedule->timer)) {
+                    throw new TimerException();
+                }
 
                 $transaction->commit();
 
@@ -534,19 +557,19 @@ class Schedules extends Component
             }
 
 
-            if ($isNewSchedule) {
+            if ($isNew) {
                 $schedule->id = $record->id;
             }
         }
 
-        if ($isNewSchedule) {
+        if ($isNew) {
             $this->_schedules[] = $schedule;
         }
 
         if ($this->hasEventHandlers(self::EVENT_AFTER_SAVE_SCHEDULE)) {
             $this->trigger(self::EVENT_AFTER_SAVE_SCHEDULE, new ScheduleEvent([
                 'schedule' => $schedule,
-                'isNew' => $isNewSchedule,
+                'isNew' => $isNew,
             ]));
         }
 
@@ -743,9 +766,11 @@ class Schedules extends Component
                 //'schedules.dateCreated',
                 //'schedules.dateUpdated',
                 'schedules.uid',
+                'actionType' => 'actions.type',
+                'actionSettings' => 'actions.settings',
             ])
             ->from(['schedules' => Table::SCHEDULES])
-            //->innerJoin(['actions' => Table::ACTIONS], '[[schedules.actionId]] = [[actions.id]]')
+            ->innerJoin(['actions' => Table::ACTIONS], '[[schedules.actionId]] = [[actions.id]]')
             ->orderBy('schedules.sortOrder');
     }
 

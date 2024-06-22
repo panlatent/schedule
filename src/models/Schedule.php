@@ -4,11 +4,16 @@ namespace panlatent\schedule\models;
 
 use Craft;
 use craft\base\Model;
+use craft\validators\HandleValidator;
+use craft\validators\UniqueValidator;
 use DateTime;
 use panlatent\craft\actions\abstract\ActionInterface;
 use panlatent\schedule\base\TimerInterface;
 use panlatent\schedule\log\LogAdapter;
+use panlatent\schedule\Plugin;
+use panlatent\schedule\records\Schedule as ScheduleRecord;
 use Psr\Log\LoggerInterface;
+use function Arrayy\array_first;
 
 /**
  * @property-read ScheduleGroup $group
@@ -31,19 +36,29 @@ class Schedule extends Model
 
     public ?ActionInterface $action = null;
 
-    public ?TimerInterface $timer = null;
+//    public ?TimerInterface $timer = null;
+
+    public ?int $timeout = null;
+
+    public ?int $retry = null;
+
+    public $onSuccess = null;
+
+    public $onFailed = null;
 
     /**
      * @var bool
      */
     public bool $enabled = true;
 
-    /**
-     * @var bool|null
-     */
-    public ?bool $enabledLog = null;
+//    /**
+//     * @var bool|null
+//     */
+    //public ?bool $enabledLog = null;
 
-//    public $timeout;
+
+
+
 
     /**
      * @var int|null
@@ -73,6 +88,21 @@ class Schedule extends Model
             $this->_info = new ScheduleInfo();
         }
         return $this->_info;
+    }
+
+    private ?TimerInterface $_timer = null;
+
+    public function getTimer(): TimerInterface
+    {
+        if ($this->_timer === null) {
+            $this->_timer = Plugin::getInstance()->timers->getTimerByScheduleId($this->id);
+        }
+        return $this->_timer;
+    }
+
+    public function setTimer(TimerInterface $timer): void
+    {
+
     }
 
     public function canRun(): bool
@@ -114,5 +144,27 @@ class Schedule extends Model
     protected function getLogger(): LoggerInterface
     {
         return new LogAdapter(Craft::$app->getLog()->getLogger(), 'schedule');
+    }
+
+    protected function defineRules(): array
+    {
+        return [
+            [['name', 'handle'], 'required'],
+            [['id', 'groupId'], 'integer'],
+            [['name', 'handle', 'description'], 'string'],
+            [['handle'], UniqueValidator::class, 'targetClass' => ScheduleRecord::class, 'targetAttribute' => 'handle'],
+            [['handle'], HandleValidator::class],
+            [['static'], 'boolean'],
+            [['action'], function($attribute) {if (!$this->$attribute->validate()) {
+                $this->addError($attribute, array_first($this->$attribute->getFirstErrors()));
+            }}],
+
+            [['timer'], function($attribute) {
+                if (!$this->$attribute->validate()) {
+                    $errors = $this->$attribute->getFirstErrors();
+                    $this->addError($attribute, reset($errors));
+                }
+            }],
+        ];
     }
 }

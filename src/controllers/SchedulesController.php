@@ -115,7 +115,7 @@ class SchedulesController extends Controller
             }
         }
 
-        $isNewSchedule = !$schedule;
+        $isNewSchedule = !$schedule->id;
 
         $allGroups = $schedules->getAllGroups();
         $allActionTypes = Plugin::getInstance()->actions->getAllActionTypes();

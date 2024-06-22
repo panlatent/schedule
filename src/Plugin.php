@@ -10,11 +10,13 @@ namespace panlatent\schedule;
 use Craft;
 use craft\base\Model;
 use craft\events\RebuildConfigEvent;
+use craft\events\RegisterComponentTypesEvent;
 use craft\events\RegisterUrlRulesEvent;
 use craft\events\RegisterUserPermissionsEvent;
 use craft\helpers\UrlHelper;
 use craft\services\ProjectConfig;
 use craft\services\UserPermissions;
+use craft\services\Utilities;
 use craft\web\Response;
 use craft\web\twig\variables\CraftVariable;
 use craft\web\UrlManager;
@@ -25,6 +27,7 @@ use panlatent\schedule\services\Logs;
 use panlatent\schedule\services\Schedules;
 use panlatent\schedule\services\Timers;
 use panlatent\schedule\user\Permissions;
+use panlatent\schedule\utilities\ActionRunner;
 use panlatent\schedule\web\twig\CraftVariableBehavior;
 use yii\base\Event;
 use yii\console\Application as ConsoleApplication;
@@ -97,6 +100,7 @@ class Plugin extends \craft\base\Plugin
             $this->_registerProjectConfigEvents();
             $this->_registerUserPermissions();
             $this->_registerVariables();
+            $this->_registerUtilities();
 
             if ($this->settings->enabledWebCron) {
                 $this->_registerWebCron();
@@ -111,29 +115,6 @@ class Plugin extends \craft\base\Plugin
     {
         $ret = parent::getCpNavItem();
         $ret['label'] = $this->getSettings()->getCustomCpNavName() ?? $this->name;
-
-        $user = Craft::$app->getUser();
-        if ($user->checkPermission(Permissions::MANAGE_SCHEDULES)) {
-            $ret['subnav']['schedules'] = [
-                'label' => Craft::t('schedule', 'Schedules'),
-                'url' => 'schedule',
-            ];
-        }
-
-        if ($user->checkPermission(Permissions::MANAGE_LOGS)) {
-            $ret['subnav']['logs'] = [
-                'label' => Craft::t('schedule', 'Logs'),
-                'url' => 'schedule/logs',
-            ];
-        }
-
-        if (Craft::$app->getConfig()->getGeneral()->allowAdminChanges && $user->getIsAdmin()) {
-            $ret['subnav']['settings'] = [
-                'label' => Craft::t('schedule', 'Settings'),
-                'url' => 'schedule/settings',
-            ];
-        }
-
         return $ret;
     }
 
@@ -216,11 +197,11 @@ class Plugin extends \craft\base\Plugin
                 'schedule/groups/<groupId:\d+|static>' => ['template' => 'schedule'],
                 'schedule/new' => 'schedule/schedules/edit-schedule',
                 'schedule/<scheduleId:\d+>' => 'schedule/schedules/edit-schedule',
-                'schedule/<scheduleId:\d+>/timers' => ['template' => 'schedule/timers'],
-                'schedule/<scheduleId:\d+>/timers/new' => 'schedule/timers/edit-timer',
-                'schedule/<scheduleId:\d+>/timers/<timerId:\d+>' => 'schedule/timers/edit-timer',
-                'schedule/<scheduleId:\d+>/logs' => ['template' => 'schedule/_logs'],
-                'schedule/<scheduleId:\d+>/logs/<logId:\d+>' => ['template' => 'schedule/logs/_view'],
+//                'schedule/<scheduleId:\d+>/timers' => ['template' => 'schedule/timers'],
+//                'schedule/<scheduleId:\d+>/timers/new' => 'schedule/timers/edit-timer',
+//                'schedule/<scheduleId:\d+>/timers/<timerId:\d+>' => 'schedule/timers/edit-timer',
+//                'schedule/<scheduleId:\d+>/logs' => ['template' => 'schedule/_logs'],
+//                'schedule/<scheduleId:\d+>/logs/<logId:\d+>' => ['template' => 'schedule/logs/_view'],
             ]);
         });
     }
@@ -237,10 +218,17 @@ class Plugin extends \craft\base\Plugin
         });
     }
 
-    private function _registerWebCron()
+    private function _registerWebCron(): void
     {
         Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_SITE_URL_RULES, function (RegisterUrlRulesEvent $event) {
             $event->rules[$this->settings->endpoint] = 'schedule/web-cron/trigger';
+        });
+    }
+
+    private function _registerUtilities(): void
+    {
+        Event::on(Utilities::class, Utilities::EVENT_REGISTER_UTILITIES, function(RegisterComponentTypesEvent $event) {
+            $event->types[] = ActionRunner::class;
         });
     }
 }

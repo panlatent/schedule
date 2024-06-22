@@ -17,11 +17,6 @@ use panlatent\schedule\db\Table;
  * @property int $id
  * @property int $scheduleId
  * @property string $type
- * @property string $minute
- * @property string $hour
- * @property string $day
- * @property string $month
- * @property string $week
  * @property string $settings
  * @property bool $enabled
  * @property int $sortOrder
@@ -34,6 +29,6 @@ class Timer extends ActiveRecord
      */
     public static function tableName(): string
     {
-        return Table::SCHEDULETIMERS;
+        return Table::TIMERS;
     }
 }

@@ -130,6 +130,9 @@ class Cron extends Timer
     public function setDateTime(mixed $datetime): void
     {
         $datetime = DateTimeHelper::toDateTime($datetime);
+        if (!$datetime) {
+            return;
+        }
         $this->timezone = $datetime->getTimezone()->getName();
         $this->year = $datetime->format('Y');
         $this->month = $datetime->format('m');
@@ -174,6 +177,14 @@ class Cron extends Timer
             Craft::t('schedule', 'Monthly') => self::EVERY_MONTHLY,
             Craft::t('schedule', 'Yearly') => self::EVERY_YEARLY,
             Craft::t('schedule', 'Weekly') => self::EVERY_WEEKLY,
+        ];
+    }
+
+    protected function defineRules(): array
+    {
+        return [
+            [['mode'], 'required'],
+            [['minute', 'hour', 'day', 'month', 'week', 'year'], 'string'],
         ];
     }
 }

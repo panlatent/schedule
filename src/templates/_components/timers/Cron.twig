@@ -4,7 +4,8 @@
     {{ forms.radio({
         label: 'Every'|t('schedule'),
         name: 'mode',
-        value: 'every'
+        value: 'every',
+        checked: timer.mode == 'every',
     }) }}
 
     {% set options = [] %}
@@ -31,7 +32,8 @@
     {{ forms.radio({
         label: 'Datetime'|t('schedule'),
         name: 'mode',
-        value: 'datetime'
+        value: 'datetime',
+        checked: timer.mode == 'datetime',
     }) }}
 
     {% include "_includes/forms/datetime.twig" with {
@@ -45,7 +47,8 @@
     {{ forms.radio({
         label: 'Cron Expression'|t('schedule'),
         name: 'mode',
-        value: 'expression'
+        value: 'expression',
+        checked: timer.mode == 'expression',
     }) }}
 
     <div class="expression">

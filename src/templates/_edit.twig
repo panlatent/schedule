@@ -58,6 +58,7 @@
         {{ forms.selectField({
             label: 'When to execute'|t('schedule'),
             disabled: not allowChange,
+            id: 'timerType',
             name: 'timerType',
             value: className(schedule.timer),
             options: timerTypeOptions,
@@ -80,31 +81,38 @@
             </div>
         {% endfor %}
 
+        {{ forms.errorList(schedule.getErrors('timer')) }}
+
         <hr>
 
-        {{ forms.selectField({
+        {{ forms.action({
             label: 'What to do'|t('schedule'),
-            disabled: not allowChange,
-            name: 'actionType',
-            value: className(schedule.action),
-            options: actionTypeOptions,
-            toggle: true,
+            value: schedule.action,
         }) }}
 
-        {% for actionType in actionTypes %}
-            {% set isCurrent = (actionType == className(schedule.action)) %}
-            <div id="{{ actionType|id }}"{% if not isCurrent %} class="hidden"{% endif %}>
-                {% if isCurrent %}
-                    {% namespace "actionTypes[" ~ actionType ~ "]" %}
-                        {{ schedule.action.getSettingsHtml()|raw }}
-                    {% endnamespace %}
-                {% else %}
-                    <div class="settings-loading">
-                        <div class="spinner"></div>
-                    </div>
-                {% endif %}
-            </div>
-        {% endfor %}
+{#        {{ forms.selectField({#}
+{#            label: 'What to do'|t('schedule'),#}
+{#            disabled: not allowChange,#}
+{#            name: 'actionType',#}
+{#            value: className(schedule.action),#}
+{#            options: actionTypeOptions,#}
+{#            toggle: true,#}
+{#        }) }}#}
+
+{#        {% for actionType in actionTypes %}#}
+{#            {% set isCurrent = (actionType == className(schedule.action)) %}#}
+{#            <div id="{{ actionType|id }}"{% if not isCurrent %} class="hidden"{% endif %}>#}
+{#                {% if isCurrent %}#}
+{#                    {% namespace "actionTypes[" ~ actionType ~ "]" %}#}
+{#                        {{ schedule.action.getSettingsHtml()|raw }}#}
+{#                    {% endnamespace %}#}
+{#                {% else %}#}
+{#                    <div class="settings-loading">#}
+{#                        <div class="spinner"></div>#}
+{#                    </div>#}
+{#                {% endif %}#}
+{#            </div>#}
+{#        {% endfor %}#}
     </div>
 {% endblock %}
 
@@ -116,8 +124,6 @@
             name: 'timeout',
             errors: schedule.getErrors('timeout'),
         }) }}
-
-
     </div>
 
     {% if craft.app.config.general.allowAdminChanges or not isNewSchedule %}
@@ -183,13 +189,13 @@
                 errors: schedule.getErrors('enabled'),
             }) }}
 
-            {{ forms.lightswitchField({
-                label: 'Enabled Log'|t('schedule'),
-                id: 'enabledLog',
-                name: 'enabledLog',
-                on: schedule.enabledLog,
-                errors: schedule.getErrors('enabledLog'),
-            }) }}
+{#            {{ forms.lightswitchField({#}
+{#                label: 'Enabled Log'|t('schedule'),#}
+{#                id: 'enabledLog',#}
+{#                name: 'enabledLog',#}
+{#                on: schedule.enabledLog,#}
+{#                errors: schedule.getErrors('enabledLog'),#}
+{#            }) }}#}
         </div>
     </fieldset>
 
@@ -203,6 +209,7 @@
     }) }}
 
     <div class="meta read-only">
+        {% if not isNewSchedule %}
         <div class="data">
             <h5 class="heading">{{ "Created at"|t('app') }}</h5>
             <div class="value">{{ schedule.dateCreated|datetime('short') }}</div>
@@ -211,6 +218,7 @@
             <h5 class="heading">{{ "Updated at"|t('app') }}</h5>
             <div class="value">{{ schedule.dateUpdated|datetime('short') }}</div>
         </div>
+        {% endif %}
 {#        {% if schedule.lastFinishedDate is not empty %}#}
 {#            <div class="data">#}
 {#                <h5 class="heading">{{ "Last running at"|t('schedule') }}</h5>#}
@@ -227,12 +235,12 @@
     </div>
 {% endblock %}
 
-{% set actionTypeIds = [] %}
-{% for actionType in actionTypes %}
-    {% if actionType != className(schedule.action) %}
-        {% set actionTypeIds = actionTypeIds|merge({(actionType): actionType|id}) %}
-    {% endif %}
-{% endfor %}
+{#{% set actionTypeIds = [] %}#}
+{#{% for actionType in actionTypes %}#}
+{#    {% if actionType != className(schedule.action) %}#}
+{#        {% set actionTypeIds = actionTypeIds|merge({(actionType): actionType|id}) %}#}
+{#    {% endif %}#}
+{#{% endfor %}#}
 
 {% set timerTypeIds = [] %}
 {% for timerType in timerTypes %}
@@ -242,26 +250,6 @@
 {% endfor %}
 
 {% js %}
-    var actionTypes = {{ actionTypeIds|json_encode|raw }};
-    $('select[name=actionType]').on('change', function(value) {
-        var actionType = $(this).val();
-        if (actionType in actionTypes) {
-            var id = '#' + actionTypes[actionType];
-            let _cancelToken =  axios.CancelToken.source();
-            Craft.sendActionRequest("POST", "schedule/actions/render-settings", {
-                cancelToken: _cancelToken.token,
-                data: {
-                    type: actionType,
-                },
-            }).then(function(response) {
-                let $settings = $(response.data.settingsHtml || '');
-                $(id).html(response.data.settingsHtml);
-                Craft.appendHeadHtml(response.data.headHtml);
-                Craft.appendBodyHtml(response.data.bodyHtml);
-            })
-            delete actionTypes[actionType]
-        }
-    });
     var timerTypes = {{ timerTypeIds|json_encode|raw }};
     $('select[name=timerType]').on('change', function(value) {
         var timerType = $(this).val();

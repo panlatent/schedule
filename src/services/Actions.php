@@ -17,11 +17,12 @@ use panlatent\schedule\actions\ElementAction;
 use panlatent\schedule\actions\HttpRequest;
 use panlatent\schedule\actions\SendEmail;
 use panlatent\schedule\db\Table;
+use panlatent\schedule\errors\ActionException;
 use panlatent\schedule\events\ActionEvent;
 use panlatent\schedule\log\LogAdapter;
 use panlatent\schedule\models\Context;
+use panlatent\schedule\records\Action as ActionRecord;
 use yii\base\Component;
-use yii\web\Request;
 
 class Actions extends Component
 {
@@ -136,24 +137,18 @@ class Actions extends Component
 
         $transaction = Craft::$app->getDb()->beginTransaction();
         try {
-            Craft::$app->getDb()
-                ->createCommand()
-                ->upsert(Table::ACTIONS, [
-                    'type' => get_class($action),
-                    'settings' => $action->getSettings(),
-                    'dateUpdated' => $action->dateUpdated,
-                    'dateCreated' => $action->dateCreated,
-                    'uid' => $action->uid,
-                ], [
-                    'type' => get_class($action),
-                    'settings' => $action->getSettings(),
-                    'dateUpdated' => $action->dateUpdated,
-                ])
-                ->execute();
-
-            if ($isNew) {
-                $action->id = $record->id;
+            if (!$isNew) {
+                $record = ActionRecord::findOne(['id' => $action->id]);
+                if (!$record) {
+                    throw new ActionException("No action exists with the ID: “{$action->id}“.");
+                }
+            } else {
+                $record = new ActionRecord();
             }
+
+            $record->type = get_class($action);
+            $record->settings = json_encode($action->getSettings(), JSON_THROW_ON_ERROR);
+            $record->save(false);
 
             $transaction->commit();
         } catch (\Throwable $exception) {
@@ -162,9 +157,9 @@ class Actions extends Component
             throw $exception;
         }
 
-        // If has some respositories ...
-        // $this->__METHOD__[$action->id] = $action;
-        // $this->__METHOD__[$action->handle] = $action;
+        if ($isNew) {
+            $action->id = $record->id;
+        }
 
         if ($this->hasEventHandlers(self::EVENT_AFTER_SAVE_ACTION)) {
             $this->trigger(self::EVENT_AFTER_SAVE_ACTION, new ActionEvent([

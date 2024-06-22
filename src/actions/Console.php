@@ -31,38 +31,35 @@ class Console extends Command
 
     public function getSettingsHtml(): ?string
     {
-        $suggestions = [];
+        return Craft::$app->getView()->renderTemplate('schedule/_components/actions/Console/settings', [
+            'schedule' => $this,
+        ]);
+    }
 
-        $process = new Process([Plugin::getInstance()->getSettings()->getCliPath(), 'craft', 'help/list'], Craft::getAlias('@root'));
+    public function getCommandOptions(): array
+    {
+        $options = [];
+
+        $process = new Process([Plugin::getInstance()->getSettings()->getCliPath(), 'craft', 'help'], Craft::getAlias('@root'));
         $process->run();
 
         if ($process->isSuccessful()) {
             $lines = explode("\n", mb_convert_encoding($process->getOutput(), mb_internal_encoding()));
-
-            $data = [];
             foreach ($lines as $line) {
-                if (($pos = strpos($line, '/')) === false) {
-                    $data[$line] = [];
+                if (str_starts_with($line, '-')) {
+                    $options[] = ['optgroup' => substr($line, 2)];
                     continue;
                 }
-
-                $data[substr($line, 0, $pos)][] = [
-                    'name' => $line,
-                    'hint' => $line,
-                ];
-            }
-
-            foreach ($data as $label => $commandSuggestions) {
-                $suggestions[] = [
-                    'label' => $label,
-                    'data' => $commandSuggestions,
-                ];
+                if (preg_match('#^\s*(\w+/\w+)\s*(?:\(\w+\)|)\s+(.+)\s*$#', $line, $match)) {
+                    $options[] = [
+                        'label' => $match[1] . ' - ' . $match[2], //substr($line, 0, $pos),
+                        'value' => $match[1],
+                    ];
+                }
             }
         }
 
-        return Craft::$app->getView()->renderTemplate('schedule/_components/schedules/Console/settings', [
-            'schedule' => $this,
-            'suggestions' => $suggestions,
-        ]);
+        return $options;
     }
+
 }
