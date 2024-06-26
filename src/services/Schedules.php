@@ -421,17 +421,13 @@ class Schedules extends Component
             $request = Craft::$app->getRequest();
         }
 
-//        try {
-            $actionType = $request->getRequiredBodyParam('actionType');
-            $actionConfig = $request->getBodyParam('actionTypes.' . $actionType) ?? [];
-            $action = Plugin::getInstance()->actions->createAction(['type' => $actionType] + $actionConfig);
+        $actionType = $request->getRequiredBodyParam('actionType');
+        $actionConfig = $request->getBodyParam('actionTypes.' . $actionType) ?? [];
+        $action = Plugin::getInstance()->actions->createAction(['type' => $actionType] + $actionConfig);
 
-            $timerType = $request->getRequiredBodyParam('timerType');
-            $timerConfig = $request->getBodyParam('timerTypes.' . $timerType) ?? [];
-            $timer = Plugin::getInstance()->timers->createTimer(['type' => $timerType] + $timerConfig);
-//        } catch () {
-//
-//        }
+        $timerType = $request->getRequiredBodyParam('timerType');
+        $timerConfig = $request->getBodyParam('timerTypes.' . $timerType) ?? [];
+        $timer = Plugin::getInstance()->timers->createTimer(['type' => $timerType] + $timerConfig);
 
         return $this->createSchedule([
             'id' => $request->getBodyParam('scheduleId'),

@@ -4,8 +4,8 @@ namespace panlatent\schedule\builder;
 
 use panlatent\craft\actions\abstract\ActionInterface;
 use panlatent\schedule\actions\Closure;
-use panlatent\schedule\actions\Command;
 use panlatent\schedule\actions\Console;
+use panlatent\schedule\actions\CraftConsole;
 use panlatent\schedule\actions\HttpRequest;
 use panlatent\schedule\models\Schedule as ScheduleModel;
 
@@ -27,13 +27,13 @@ final class Schedule
 
     public static function exec(string $command, array $arguments = [])
     {
-        $action = new Command();
+        $action = new Console();
         return new Schedule($action);
     }
 
     public static function console(string $command, array $arguments = [])
     {
-        $action = new Console();
+        $action = new CraftConsole();
         return new Schedule($action);
     }
 

@@ -227,7 +227,7 @@ class Plugin extends \craft\base\Plugin
 
     private function _registerUtilities(): void
     {
-        Event::on(Utilities::class, Utilities::EVENT_REGISTER_UTILITIES, function(RegisterComponentTypesEvent $event) {
+        Event::on(Utilities::class, Utilities::EVENT_REGISTER_UTILITIES, static function(RegisterComponentTypesEvent $event) {
             $event->types[] = ActionRunner::class;
         });
     }

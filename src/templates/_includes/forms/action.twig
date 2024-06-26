@@ -25,9 +25,7 @@
     {% set isCurrent = (actionType == className(action)) %}
     <div id="{{ actionType|id }}"{% if not isCurrent %} class="hidden"{% endif %}>
         {% if isCurrent %}
-            {% namespace "actionTypes[" ~ actionType ~ "]" %}
-                {{ action.getSettingsHtml()|raw }}
-            {% endnamespace %}
+            {% include "schedule/_includes/forms/actionSetting.twig" with {action: action} %}
         {% else %}
             <div class="settings-loading">
                 <div class="spinner"></div>

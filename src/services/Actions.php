@@ -10,9 +10,11 @@ use craft\helpers\ArrayHelper;
 use craft\helpers\Component as ComponentHelper;
 use craft\helpers\Db;
 use craft\helpers\StringHelper;
+use craft\web\Request;
 use panlatent\craft\actions\abstract\ActionInterface;
-use panlatent\schedule\actions\Command;
+use panlatent\craft\actions\abstract\ContextInterface;
 use panlatent\schedule\actions\Console;
+use panlatent\schedule\actions\CraftConsole;
 use panlatent\schedule\actions\ElementAction;
 use panlatent\schedule\actions\HttpRequest;
 use panlatent\schedule\actions\SendEmail;
@@ -57,8 +59,8 @@ class Actions extends Component
     {
         $event = new RegisterComponentTypesEvent([
             'types' => [
-                Command::class,
                 Console::class,
+                CraftConsole::class,
                 ElementAction::class,
                 HttpRequest::class,
                 SendEmail::class,
@@ -96,7 +98,14 @@ class Actions extends Component
     {
         $context = new Context(new LogAdapter(Craft::$app->getLog()->getLogger(), 'action'));
 
+        return $this->runActionWithContext($action, $context);
+    }
 
+    public function runActionWithContext(ActionInterface $action, ContextInterface $context, bool $runValidation = true): bool
+    {
+//        if ($runValidation && !$action->validate()) {
+//            return false;
+//        }
         return $action->execute($context);
     }
 
@@ -107,6 +116,17 @@ class Actions extends Component
         } catch (MissingComponentException $exception) {
 
         }
+    }
+
+    public function createActionFromRequest(?Request $request = null): ActionInterface
+    {
+        if ($request === null) {
+            $request = Craft::$app->getRequest();
+        }
+
+        $type = $request->getBodyParam('actionType');
+        $settings = $request->getBodyParam('actionTypes.' . $type) ?? [];
+        return $this->createAction(['type' => $type, 'settings' => $settings]);
     }
 
     public function saveAction(ActionInterface $action, bool $runValidation = true): bool

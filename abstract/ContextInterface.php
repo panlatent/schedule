@@ -7,6 +7,10 @@ use Psr\Log\LoggerInterface;
 
 interface ContextInterface
 {
+    public function addError(string $attribute, string $error): void;
+
+    public function hasErrors(): bool;
+
     public function getContainer(): ContainerInterface;
 
     public function getErrors(): array;

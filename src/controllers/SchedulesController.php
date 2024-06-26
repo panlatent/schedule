@@ -193,7 +193,6 @@ class SchedulesController extends Controller
         $schedule->enabled = (bool)$request->getBodyParam('enabled');
 
         if (!$schedules->saveSchedule($schedule)) {
-            var_dump($schedule->getErrors());
             return $this->asJson(['success' => false]);
         }
 

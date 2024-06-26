@@ -1,10 +1,50 @@
 {% import "schedule/_includes/forms.twig" as forms %}
 
-<form action="">
+<form id="action-runner" accept-charset="UTF-8" method="post">
+    {{ forms.action({
+        action: action,
+    }) }}
 
-{{ forms.action({
-    action: action,
-}) }}
-
-    <button type="submit" class="btn submit">{{ "Run"|t('schedule') }}</button>
+    <div class="run">
+        <button type="submit" class="btn submit">{{ "Run"|t('schedule') }}</button>
+        <span class="status"></span>
+        <span class="duration"></span>
+        <span class="usage-memory"></span>
+    </div>
 </form>
+
+<div id="action-logs"></div>
+<div id="action-output"></div>
+
+{% css %}
+#action-logs {
+
+}
+{% endcss %}
+
+{% js %}
+$('#action-runner').on('submit', function(value) {
+    let form = $(this);
+    let _cancelToken =  axios.CancelToken.source();
+    Craft.sendActionRequest("POST", "schedule/actions/run", {
+      cancelToken: _cancelToken.token,
+      data: form.serialize()
+    }).then(function(response) {
+      $('#action-runner .status').html('<i class="status active"></i>');
+      $('#action-runner .duration').html(response.data.duration);
+      $('#action-runner .usage-memory').html(response.data.usageMemory);
+
+
+      let $logs = $('#action-logs');
+      for (let log of $(response.data.logs)) {
+        $logs.append($(`<p><span class="level">${log.level}</span> <span class="message">${log.message}</span></p>`));
+      }
+
+      let $output = $(response.data.outputHtml || '');
+      $('#action-output').html($output);
+      Craft.appendHeadHtml(response.data.headHtml);
+      Craft.appendBodyHtml(response.data.bodyHtml);
+    })
+    return false;
+})
+{% endjs %}

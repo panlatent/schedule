@@ -9,6 +9,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use panlatent\craft\actions\abstract\Action;
 use panlatent\craft\actions\abstract\ActionInterface;
+use panlatent\craft\actions\abstract\ArrayOutput;
 use panlatent\craft\actions\abstract\ContextInterface;
 use panlatent\craft\actions\abstract\OutputInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -57,10 +58,13 @@ class HttpRequest extends Action
     {
         $response = $client->request($this->method, $this->url, $this->getOptions());
         $statusCode = $response->getStatusCode();
-
-//        $context->setOutput(new class($response) implements OutputInterface {
-//            public function __construct(public ResponseInterface $response) {}
-//        });
+        $context->setOutput(new ArrayOutput([
+            'method' => $this->method,
+            'url' => $this->url,
+            'statusCode' => $statusCode,
+            'headers' => $response->getHeaders(),
+            'body' => $response->getBody()->getContents(),
+        ], 'schedule/_components/actions/HttpRequest/output'));
 
         return $statusCode >= 200 && $statusCode < 400;
     }
@@ -102,7 +106,6 @@ class HttpRequest extends Action
             // ],
         ]);
     }
-
 
     protected function getOptions(): array
     {

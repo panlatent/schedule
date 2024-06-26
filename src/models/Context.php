@@ -12,9 +12,23 @@ use yii\di\Container;
 
 class Context implements ContextInterface
 {
+    private ?OutputInterface $output = null;
+
+    private array $errors = [];
+
     public function __construct(protected readonly LoggerInterface $logger, protected readonly ?ContainerInterface $container = null)
     {
 
+    }
+
+    public function addError(string $attribute, string $error): void
+    {
+        $this->errors[$attribute] = $error;
+    }
+
+    public function hasErrors(): bool
+    {
+        return !empty($this->errors);
     }
 
     public function getContainer(): ContainerInterface
@@ -24,7 +38,7 @@ class Context implements ContextInterface
 
     public function getErrors(): array
     {
-        return [];
+        return $this->errors;
     }
 
     public function getLogger(): LoggerInterface
@@ -34,17 +48,17 @@ class Context implements ContextInterface
 
     public function getInput(): InputInterface
     {
-        // TODO: Implement getInput() method.
+
     }
 
     public function getOutput(): OutputInterface
     {
-        // TODO: Implement getOutput() method.
+        return $this->output;
     }
 
     public function setOutput(OutputInterface $output): void
     {
-        // TODO: Implement setOutput() method.
+        $this->output = $output;
     }
 
 }

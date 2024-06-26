@@ -1,0 +1,4 @@
+{% set namespace = namespace ?? "actionTypes[" ~ className(action)  ~ "]" %}
+{% namespace namespace %}
+    {{ action.getSettingsHtml()|raw }}
+{% endnamespace %}

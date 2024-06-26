@@ -1,0 +1,15 @@
+{% do view.registerAssetBundle('panlatent\\schedule\\web\\assets\\console\\ConsoleAsset') %}
+<h4>{{ "Console Output"|t('schedule') }}</h4>
+
+<div class="pane code last console-tty">
+    {{- message|raw -}}
+</div>
+
+{% css %}
+.console-tty {
+    font-family: Hack, monospace;
+    white-space: pre;
+    background-color: #000 !important;
+    color: #969696;
+}
+{% endcss %}

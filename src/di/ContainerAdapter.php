@@ -4,6 +4,7 @@ namespace panlatent\schedule\di;
 
 use Psr\Container\ContainerInterface;
 use yii\di\Container;
+use yii\di\NotInstantiableException;
 
 readonly class ContainerAdapter implements ContainerInterface
 {
@@ -14,7 +15,11 @@ readonly class ContainerAdapter implements ContainerInterface
 
     public function get(string $id)
     {
-        return $this->container->get($id);
+        try {
+            return $this->container->get($id);
+        } catch (NotInstantiableException $exception) {
+            throw new NotFoundException('', $exception->getMessage(), $exception->getCode(), $exception->getPrevious());
+        }
     }
 
     public function has(string $id): bool

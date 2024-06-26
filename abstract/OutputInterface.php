@@ -6,5 +6,5 @@ interface OutputInterface
 {
     public function canStored(): bool;
 
-    public function getSettings(): array;
+    public function render(): string;
 }

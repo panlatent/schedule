@@ -1,0 +1,24 @@
+<h3>{{ "HTTP Response"|t("schedule") }}</h3>
+
+<div class="meta">
+    <div class="data">
+        <div class="heading">{{ 'URL'|t('schedule') }}</div>
+        <div class="value code">{{ method|upper }} {{ url }}</div>
+    </div>
+</div>
+
+<h4>{{ "Headers"|t("schedule") }}</h4>
+<div class="meta">
+    {% for header,values in headers %}
+    <div class="data">
+        <div class="heading">{{ header }}</div>
+        <div class="value code">{{ values|join(',') }}</div>
+    </div>
+    {% endfor %}
+</div>
+
+<h4>{{ "Response Body"|t("schedule") }}</h4>
+
+<div class="pane code last">
+    {{ body }}
+</div>
