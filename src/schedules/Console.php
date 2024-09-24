@@ -80,8 +80,10 @@ class Console extends Schedule
             PHP_BINARY,
             self::CRAFT_CLI_SCRIPT,
             $this->command,
-            $this->arguments,
         ];
+
+        $arguments = explode(' ', $this->arguments);
+        $command = array_merge($command, $arguments);
 
         if ($this->user) {
             $command = array_merge(['sudo -u', $this->user], $command);
