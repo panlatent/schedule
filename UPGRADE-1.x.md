@@ -29,11 +29,11 @@ Sometimes people want to create new schedules in code, and now there is a new wa
 ```php
 <?php // config/schedule.php
 
-use panlatent\schedule\builder\Schedule;
+use panlatent\schedule\builder\Buidler;
 
 return [
     'schedules' => [
-        Schedule::command('clear-caches/all')->hourly(),
+        Buidler::command('clear-caches/all')->hourly(),
     ]
 ];
 ```

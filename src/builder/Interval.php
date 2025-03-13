@@ -2,8 +2,6 @@
 
 namespace panlatent\schedule\builder;
 
-use panlatent\schedule\models\Schedule;
-
 trait Interval
 {
     public function minute(): static

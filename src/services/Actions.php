@@ -11,13 +11,11 @@ use craft\helpers\Component as ComponentHelper;
 use craft\helpers\Db;
 use craft\helpers\StringHelper;
 use craft\web\Request;
-use panlatent\craft\actions\abstract\ActionInterface;
+use Panlatent\Action\ActionInterface;
 use panlatent\craft\actions\abstract\ContextInterface;
-use panlatent\schedule\actions\Console;
-use panlatent\schedule\actions\CraftConsole;
-use panlatent\schedule\actions\ElementAction;
-use panlatent\schedule\actions\HttpRequest;
-use panlatent\schedule\actions\SendEmail;
+use panlatent\craft\actions\abstract\SavableActionInterface;
+use panlatent\craft\actions\bundle\Bundle;
+use panlatent\craft\actions\bundle\MissingAction;
 use panlatent\schedule\db\Table;
 use panlatent\schedule\errors\ActionException;
 use panlatent\schedule\events\ActionEvent;
@@ -58,13 +56,7 @@ class Actions extends Component
     public function getAllActionTypes(): array
     {
         $event = new RegisterComponentTypesEvent([
-            'types' => [
-                Console::class,
-                CraftConsole::class,
-                ElementAction::class,
-                HttpRequest::class,
-                SendEmail::class,
-            ]
+            'types' => Bundle::actions(),
         ]);
 
         $this->trigger(self::EVENT_REGISTER_ACTION_TYPES, $event);
@@ -114,7 +106,7 @@ class Actions extends Component
         try {
             return ComponentHelper::createComponent($config, ActionInterface::class);
         } catch (MissingComponentException $exception) {
-
+            return new MissingAction();
         }
     }
 
@@ -129,7 +121,7 @@ class Actions extends Component
         return $this->createAction(['type' => $type, 'settings' => $settings]);
     }
 
-    public function saveAction(ActionInterface $action, bool $runValidation = true): bool
+    public function saveAction(SavableActionInterface $action, bool $runValidation = true): bool
     {
         $isNew = $action->getIsNew();
 

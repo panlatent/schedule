@@ -1,22 +1,41 @@
 <?php
 
-use panlatent\schedule\builder\Schedule;
+use panlatent\schedule\models\Schedule;
 
 return [
-    'schedules' => [
-        Schedule::closure(static fn() => true)->minute(),
+    'actions' => [
+        \panlatent\schedule\base\Action::make()
 
-        Schedule::request('')->hourly()->onSuccess(function() {
 
-        }),
-
-        Schedule::exec('ls')->hourly()->onSuccess(function() {
-
-        }),
-
-        Schedule::console('db/backup')->hourly()->onSuccess(function() {
-
-        }),
     ],
 
+    'schedules' => [
+        Schedule::make()
+            ->hourly(),
+
+        Schedule::make()
+            ->closure(static fn() => true)
+            ->minute(),
+
+        Schedule::make()
+            ->request('')
+            ->hourly()
+            ->onSuccess(function() {
+
+            }),
+
+        Schedule::make()
+            ->exec('ls')
+            ->hourly()
+            ->onSuccess(function() {
+
+            }),
+
+        Schedule::make()
+            ->console('db/backup')
+            ->hourly()
+            ->onSuccess(function() {
+
+            }),
+    ],
 ];

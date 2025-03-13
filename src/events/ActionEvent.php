@@ -3,9 +3,9 @@
 namespace panlatent\schedule\events;
 
 use craft\events\ModelEvent;
-use panlatent\craft\actions\abstract\ActionInterface;
+use panlatent\craft\actions\abstract\SavableActionInterface;
 
 class ActionEvent extends ModelEvent
 {
-    public ?ActionInterface $action = null;
+    public ?SavableActionInterface $action = null;
 }

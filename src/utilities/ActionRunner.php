@@ -4,7 +4,7 @@ namespace panlatent\schedule\utilities;
 
 use Craft;
 use craft\base\Utility;
-use panlatent\craft\actions\abstract\ActionInterface;
+use panlatent\craft\actions\abstract\SavableActionInterface;
 use panlatent\schedule\actions\HttpRequest;
 use panlatent\schedule\Plugin;
 
@@ -30,7 +30,7 @@ class ActionRunner extends Utility
         return static::contentHtmlFromAction(new HttpRequest());
     }
 
-    public static function contentHtmlFromAction(ActionInterface $action): string
+    public static function contentHtmlFromAction(SavableActionInterface $action): string
     {
         $allActionTypes = Plugin::getInstance()->actions->getAllActionTypes();
         return Craft::$app->getView()->renderTemplate('schedule/_components/utilities/ActionRunner', [

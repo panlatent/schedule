@@ -10,7 +10,7 @@ namespace panlatent\schedule\controllers;
 use Craft;
 use craft\helpers\Json;
 use craft\web\Controller;
-use panlatent\schedule\actions\HttpRequest;
+use panlatent\craft\actions\bundle\HttpRequest;
 use panlatent\schedule\models\Schedule;
 use panlatent\schedule\models\ScheduleGroup;
 use panlatent\schedule\Plugin;

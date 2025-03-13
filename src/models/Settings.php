@@ -9,7 +9,7 @@ namespace panlatent\schedule\models;
 
 use craft\base\Model;
 use craft\helpers\App;
-use panlatent\schedule\builder\Schedule as ScheduleBuilder;
+use panlatent\schedule\builder\Buidler as ScheduleBuilder;
 use panlatent\schedule\validators\CarbonStringIntervalValidator;
 use panlatent\schedule\validators\PhpBinaryValidator;
 use yii\base\InvalidConfigException;

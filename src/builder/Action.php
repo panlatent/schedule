@@ -2,35 +2,20 @@
 
 namespace panlatent\schedule\builder;
 
-use panlatent\craft\actions\abstract\SavableActionInterface;
 use panlatent\schedule\actions\Closure;
 use panlatent\schedule\actions\Console;
 use panlatent\schedule\actions\CraftConsole;
 use panlatent\schedule\actions\HttpRequest;
-use panlatent\schedule\models\Schedule as ScheduleModel;
 
 /**
  * @internal
  */
-final class Schedule
+final class Action
 {
-    use Handler, Interval;
-
-    public function __construct(protected SavableActionInterface $action)
-    {
-
-    }
-
-    public function action()
-    {
-
-    }
-
-    public function closure(\Closure $closure)
+    public function action(\Closure $closure)
     {
         $action = new Closure();
-        $action->closure = $closure;
-        return new Schedule($action);
+        return $this;
     }
 
     public function exec(string $command, array $arguments = [])
@@ -50,12 +35,5 @@ final class Schedule
         $action = new HttpRequest();
         $action->url = $url;
         return new Schedule($action);
-    }
-
-    public function create(): ScheduleModel
-    {
-        $schedule = new ScheduleModel();
-        $schedule->action = $this->action;
-        return $schedule;
     }
 }

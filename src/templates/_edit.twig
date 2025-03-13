@@ -66,7 +66,7 @@
         }) }}
 
         {% for timerType in timerTypes %}
-            {% set isCurrent = (timerType == className(schedule.timer)) %}
+            {% set isCurrent =  (timerType == className(schedule.timer)) %}
             <div id="{{ timerType|id }}"{% if not isCurrent %} class="hidden"{% endif %}>
                 {% if isCurrent %}
                     {% namespace "timerTypes[" ~ timerType ~ "]" %}

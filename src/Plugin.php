@@ -20,6 +20,7 @@ use craft\services\Utilities;
 use craft\web\Response;
 use craft\web\twig\variables\CraftVariable;
 use craft\web\UrlManager;
+use panlatent\craft\actions\bundle\Bundle;
 use panlatent\schedule\console\SchedulesController;
 use panlatent\schedule\models\Settings;
 use panlatent\schedule\services\Actions;
@@ -101,6 +102,8 @@ class Plugin extends \craft\base\Plugin
             $this->_registerUserPermissions();
             $this->_registerVariables();
             $this->_registerUtilities();
+
+            Bundle::register();
 
             if ($this->settings->enabledWebCron) {
                 $this->_registerWebCron();

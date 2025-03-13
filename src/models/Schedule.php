@@ -7,8 +7,9 @@ use craft\base\Model;
 use craft\validators\HandleValidator;
 use craft\validators\UniqueValidator;
 use DateTime;
-use panlatent\craft\actions\abstract\ActionInterface;
+use Panlatent\Action\ActionInterface;
 use panlatent\schedule\base\TimerInterface;
+use panlatent\schedule\builder\Buidler;
 use panlatent\schedule\log\LogAdapter;
 use panlatent\schedule\Plugin;
 use panlatent\schedule\records\Schedule as ScheduleRecord;
@@ -17,6 +18,9 @@ use function Arrayy\array_first;
 
 /**
  * @property-read ScheduleGroup $group
+ * @property-read array $conditions
+ * @property-read LoggerInterface $logger
+ * @property TimerInterface $timer
  * @property-read ScheduleInfo $info
  * @since 1.0.0
  */
@@ -57,9 +61,6 @@ class Schedule extends Model
     //public ?bool $enabledLog = null;
 
 
-
-
-
     /**
      * @var int|null
      */
@@ -72,6 +73,11 @@ class Schedule extends Model
     public ?DateTime $dateUpdated = null;
 
     private ?ScheduleInfo $_info = null;
+
+    public static function make()
+    {
+        return new Buidler();
+    }
 
     /**
      * @return array
@@ -102,7 +108,7 @@ class Schedule extends Model
 
     public function setTimer(TimerInterface $timer): void
     {
-
+        $this->_timer = $timer;
     }
 
     public function canRun(): bool

@@ -5,7 +5,7 @@ namespace panlatent\schedule\controllers;
 use Craft;
 use craft\elements\Entry;
 use craft\web\Controller;
-use panlatent\craft\actions\abstract\ActionInterface;
+use panlatent\craft\actions\abstract\SavableActionInterface;
 use panlatent\schedule\actions\HttpRequest;
 use panlatent\schedule\log\LogAdapter;
 use panlatent\schedule\log\MemoryLog;
@@ -18,7 +18,7 @@ use yii\web\Response;
 
 class ActionsController extends Controller
 {
-    public function actionEdit(?int $actionId = null, ?ActionInterface $action = null): Response
+    public function actionEdit(?int $actionId = null, ?SavableActionInterface $action = null): Response
     {
         if ($actionId !== null) {
             if ($action === null) {
