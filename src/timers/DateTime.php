@@ -106,7 +106,7 @@ class DateTime extends Timer
         $this->month = $datetime->format('m');
         $this->day = $datetime->format('d');
         $this->hour = $datetime->format('H');
-        $this->minute = $datetime->format('m');
+        $this->minute = $datetime->format('i');
     }
 
     /**
