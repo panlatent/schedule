@@ -66,6 +66,11 @@ class SchedulesController extends Controller
      */
     public bool $withClearLogs = false;
 
+    /**
+     * @var bool Prevent running multiple schedules at once.
+     */
+    public bool $isolated = false;
+
     // Public Methods
     // =========================================================================
 
@@ -79,12 +84,14 @@ class SchedulesController extends Controller
             case 'run':
                 $options[] = 'force';
                 $options[] = 'async';
+                $options[] = 'isolated';
                 break;
             case 'listen':
                 $options[] = 'force';
                 $options[] = 'async';
                 $options[] = 'withClearLogs';
                 $options[] = 'expire';
+                $options[] = 'isolated';
                 break;
             case 'clear-logs':
                 $options[] = 'all';
@@ -183,6 +190,14 @@ class SchedulesController extends Controller
             }
         }
 
+        if ($this->isolated) {
+            $mutex = Craft::$app->getMutex();
+            if (!$mutex->acquire('schedule:' . $schedule->handle)) {
+                $this->stderr("Schedule is already running: {$schedule->handle}\n");
+                return 1;
+            }
+        }
+
         $info = sprintf('#%d %s[%s]', $schedule->id, $schedule->name, $schedule->handle);
         $this->stdout("Running schedule: $info ... ");
         $start = microtime(true);
@@ -197,6 +212,10 @@ class SchedulesController extends Controller
             $this->stderr("Error: {$e->getMessage()}\n");
             Craft::error("Running schedule: $info", __METHOD__);
             return -1;
+        } finally {
+            if ($this->isolated) {
+                $mutex->release('schedule:' . $schedule->handle);
+            }
         }
 
         return 0;
